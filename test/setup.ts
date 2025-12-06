@@ -8,7 +8,7 @@ afterEach(() => {
 });
 
 // Mock chrome API globally
-global.chrome = {
+(global as any).chrome = {
   storage: {
     local: {
       get: vi.fn(),
@@ -29,4 +29,4 @@ global.chrome = {
     query: vi.fn(),
     create: vi.fn(),
   },
-} as any;
+};

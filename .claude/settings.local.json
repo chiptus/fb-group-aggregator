@@ -3,7 +3,8 @@
     "allow": [
       "Bash(cat:*)",
       "Bash(pnpm add:*)",
-      "Bash(pnpm test:run:*)"
+      "Bash(pnpm test:run:*)",
+      "Bash(pnpm compile:*)"
     ],
     "deny": [],
     "ask": []

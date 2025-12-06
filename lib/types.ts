@@ -1,29 +1,37 @@
-export interface Subscription {
-  id: string;
-  name: string;
-  createdAt: number;
-}
+import { z } from 'zod';
 
-export interface Group {
-  id: string;
-  url: string;
-  name: string;
-  subscriptionIds: string[];
-  addedAt: number;
-  lastScrapedAt: number | null;
-  enabled: boolean;
-}
+// Zod schemas for runtime validation
+export const SubscriptionSchema = z.object({
+  id: z.string(),
+  name: z.string(),
+  createdAt: z.number(),
+});
 
-export interface Post {
-  id: string;
-  groupId: string;
-  authorName: string;
-  contentHtml: string;
-  timestamp: number;
-  scrapedAt: number;
-  seen: boolean;
-  url: string;
-}
+export const GroupSchema = z.object({
+  id: z.string(),
+  url: z.string(),
+  name: z.string(),
+  subscriptionIds: z.array(z.string()),
+  addedAt: z.number(),
+  lastScrapedAt: z.number().nullable(),
+  enabled: z.boolean(),
+});
+
+export const PostSchema = z.object({
+  id: z.string(),
+  groupId: z.string(),
+  authorName: z.string(),
+  contentHtml: z.string(),
+  timestamp: z.number(),
+  scrapedAt: z.number(),
+  seen: z.boolean(),
+  url: z.string(),
+});
+
+// TypeScript types inferred from Zod schemas
+export type Subscription = z.infer<typeof SubscriptionSchema>;
+export type Group = z.infer<typeof GroupSchema>;
+export type Post = z.infer<typeof PostSchema>;
 
 // Extension messaging types
 export type ExtensionMessage =
