@@ -35,9 +35,23 @@ export type Post = z.infer<typeof PostSchema>;
 
 // Extension messaging types
 export type ExtensionMessage =
-	| { type: "SCRAPE_POSTS"; posts: Omit<Post, "scrapedAt" | "seen">[] }
-	| { type: "GET_CURRENT_GROUP" }
-	| {
-			type: "ADD_GROUP_TO_SUBSCRIPTION";
-			group: Omit<Group, "addedAt" | "lastScrapedAt">;
-	  };
+  | {
+      type: "SCRAPE_POSTS";
+      payload: {
+        groupId: string;
+        groupInfo: { name: string; url: string };
+        posts: Omit<Post, "scrapedAt" | "seen">[];
+      };
+    }
+  | { type: "GET_CURRENT_GROUP" }
+  | {
+      type: "ADD_GROUP_TO_SUBSCRIPTION";
+      group: Omit<Group, "addedAt" | "lastScrapedAt">;
+    };
+
+// Response types
+export type ScrapePostsResponse = {
+  success: boolean;
+  count?: number;
+  error?: string;
+};
