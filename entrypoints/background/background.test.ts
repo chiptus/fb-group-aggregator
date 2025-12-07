@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import type { Post, ScrapePostsResponse } from '@/lib/types';
 import { listGroups, listPosts, createGroup } from '@/lib/storage';
-import { handleScrapePosts, messageListener } from '@/lib/background-handler';
+import { handleScrapePosts, messageListener } from './background-handler';
 
 describe('Background Script - Message Handling', () => {
   beforeEach(async () => {

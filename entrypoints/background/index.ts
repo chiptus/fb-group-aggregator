@@ -1,4 +1,4 @@
-import { messageListener } from '@/lib/background-handler';
+import { messageListener } from './background-handler';
 
 export default defineBackground(() => {
   console.log('FB Group Aggregator background script initialized', {

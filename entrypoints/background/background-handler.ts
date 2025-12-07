@@ -1,11 +1,11 @@
-import type { ExtensionMessage, ScrapePostsResponse } from './types';
+import type { ExtensionMessage, ScrapePostsResponse } from '@/lib/types';
 import {
   createPosts,
   listGroups,
   createGroup,
   updateGroup,
   listPosts,
-} from './storage';
+} from '@/lib/storage';
 
 /**
  * Message listener for runtime messages

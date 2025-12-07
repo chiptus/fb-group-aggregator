@@ -120,8 +120,8 @@ Implement the background service worker that:
 
 ### Files Created/Updated
 - [entrypoints/background/index.ts](../entrypoints/background/index.ts) - Background script entry point
+- [entrypoints/background/background-handler.ts](../entrypoints/background/background-handler.ts) - Testable message handling logic (colocated)
 - [entrypoints/background/background.test.ts](../entrypoints/background/background.test.ts) - 10 tests for background script (colocated)
-- [lib/background-handler.ts](../lib/background-handler.ts) - Testable message handling logic
 - [lib/types.ts](../lib/types.ts) - Updated message types and added ScrapePostsResponse
 
 **Test Count:** 10 tests passing (43 total with all phases)
@@ -132,7 +132,8 @@ Implement the background service worker that:
 - **Timestamp tracking**: lastScrapedAt is updated for both new and existing groups
 - **Data preservation**: Existing group settings (subscriptions, enabled state) are preserved
 - **Error handling**: Comprehensive error handling with detailed error messages
-- **Testability**: Logic separated into lib/background-handler.ts for easy testing
+- **Testability**: Logic separated into background-handler.ts (colocated with entry point) for easy testing
+- **Colocation**: All background-related files in entrypoints/background/ directory
 
 ### Message Protocol
 ```typescript
