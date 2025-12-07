@@ -86,10 +86,9 @@ A Chrome/Firefox browser extension that aggregates posts from multiple Facebook 
 - [lib/scraper.test.ts](lib/scraper.test.ts) - 14 tests for scraper
 - [lib/scraper-explorer.js](lib/scraper-explorer.js) - Browser console exploration tool
 - [lib/SCRAPER-NOTES.md](lib/SCRAPER-NOTES.md) - DOM analysis and maintenance notes
-- [entrypoints/content.ts](entrypoints/content.ts) - Content script implementation
-- [entrypoints/content.test.ts](entrypoints/content.test.ts) - 14 tests for content script
+- [entrypoints/content/index.ts](entrypoints/content/index.ts) - Content script implementation (needs tests - see Phase 6)
 
-**Test Count:** 47 tests passing total
+**Test Count:** 33 tests passing total
 
 **Key Technical Achievements:**
 - Comment filtering via aria-label detection
@@ -120,12 +119,12 @@ Implement the background service worker that:
 - [x] Test error scenarios
 
 ### Files Created/Updated
-- [entrypoints/background.ts](../entrypoints/background.ts) - Background script entry point
+- [entrypoints/background/index.ts](../entrypoints/background/index.ts) - Background script entry point
+- [entrypoints/background/background.test.ts](../entrypoints/background/background.test.ts) - 10 tests for background script (colocated)
 - [lib/background-handler.ts](../lib/background-handler.ts) - Testable message handling logic
-- [test/background.test.ts](../test/background.test.ts) - 10 tests for background script
 - [lib/types.ts](../lib/types.ts) - Updated message types and added ScrapePostsResponse
 
-**Test Count:** 10 tests passing (57 total with all phases)
+**Test Count:** 10 tests passing (43 total with all phases)
 
 ### Implementation Highlights
 - **Auto-registration**: New groups are automatically registered when posts are scraped
@@ -206,6 +205,12 @@ Build the extension popup for quick actions and management.
 End-to-end testing and refinement.
 
 ### Tasks
+- [ ] **Add content script tests** - Properly test entrypoints/content/index.ts:
+  - Test `scrapeAndSend()` function behavior
+  - Test `isNearBottom()` scroll detection logic
+  - Test debouncing mechanism (2s minimum interval)
+  - Test message listener for TRIGGER_SCRAPE
+  - Test integration with chrome.runtime.sendMessage
 - [ ] Manual testing with real Facebook groups
 - [ ] Performance optimization
 - [ ] Error handling improvements
@@ -223,7 +228,7 @@ End-to-end testing and refinement.
 3. Refactor if needed
 4. All code must have test coverage
 
-**Current Test Coverage**: 57 tests across 5 test files
+**Current Test Coverage**: 43 tests across 4 test files
 
 ---
 
@@ -272,4 +277,4 @@ pnpm zip              # Package for distribution
 
 ---
 
-**Last Updated**: 2025-12-07 (Phase 3 complete, 57 tests passing)
+**Last Updated**: 2025-12-07 (Phase 3 complete, 43 tests passing, file colocation applied)
