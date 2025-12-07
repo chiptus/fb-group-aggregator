@@ -11,59 +11,59 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
  */
 
 describe("Content Script", () => {
-  beforeEach(() => {
-    // Clear DOM
-    document.body.innerHTML = "";
+	beforeEach(() => {
+		// Clear DOM
+		document.body.innerHTML = "";
 
-    // Clear all mocks
-    vi.clearAllMocks();
+		// Clear all mocks
+		vi.clearAllMocks();
 
-    // Mock window.location
-    Object.defineProperty(window, "location", {
-      value: {
-        href: "https://www.facebook.com/groups/123456/posts/",
-        pathname: "/groups/123456/posts/",
-      },
-      writable: true,
-    });
-  });
+		// Mock window.location
+		Object.defineProperty(window, "location", {
+			value: {
+				href: "https://www.facebook.com/groups/123456/posts/",
+				pathname: "/groups/123456/posts/",
+			},
+			writable: true,
+		});
+	});
 
-  describe("URL Detection", () => {
-    it("should detect Facebook group URL", () => {
-      const url = "https://www.facebook.com/groups/123456/";
-      const groupIdMatch = url.match(/facebook\.com\/groups\/([^/]+)/);
+	describe("URL Detection", () => {
+		it("should detect Facebook group URL", () => {
+			const url = "https://www.facebook.com/groups/123456/";
+			const groupIdMatch = url.match(/facebook\.com\/groups\/([^/]+)/);
 
-      expect(groupIdMatch).toBeTruthy();
-      expect(groupIdMatch?.[1]).toBe("123456");
-    });
+			expect(groupIdMatch).toBeTruthy();
+			expect(groupIdMatch?.[1]).toBe("123456");
+		});
 
-    it("should detect Facebook group posts page", () => {
-      const url = "https://www.facebook.com/groups/123456/posts/";
-      const groupIdMatch = url.match(/facebook\.com\/groups\/([^/]+)/);
+		it("should detect Facebook group posts page", () => {
+			const url = "https://www.facebook.com/groups/123456/posts/";
+			const groupIdMatch = url.match(/facebook\.com\/groups\/([^/]+)/);
 
-      expect(groupIdMatch).toBeTruthy();
-      expect(groupIdMatch?.[1]).toBe("123456");
-    });
+			expect(groupIdMatch).toBeTruthy();
+			expect(groupIdMatch?.[1]).toBe("123456");
+		});
 
-    it("should not match non-group Facebook pages", () => {
-      const url = "https://www.facebook.com/profile/123";
-      const groupIdMatch = url.match(/facebook\.com\/groups\/([^/]+)/);
+		it("should not match non-group Facebook pages", () => {
+			const url = "https://www.facebook.com/profile/123";
+			const groupIdMatch = url.match(/facebook\.com\/groups\/([^/]+)/);
 
-      expect(groupIdMatch).toBeNull();
-    });
+			expect(groupIdMatch).toBeNull();
+		});
 
-    it("should extract group ID from permalink URLs", () => {
-      const url = "https://www.facebook.com/groups/123456/permalink/789/";
-      const groupIdMatch = url.match(/facebook\.com\/groups\/([^/]+)/);
+		it("should extract group ID from permalink URLs", () => {
+			const url = "https://www.facebook.com/groups/123456/permalink/789/";
+			const groupIdMatch = url.match(/facebook\.com\/groups\/([^/]+)/);
 
-      expect(groupIdMatch?.[1]).toBe("123456");
-    });
-  });
+			expect(groupIdMatch?.[1]).toBe("123456");
+		});
+	});
 
-  describe("Scraping Integration", () => {
-    it("should scrape posts and send to background", async () => {
-      // Mock Facebook group page with posts
-      document.body.innerHTML = `
+	describe("Scraping Integration", () => {
+		it("should scrape posts and send to background", async () => {
+			// Mock Facebook group page with posts
+			document.body.innerHTML = `
         <div data-pagelet="GroupFeed">
           <div role="article" data-ft='{"mf_story_key":"12345"}'>
             <div>
@@ -78,65 +78,65 @@ describe("Content Script", () => {
         </div>
       `;
 
-      // Mock chrome.runtime.sendMessage
-      const sendMessageMock = vi.fn().mockResolvedValue({ success: true });
-      global.chrome = {
-        runtime: {
-          sendMessage: sendMessageMock,
-        },
-      } as unknown as typeof chrome;
+			// Mock chrome.runtime.sendMessage
+			const sendMessageMock = vi.fn().mockResolvedValue({ success: true });
+			global.chrome = {
+				runtime: {
+					sendMessage: sendMessageMock,
+				},
+			} as unknown as typeof chrome;
 
-      // Import scraper (in real code, content script will import this)
-      const { scrapeGroupPosts } = await import("@/lib/scraper");
+			// Import scraper (in real code, content script will import this)
+			const { scrapeGroupPosts } = await import("@/lib/scraper");
 
-      const groupId = "123456";
-      const posts = scrapeGroupPosts(groupId);
+			const groupId = "123456";
+			const posts = scrapeGroupPosts(groupId);
 
-      expect(posts).toHaveLength(1);
+			expect(posts).toHaveLength(1);
 
-      // Content script should send these posts to background
-      await chrome.runtime.sendMessage({
-        type: "SCRAPE_POSTS",
-        payload: {
-          groupId,
-          posts,
-        },
-      });
+			// Content script should send these posts to background
+			await chrome.runtime.sendMessage({
+				type: "SCRAPE_POSTS",
+				payload: {
+					groupId,
+					posts,
+				},
+			});
 
-      expect(sendMessageMock).toHaveBeenCalledWith({
-        type: "SCRAPE_POSTS",
-        payload: {
-          groupId,
-          posts: expect.arrayContaining([
-            expect.objectContaining({
-              id: expect.any(String),
-              groupId: "123456",
-              authorName: "John Doe",
-              contentHtml: expect.stringContaining("Test post"),
-            }),
-          ]),
-        },
-      });
-    });
+			expect(sendMessageMock).toHaveBeenCalledWith({
+				type: "SCRAPE_POSTS",
+				payload: {
+					groupId,
+					posts: expect.arrayContaining([
+						expect.objectContaining({
+							id: expect.any(String),
+							groupId: "123456",
+							authorName: "John Doe",
+							contentHtml: expect.stringContaining("Test post"),
+						}),
+					]),
+				},
+			});
+		});
 
-    it("should handle empty scrape results", async () => {
-      // Mock Facebook page with no posts
-      document.body.innerHTML = `
+		it("should handle empty scrape results", async () => {
+			// Mock Facebook page with no posts
+			document.body.innerHTML = `
         <div data-pagelet="GroupFeed">
           <div>No posts here</div>
         </div>
       `;
 
-      const { scrapeGroupPosts } = await import("@/lib/scraper");
+			const { scrapeGroupPosts } = await import("@/lib/scraper");
 
-      const groupId = "123456";
-      const posts = scrapeGroupPosts(groupId);
+			const groupId = "123456";
+			const posts = scrapeGroupPosts(groupId);
 
-      expect(posts).toEqual([]);
-    });
+			expect(posts).toEqual([]);
+		});
 
-    it("should extract group info from page", async () => {
-      document.body.innerHTML = `
+		it("should extract group info from page", async () => {
+			document.body.innerHTML = `
         <div>
           <h1>
             <a href="/groups/123456">Test Group Name</a>
@@ -144,153 +144,153 @@ describe("Content Script", () => {
         </div>
       `;
 
-      const { extractGroupInfo } = await import("@/lib/scraper");
+			const { extractGroupInfo } = await import("@/lib/scraper");
 
-      const info = extractGroupInfo();
+			const info = extractGroupInfo();
 
-      expect(info).toEqual({
-        name: "Test Group Name",
-        url: expect.stringContaining("123456"),
-      });
-    });
-  });
+			expect(info).toEqual({
+				name: "Test Group Name",
+				url: expect.stringContaining("123456"),
+			});
+		});
+	});
 
-  describe("Message Handling", () => {
-    it("should handle successful scrape response", async () => {
-      const sendMessageMock = vi.fn().mockResolvedValue({
-        success: true,
-        count: 5,
-      });
+	describe("Message Handling", () => {
+		it("should handle successful scrape response", async () => {
+			const sendMessageMock = vi.fn().mockResolvedValue({
+				success: true,
+				count: 5,
+			});
 
-      global.chrome = {
-        runtime: {
-          sendMessage: sendMessageMock,
-        },
-      } as unknown as typeof chrome;
+			global.chrome = {
+				runtime: {
+					sendMessage: sendMessageMock,
+				},
+			} as unknown as typeof chrome;
 
-      const response = await chrome.runtime.sendMessage({
-        type: "SCRAPE_POSTS",
-        payload: { groupId: "123", posts: [] },
-      });
+			const response = await chrome.runtime.sendMessage({
+				type: "SCRAPE_POSTS",
+				payload: { groupId: "123", posts: [] },
+			});
 
-      expect(response.success).toBe(true);
-      expect(response.count).toBe(5);
-    });
+			expect(response.success).toBe(true);
+			expect(response.count).toBe(5);
+		});
 
-    it("should handle scrape errors", async () => {
-      const sendMessageMock = vi.fn().mockResolvedValue({
-        success: false,
-        error: "Failed to save posts",
-      });
+		it("should handle scrape errors", async () => {
+			const sendMessageMock = vi.fn().mockResolvedValue({
+				success: false,
+				error: "Failed to save posts",
+			});
 
-      global.chrome = {
-        runtime: {
-          sendMessage: sendMessageMock,
-        },
-      } as unknown as typeof chrome;
+			global.chrome = {
+				runtime: {
+					sendMessage: sendMessageMock,
+				},
+			} as unknown as typeof chrome;
 
-      const response = await chrome.runtime.sendMessage({
-        type: "SCRAPE_POSTS",
-        payload: { groupId: "123", posts: [] },
-      });
+			const response = await chrome.runtime.sendMessage({
+				type: "SCRAPE_POSTS",
+				payload: { groupId: "123", posts: [] },
+			});
 
-      expect(response.success).toBe(false);
-      expect(response.error).toBeTruthy();
-    });
-  });
+			expect(response.success).toBe(false);
+			expect(response.error).toBeTruthy();
+		});
+	});
 
-  describe("Scraping Trigger", () => {
-    it("should trigger scrape on page load", () => {
-      // In real implementation, content script will:
-      // 1. Wait for DOM to load
-      // 2. Check if on Facebook group page
-      // 3. Trigger scrape
+	describe("Scraping Trigger", () => {
+		it("should trigger scrape on page load", () => {
+			// In real implementation, content script will:
+			// 1. Wait for DOM to load
+			// 2. Check if on Facebook group page
+			// 3. Trigger scrape
 
-      const url = window.location.href;
-      const isGroupPage = /facebook\.com\/groups\/[^/]+/.test(url);
+			const url = window.location.href;
+			const isGroupPage = /facebook\.com\/groups\/[^/]+/.test(url);
 
-      expect(isGroupPage).toBe(true);
-    });
+			expect(isGroupPage).toBe(true);
+		});
 
-    it("should trigger scrape on scroll to bottom", () => {
-      // Facebook lazy-loads posts, so we need to trigger scrape
-      // when user scrolls to bottom to load more posts
+		it("should trigger scrape on scroll to bottom", () => {
+			// Facebook lazy-loads posts, so we need to trigger scrape
+			// when user scrolls to bottom to load more posts
 
-      const isNearBottom = (threshold = 100) => {
-        const scrollTop = window.scrollY;
-        const scrollHeight = document.documentElement.scrollHeight;
-        const clientHeight = window.innerHeight;
+			const isNearBottom = (threshold = 100) => {
+				const scrollTop = window.scrollY;
+				const scrollHeight = document.documentElement.scrollHeight;
+				const clientHeight = window.innerHeight;
 
-        return scrollHeight - scrollTop - clientHeight < threshold;
-      };
+				return scrollHeight - scrollTop - clientHeight < threshold;
+			};
 
-      // Mock scroll position near bottom
-      Object.defineProperty(window, "scrollY", { value: 1000, writable: true });
-      Object.defineProperty(document.documentElement, "scrollHeight", {
-        value: 1200,
-        writable: true,
-      });
-      Object.defineProperty(window, "innerHeight", {
-        value: 150,
-        writable: true,
-      });
+			// Mock scroll position near bottom
+			Object.defineProperty(window, "scrollY", { value: 1000, writable: true });
+			Object.defineProperty(document.documentElement, "scrollHeight", {
+				value: 1200,
+				writable: true,
+			});
+			Object.defineProperty(window, "innerHeight", {
+				value: 150,
+				writable: true,
+			});
 
-      expect(isNearBottom()).toBe(true);
-    });
+			expect(isNearBottom()).toBe(true);
+		});
 
-    it("should not trigger scrape too frequently", () => {
-      // Use debounce to avoid scraping on every scroll event
-      let lastScrapeTime = 0;
-      const minInterval = 2000; // 2 seconds
+		it("should not trigger scrape too frequently", () => {
+			// Use debounce to avoid scraping on every scroll event
+			let lastScrapeTime = 0;
+			const minInterval = 2000; // 2 seconds
 
-      const shouldScrape = () => {
-        const now = Date.now();
-        if (now - lastScrapeTime < minInterval) {
-          return false;
-        }
-        lastScrapeTime = now;
-        return true;
-      };
+			const shouldScrape = () => {
+				const now = Date.now();
+				if (now - lastScrapeTime < minInterval) {
+					return false;
+				}
+				lastScrapeTime = now;
+				return true;
+			};
 
-      expect(shouldScrape()).toBe(true); // First call
-      expect(shouldScrape()).toBe(false); // Too soon
-    });
-  });
+			expect(shouldScrape()).toBe(true); // First call
+			expect(shouldScrape()).toBe(false); // Too soon
+		});
+	});
 
-  describe("Error Handling", () => {
-    it("should handle scraper errors gracefully", () => {
-      // If scraper throws, content script should catch and log
-      const mockError = new Error("Scraper failed");
+	describe("Error Handling", () => {
+		it("should handle scraper errors gracefully", () => {
+			// If scraper throws, content script should catch and log
+			const mockError = new Error("Scraper failed");
 
-      expect(() => {
-        try {
-          throw mockError;
-        } catch (error) {
-          console.error("Scraping error:", error);
-          // Content script should not crash
-        }
-      }).not.toThrow();
-    });
+			expect(() => {
+				try {
+					throw mockError;
+				} catch (error) {
+					console.error("Scraping error:", error);
+					// Content script should not crash
+				}
+			}).not.toThrow();
+		});
 
-    it("should handle message send failures", async () => {
-      const sendMessageMock = vi
-        .fn()
-        .mockRejectedValue(new Error("Network error"));
+		it("should handle message send failures", async () => {
+			const sendMessageMock = vi
+				.fn()
+				.mockRejectedValue(new Error("Network error"));
 
-      global.chrome = {
-        runtime: {
-          sendMessage: sendMessageMock,
-        },
-      } as unknown as typeof chrome;
+			global.chrome = {
+				runtime: {
+					sendMessage: sendMessageMock,
+				},
+			} as unknown as typeof chrome;
 
-      try {
-        await chrome.runtime.sendMessage({
-          type: "SCRAPE_POSTS",
-          payload: { groupId: "123", posts: [] },
-        });
-      } catch (error) {
-        expect(error).toBeTruthy();
-      }
-    });
-  });
+			try {
+				await chrome.runtime.sendMessage({
+					type: "SCRAPE_POSTS",
+					payload: { groupId: "123", posts: [] },
+				});
+			} catch (error) {
+				expect(error).toBeTruthy();
+			}
+		});
+	});
 });

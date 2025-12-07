@@ -4,5 +4,5 @@ import { afterEach } from "vitest";
 
 // Cleanup after each test case (e.g., clearing jsdom)
 afterEach(() => {
-  cleanup();
+	cleanup();
 });
