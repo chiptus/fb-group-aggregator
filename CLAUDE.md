@@ -39,6 +39,37 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Architecture
 
+### File Organization & Colocation
+
+**IMPORTANT**: This project follows a colocation pattern for test files to improve maintainability.
+
+**Colocation Rules**:
+- **Prefer colocation**: Test files should be placed next to the code they test
+- **Entrypoints with subdirectories**: For entrypoints, create a subdirectory and use `index.ts` for the main file:
+  ```
+  entrypoints/
+    background/
+      index.ts              # Main background script
+      background.test.ts    # Tests for background script
+    content/
+      index.ts              # Main content script
+      content.test.ts       # Tests for content script
+  ```
+- **Library files**: Keep test files adjacent in the same directory:
+  ```
+  lib/
+    storage.ts
+    storage.test.ts
+    scraper.ts
+    scraper.test.ts
+  ```
+- **Benefits**: Easier to find related tests, ensures tests move with code, better IDE navigation
+
+**Why not test/ directory?**
+- WXT treats files in `entrypoints/` as potential entrypoints, which can cause build conflicts
+- The subdirectory pattern (`entrypoints/feature/index.ts`) solves this while maintaining colocation
+- Test files use `*.test.ts` suffix, which WXT ignores during builds
+
 ### WXT Framework
 
 This project uses WXT, a framework for building browser extensions with:
@@ -51,20 +82,22 @@ This project uses WXT, a framework for building browser extensions with:
 
 Browser extensions in WXT use distinct entry points, each with a specific role:
 
-1. **Background Script** ([entrypoints/background.ts](entrypoints/background.ts))
+1. **Background Script** ([entrypoints/background/index.ts](entrypoints/background/index.ts))
    - Service worker that runs in the background
    - No direct DOM access
    - Coordinates storage operations and deduplication
    - Handles messages from content script
    - Uses `defineBackground()` from WXT
+   - Tests: [entrypoints/background/background.test.ts](entrypoints/background/background.test.ts)
 
-2. **Content Script** ([entrypoints/content.ts](entrypoints/content.ts))
+2. **Content Script** ([entrypoints/content/index.ts](entrypoints/content/index.ts))
    - Injected into Facebook group pages matching:
      - `*://www.facebook.com/groups/*`
      - `*://facebook.com/groups/*`
    - Has DOM access to scrape posts
    - Sends scraped posts to background script via messaging
    - Uses `defineContentScript()` with `matches` array
+   - Tests: [entrypoints/content/content.test.ts](entrypoints/content/content.test.ts)
 
 3. **Popup UI** ([entrypoints/popup/](entrypoints/popup/))
    - React application for the extension's popup interface
