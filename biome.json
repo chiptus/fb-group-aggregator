@@ -26,13 +26,14 @@
 		"rules": {
 			"recommended": true,
 			"complexity": {
-				"noExcessiveCognitiveComplexity": "warn"
+				"noExcessiveCognitiveComplexity": "warn",
+				"useArrowFunction": "off"
 			},
 			"correctness": {
 				"useExhaustiveDependencies": "warn"
 			},
 			"suspicious": {
-				"noExplicitAny": "warn"
+				"noExplicitAny": "error"
 			}
 		}
 	},
