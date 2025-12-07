@@ -12,7 +12,7 @@ A Chrome/Firefox browser extension that aggregates posts from multiple Facebook 
 - **Validation**: Zod for runtime type safety
 - **Package Manager**: pnpm
 
-## Project Status: Phase 2 Complete ✅
+## Project Status: Phase 3 Complete ✅
 
 ### ✅ Phase 0: Test Infrastructure (COMPLETED)
 - [x] Configure Vitest with WXT plugin
@@ -86,10 +86,9 @@ A Chrome/Firefox browser extension that aggregates posts from multiple Facebook 
 - [lib/scraper.test.ts](lib/scraper.test.ts) - 14 tests for scraper
 - [lib/scraper-explorer.js](lib/scraper-explorer.js) - Browser console exploration tool
 - [lib/SCRAPER-NOTES.md](lib/SCRAPER-NOTES.md) - DOM analysis and maintenance notes
-- [entrypoints/content.ts](entrypoints/content.ts) - Content script implementation
-- [entrypoints/content.test.ts](entrypoints/content.test.ts) - 14 tests for content script
+- [entrypoints/content/index.ts](entrypoints/content/index.ts) - Content script implementation (needs tests - see Phase 6)
 
-**Test Count:** 47 tests passing total
+**Test Count:** 33 tests passing total
 
 **Key Technical Achievements:**
 - Comment filtering via aria-label detection
@@ -99,29 +98,42 @@ A Chrome/Firefox browser extension that aggregates posts from multiple Facebook 
 
 ---
 
-## 🎯 Phase 3: Background Script Coordination (IN PROGRESS)
+## ✅ Phase 3: Background Script Coordination (COMPLETED)
 
 ### Objectives
 Implement the background service worker that:
-1. Receives scraped posts from content scripts
-2. Deduplicates posts (don't save duplicates)
-3. Stores posts using storage API
-4. Auto-registers groups when posts are scraped
-5. Updates group lastScrapedAt timestamps
-6. Handles cross-tab communication
-7. Manages extension lifecycle
+1. Receives scraped posts from content scripts ✅
+2. Deduplicates posts (don't save duplicates) ✅
+3. Stores posts using storage API ✅
+4. Auto-registers groups when posts are scraped ✅
+5. Updates group lastScrapedAt timestamps ✅
+6. Handles cross-tab communication ⚠️ (Deferred - not needed yet)
+7. Manages extension lifecycle ✅
 
 ### Tasks
-- [ ] Write tests for background script message handling
-- [ ] Implement background.ts message listeners
-- [ ] Implement post deduplication logic
-- [ ] Implement group auto-registration
-- [ ] Test storage integration
-- [ ] Test error scenarios
+- [x] Write tests for background script message handling
+- [x] Implement background.ts message listeners
+- [x] Implement post deduplication logic (handled by storage.createPosts)
+- [x] Implement group auto-registration
+- [x] Test storage integration
+- [x] Test error scenarios
 
-### Files to Create/Update
-- [entrypoints/background.ts](entrypoints/background.ts) - Currently just "Hello background"
-- `entrypoints/background.test.ts` - Test suite for background script
+### Files Created/Updated
+- [entrypoints/background/index.ts](../entrypoints/background/index.ts) - Background script entry point
+- [entrypoints/background/background-handler.ts](../entrypoints/background/background-handler.ts) - Testable message handling logic (colocated)
+- [entrypoints/background/background-handler.test.ts](../entrypoints/background/background-handler.test.ts) - 10 tests for background handler (colocated)
+- [lib/types.ts](../lib/types.ts) - Updated message types and added ScrapePostsResponse
+
+**Test Count:** 10 tests passing (43 total with all phases)
+
+### Implementation Highlights
+- **Auto-registration**: New groups are automatically registered when posts are scraped
+- **Deduplication**: Posts are deduplicated by ID (no duplicates saved)
+- **Timestamp tracking**: lastScrapedAt is updated for both new and existing groups
+- **Data preservation**: Existing group settings (subscriptions, enabled state) are preserved
+- **Error handling**: Comprehensive error handling with detailed error messages
+- **Testability**: Logic separated into background-handler.ts (colocated with entry point) for easy testing
+- **Colocation**: All background-related files in entrypoints/background/ directory
 
 ### Message Protocol
 ```typescript
@@ -194,6 +206,12 @@ Build the extension popup for quick actions and management.
 End-to-end testing and refinement.
 
 ### Tasks
+- [ ] **Add content script tests** - Properly test entrypoints/content/index.ts:
+  - Test `scrapeAndSend()` function behavior
+  - Test `isNearBottom()` scroll detection logic
+  - Test debouncing mechanism (2s minimum interval)
+  - Test message listener for TRIGGER_SCRAPE
+  - Test integration with chrome.runtime.sendMessage
 - [ ] Manual testing with real Facebook groups
 - [ ] Performance optimization
 - [ ] Error handling improvements
@@ -211,7 +229,7 @@ End-to-end testing and refinement.
 3. Refactor if needed
 4. All code must have test coverage
 
-**Current Test Coverage**: 47 tests across 4 test files
+**Current Test Coverage**: 43 tests across 4 test files
 
 ---
 
@@ -234,9 +252,9 @@ End-to-end testing and refinement.
 
 1. **Review this file** to understand current progress
 2. **Run tests** to verify everything works: `pnpm test:run`
-3. **Start Phase 3**: Background script coordination
-4. **Check [CLAUDE.md](CLAUDE.md)** for WXT framework conventions
-5. **Check [lib/SCRAPER-NOTES.md](lib/SCRAPER-NOTES.md)** for scraper maintenance info
+3. **Start Phase 4**: Dashboard UI (post viewing and management)
+4. **Check [CLAUDE.md](../CLAUDE.md)** for WXT framework conventions
+5. **Check [lib/SCRAPER-NOTES.md](../lib/SCRAPER-NOTES.md)** for scraper maintenance info
 
 ---
 
@@ -260,4 +278,4 @@ pnpm zip              # Package for distribution
 
 ---
 
-**Last Updated**: 2025-12-07 (Phase 2 complete, 47 tests passing)
+**Last Updated**: 2025-12-07 (Phase 3 complete, 43 tests passing, file colocation applied)
