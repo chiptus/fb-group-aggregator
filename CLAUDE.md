@@ -2,6 +2,8 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+> **📋 Project Plan**: For detailed development phases, current status, and next steps, see [docs/PROJECT-PLAN.md](docs/PROJECT-PLAN.md)
+
 ## Project Overview
 
 **FB Group Aggregator** is a browser extension built with WXT (Web Extension Tools) and React to aggregate Facebook group posts into custom subscription-based feeds.
