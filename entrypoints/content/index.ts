@@ -1,4 +1,4 @@
-import { extractGroupInfo, scrapeGroupPosts } from "../lib/scraper";
+import { extractGroupInfo, scrapeGroupPosts } from "@/lib/scraper";
 
 export default defineContentScript({
   matches: ["*://*.facebook.com/*"],

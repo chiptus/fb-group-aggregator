@@ -87,7 +87,7 @@ describe("Content Script", () => {
       } as unknown as typeof chrome;
 
       // Import scraper (in real code, content script will import this)
-      const { scrapeGroupPosts } = await import("../lib/scraper");
+      const { scrapeGroupPosts } = await import("@/lib/scraper");
 
       const groupId = "123456";
       const posts = scrapeGroupPosts(groupId);
@@ -127,7 +127,7 @@ describe("Content Script", () => {
         </div>
       `;
 
-      const { scrapeGroupPosts } = await import("../lib/scraper");
+      const { scrapeGroupPosts } = await import("@/lib/scraper");
 
       const groupId = "123456";
       const posts = scrapeGroupPosts(groupId);
@@ -144,7 +144,7 @@ describe("Content Script", () => {
         </div>
       `;
 
-      const { extractGroupInfo } = await import("../lib/scraper");
+      const { extractGroupInfo } = await import("@/lib/scraper");
 
       const info = extractGroupInfo();
 
