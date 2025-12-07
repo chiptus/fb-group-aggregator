@@ -26,8 +26,7 @@
 		"rules": {
 			"recommended": true,
 			"complexity": {
-				"noExcessiveCognitiveComplexity": "warn",
-				"useArrowFunction": "off"
+				"noExcessiveCognitiveComplexity": "warn"
 			},
 			"correctness": {
 				"useExhaustiveDependencies": "warn"
