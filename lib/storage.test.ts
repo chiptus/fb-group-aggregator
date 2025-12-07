@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { describe, it, expect, beforeEach } from 'vitest';
 import type { Subscription, Group, Post } from './types';
 import {
   createSubscription,
@@ -17,11 +17,9 @@ import {
 } from './storage';
 
 describe('Storage - Subscriptions', () => {
-  beforeEach(() => {
-    vi.clearAllMocks();
-    // Reset storage mock
-    (chrome.storage.local.get as any).mockResolvedValue({ subscriptions: [] });
-    (chrome.storage.local.set as any).mockResolvedValue(undefined);
+  beforeEach(async () => {
+    // Clear storage before each test using WXT's polyfilled API
+    await chrome.storage.local.clear();
   });
 
   it('should create a new subscription', async () => {
@@ -33,9 +31,8 @@ describe('Storage - Subscriptions', () => {
       createdAt: expect.any(Number),
     });
 
-    expect(chrome.storage.local.set).toHaveBeenCalledWith({
-      subscriptions: [subscription],
-    });
+    const stored = await listSubscriptions();
+    expect(stored).toEqual([subscription]);
   });
 
   it('should list all subscriptions', async () => {
@@ -44,19 +41,15 @@ describe('Storage - Subscriptions', () => {
       { id: '2', name: 'Sub 2', createdAt: Date.now() },
     ];
 
-    (chrome.storage.local.get as any).mockResolvedValue({
-      subscriptions: mockSubscriptions,
-    });
+    // Use WXT's polyfilled storage API
+    await chrome.storage.local.set({ subscriptions: mockSubscriptions });
 
     const subscriptions = await listSubscriptions();
 
     expect(subscriptions).toEqual(mockSubscriptions);
-    expect(chrome.storage.local.get).toHaveBeenCalledWith('subscriptions');
   });
 
   it('should handle empty subscriptions list', async () => {
-    (chrome.storage.local.get as any).mockResolvedValue({});
-
     const subscriptions = await listSubscriptions();
 
     expect(subscriptions).toEqual([]);
@@ -68,23 +61,18 @@ describe('Storage - Subscriptions', () => {
       { id: '2', name: 'Sub 2', createdAt: Date.now() },
     ];
 
-    (chrome.storage.local.get as any).mockResolvedValue({
-      subscriptions: mockSubscriptions,
-    });
+    await chrome.storage.local.set({ subscriptions: mockSubscriptions });
 
     await deleteSubscription('1');
 
-    expect(chrome.storage.local.set).toHaveBeenCalledWith({
-      subscriptions: [mockSubscriptions[1]],
-    });
+    const result = await listSubscriptions();
+    expect(result).toEqual([mockSubscriptions[1]]);
   });
 });
 
 describe('Storage - Groups', () => {
-  beforeEach(() => {
-    vi.clearAllMocks();
-    (chrome.storage.local.get as any).mockResolvedValue({ groups: [] });
-    (chrome.storage.local.set as any).mockResolvedValue(undefined);
+  beforeEach(async () => {
+    await chrome.storage.local.clear();
   });
 
   it('should create a new group', async () => {
@@ -104,7 +92,8 @@ describe('Storage - Groups', () => {
       lastScrapedAt: null,
     });
 
-    expect(chrome.storage.local.set).toHaveBeenCalled();
+    const stored = await listGroups();
+    expect(stored).toEqual([group]);
   });
 
   it('should list all groups', async () => {
@@ -120,7 +109,7 @@ describe('Storage - Groups', () => {
       },
     ];
 
-    (chrome.storage.local.get as any).mockResolvedValue({ groups: mockGroups });
+    await chrome.storage.local.set({ groups: mockGroups });
 
     const groups = await listGroups();
 
@@ -138,19 +127,18 @@ describe('Storage - Groups', () => {
       enabled: true,
     };
 
-    (chrome.storage.local.get as any).mockResolvedValue({ groups: [mockGroup] });
+    await chrome.storage.local.set({ groups: [mockGroup] });
 
     await updateGroup('1', { enabled: false, lastScrapedAt: 123456 });
 
-    expect(chrome.storage.local.set).toHaveBeenCalledWith({
-      groups: [
-        {
-          ...mockGroup,
-          enabled: false,
-          lastScrapedAt: 123456,
-        },
-      ],
-    });
+    const groups = await listGroups();
+    expect(groups).toEqual([
+      {
+        ...mockGroup,
+        enabled: false,
+        lastScrapedAt: 123456,
+      },
+    ]);
   });
 
   it('should delete a group', async () => {
@@ -175,13 +163,12 @@ describe('Storage - Groups', () => {
       },
     ];
 
-    (chrome.storage.local.get as any).mockResolvedValue({ groups: mockGroups });
+    await chrome.storage.local.set({ groups: mockGroups });
 
     await deleteGroup('1');
 
-    expect(chrome.storage.local.set).toHaveBeenCalledWith({
-      groups: [mockGroups[1]],
-    });
+    const groups = await listGroups();
+    expect(groups).toEqual([mockGroups[1]]);
   });
 
   it('should find group by URL', async () => {
@@ -195,7 +182,7 @@ describe('Storage - Groups', () => {
       enabled: true,
     };
 
-    (chrome.storage.local.get as any).mockResolvedValue({ groups: [mockGroup] });
+    await chrome.storage.local.set({ groups: [mockGroup] });
 
     const found = await findGroupByUrl('https://www.facebook.com/groups/test');
 
@@ -203,8 +190,6 @@ describe('Storage - Groups', () => {
   });
 
   it('should return undefined when group not found by URL', async () => {
-    (chrome.storage.local.get as any).mockResolvedValue({ groups: [] });
-
     const found = await findGroupByUrl('https://www.facebook.com/groups/nonexistent');
 
     expect(found).toBeUndefined();
@@ -212,10 +197,8 @@ describe('Storage - Groups', () => {
 });
 
 describe('Storage - Posts', () => {
-  beforeEach(() => {
-    vi.clearAllMocks();
-    (chrome.storage.local.get as any).mockResolvedValue({ posts: [] });
-    (chrome.storage.local.set as any).mockResolvedValue(undefined);
+  beforeEach(async () => {
+    await chrome.storage.local.clear();
   });
 
   it('should create new posts', async () => {
@@ -240,8 +223,10 @@ describe('Storage - Posts', () => {
 
     await createPosts(newPosts);
 
-    expect(chrome.storage.local.set).toHaveBeenCalledWith({
-      posts: expect.arrayContaining([
+    const posts = await listPosts();
+    expect(posts).toHaveLength(2);
+    expect(posts).toEqual(
+      expect.arrayContaining([
         expect.objectContaining({
           ...newPosts[0],
           scrapedAt: expect.any(Number),
@@ -252,8 +237,8 @@ describe('Storage - Posts', () => {
           scrapedAt: expect.any(Number),
           seen: false,
         }),
-      ]),
-    });
+      ])
+    );
   });
 
   it('should deduplicate posts by ID', async () => {
@@ -268,7 +253,7 @@ describe('Storage - Posts', () => {
       url: 'https://facebook.com/posts/1',
     };
 
-    (chrome.storage.local.get as any).mockResolvedValue({ posts: [existingPost] });
+    await chrome.storage.local.set({ posts: [existingPost] });
 
     const newPosts = [
       {
@@ -291,10 +276,10 @@ describe('Storage - Posts', () => {
 
     await createPosts(newPosts);
 
-    const setCall = (chrome.storage.local.set as any).mock.calls[0][0];
-    expect(setCall.posts).toHaveLength(2); // Should have 2 posts total (1 existing, 1 new)
-    expect(setCall.posts.find((p: Post) => p.id === 'post-1')).toEqual(existingPost); // Existing should remain unchanged
-    expect(setCall.posts.find((p: Post) => p.id === 'post-2')).toBeDefined(); // New post should be added
+    const posts = await listPosts();
+    expect(posts).toHaveLength(2); // Should have 2 posts total (1 existing, 1 new)
+    expect(posts.find((p: Post) => p.id === 'post-1')).toEqual(existingPost); // Existing should remain unchanged
+    expect(posts.find((p: Post) => p.id === 'post-2')).toBeDefined(); // New post should be added
   });
 
   it('should list all posts', async () => {
@@ -311,7 +296,7 @@ describe('Storage - Posts', () => {
       },
     ];
 
-    (chrome.storage.local.get as any).mockResolvedValue({ posts: mockPosts });
+    await chrome.storage.local.set({ posts: mockPosts });
 
     const posts = await listPosts();
 
@@ -363,7 +348,7 @@ describe('Storage - Posts', () => {
       },
     ];
 
-    (chrome.storage.local.get as any).mockResolvedValue({
+    await chrome.storage.local.set({
       groups: mockGroups,
       posts: mockPosts,
     });
@@ -388,18 +373,17 @@ describe('Storage - Posts', () => {
       },
     ];
 
-    (chrome.storage.local.get as any).mockResolvedValue({ posts: mockPosts });
+    await chrome.storage.local.set({ posts: mockPosts });
 
     await markPostAsSeen('post-1', true);
 
-    expect(chrome.storage.local.set).toHaveBeenCalledWith({
-      posts: [
-        {
-          ...mockPosts[0],
-          seen: true,
-        },
-      ],
-    });
+    const posts = await listPosts();
+    expect(posts).toEqual([
+      {
+        ...mockPosts[0],
+        seen: true,
+      },
+    ]);
   });
 
   it('should delete old posts', async () => {
@@ -426,14 +410,13 @@ describe('Storage - Posts', () => {
       url: 'https://facebook.com/posts/recent',
     };
 
-    (chrome.storage.local.get as any).mockResolvedValue({
+    await chrome.storage.local.set({
       posts: [oldPost, recentPost],
     });
 
     await deleteOldPosts(30); // Delete posts older than 30 days
 
-    expect(chrome.storage.local.set).toHaveBeenCalledWith({
-      posts: [recentPost],
-    });
+    const posts = await listPosts();
+    expect(posts).toEqual([recentPost]);
   });
 });

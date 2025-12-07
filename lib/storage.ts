@@ -42,7 +42,8 @@ export async function listSubscriptions(): Promise<Subscription[]> {
 
 export async function deleteSubscription(id: string): Promise<void> {
   const result = await chrome.storage.local.get(STORAGE_KEYS.SUBSCRIPTIONS);
-  const subscriptions = (result.subscriptions as Subscription[]) || [];
+  const data = result.subscriptions || [];
+  const subscriptions = z.array(SubscriptionSchema).parse(data);
   const filtered = subscriptions.filter((s: Subscription) => s.id !== id);
   await chrome.storage.local.set({ subscriptions: filtered });
 }
@@ -79,7 +80,8 @@ export async function updateGroup(
   updates: Partial<Omit<Group, 'id' | 'addedAt'>>
 ): Promise<void> {
   const result = await chrome.storage.local.get(STORAGE_KEYS.GROUPS);
-  const groups = (result.groups as Group[]) || [];
+  const data = result.groups || [];
+  const groups = z.array(GroupSchema).parse(data);
   const updatedGroups = groups.map((g: Group) =>
     g.id === id ? { ...g, ...updates } : g
   );
@@ -88,7 +90,8 @@ export async function updateGroup(
 
 export async function deleteGroup(id: string): Promise<void> {
   const result = await chrome.storage.local.get(STORAGE_KEYS.GROUPS);
-  const groups = (result.groups as Group[]) || [];
+  const data = result.groups || [];
+  const groups = z.array(GroupSchema).parse(data);
   const filtered = groups.filter((g: Group) => g.id !== id);
   await chrome.storage.local.set({ groups: filtered });
 }
@@ -108,7 +111,8 @@ export async function createPosts(
   newPosts: Omit<Post, 'scrapedAt' | 'seen'>[]
 ): Promise<void> {
   const result = await chrome.storage.local.get(STORAGE_KEYS.POSTS);
-  const posts = (result.posts as Post[]) || [];
+  const data = result.posts || [];
+  const posts = z.array(PostSchema).parse(data);
 
   // Deduplicate: only add posts that don't already exist
   const existingIds = new Set(posts.map((p: Post) => p.id));
@@ -157,7 +161,8 @@ export async function markPostAsSeen(
   seen: boolean
 ): Promise<void> {
   const result = await chrome.storage.local.get(STORAGE_KEYS.POSTS);
-  const posts = (result.posts as Post[]) || [];
+  const data = result.posts || [];
+  const posts = z.array(PostSchema).parse(data);
   const updatedPosts = posts.map((p: Post) =>
     p.id === postId ? { ...p, seen } : p
   );
@@ -166,7 +171,8 @@ export async function markPostAsSeen(
 
 export async function deleteOldPosts(daysOld: number): Promise<void> {
   const result = await chrome.storage.local.get(STORAGE_KEYS.POSTS);
-  const posts = (result.posts as Post[]) || [];
+  const data = result.posts || [];
+  const posts = z.array(PostSchema).parse(data);
   const cutoffTime = Date.now() - daysOld * 24 * 60 * 60 * 1000;
   const recentPosts = posts.filter((p: Post) => p.timestamp >= cutoffTime);
   await chrome.storage.local.set({ posts: recentPosts });
