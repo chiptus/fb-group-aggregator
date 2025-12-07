@@ -1,18 +1,18 @@
-import { z } from 'zod';
+import { z } from "zod";
 import {
-  type Subscription,
   type Group,
-  type Post,
-  SubscriptionSchema,
   GroupSchema,
+  type Post,
   PostSchema,
-} from './types';
+  type Subscription,
+  SubscriptionSchema,
+} from "./types";
 
 // Storage keys
 const STORAGE_KEYS = {
-  SUBSCRIPTIONS: 'subscriptions',
-  GROUPS: 'groups',
-  POSTS: 'posts',
+  SUBSCRIPTIONS: "subscriptions",
+  GROUPS: "groups",
+  POSTS: "posts",
 } as const;
 
 /**
@@ -53,7 +53,7 @@ export async function deleteSubscription(id: string): Promise<void> {
  */
 
 export async function createGroup(
-  groupData: Omit<Group, 'addedAt' | 'lastScrapedAt'>
+  groupData: Omit<Group, "addedAt" | "lastScrapedAt">,
 ): Promise<Group> {
   const group: Group = {
     ...groupData,
@@ -77,13 +77,13 @@ export async function listGroups(): Promise<Group[]> {
 
 export async function updateGroup(
   id: string,
-  updates: Partial<Omit<Group, 'id' | 'addedAt'>>
+  updates: Partial<Omit<Group, "id" | "addedAt">>,
 ): Promise<void> {
   const result = await chrome.storage.local.get(STORAGE_KEYS.GROUPS);
   const data = result.groups || [];
   const groups = z.array(GroupSchema).parse(data);
   const updatedGroups = groups.map((g: Group) =>
-    g.id === id ? { ...g, ...updates } : g
+    g.id === id ? { ...g, ...updates } : g,
   );
   await chrome.storage.local.set({ groups: updatedGroups });
 }
@@ -108,7 +108,7 @@ export async function findGroupByUrl(url: string): Promise<Group | undefined> {
  */
 
 export async function createPosts(
-  newPosts: Omit<Post, 'scrapedAt' | 'seen'>[]
+  newPosts: Omit<Post, "scrapedAt" | "seen">[],
 ): Promise<void> {
   const result = await chrome.storage.local.get(STORAGE_KEYS.POSTS);
   const data = result.posts || [];
@@ -135,7 +135,7 @@ export async function listPosts(): Promise<Post[]> {
 }
 
 export async function listPostsBySubscription(
-  subscriptionId: string
+  subscriptionId: string,
 ): Promise<Post[]> {
   const result = await chrome.storage.local.get([
     STORAGE_KEYS.GROUPS,
@@ -158,13 +158,13 @@ export async function listPostsBySubscription(
 
 export async function markPostAsSeen(
   postId: string,
-  seen: boolean
+  seen: boolean,
 ): Promise<void> {
   const result = await chrome.storage.local.get(STORAGE_KEYS.POSTS);
   const data = result.posts || [];
   const posts = z.array(PostSchema).parse(data);
   const updatedPosts = posts.map((p: Post) =>
-    p.id === postId ? { ...p, seen } : p
+    p.id === postId ? { ...p, seen } : p,
   );
   await chrome.storage.local.set({ posts: updatedPosts });
 }

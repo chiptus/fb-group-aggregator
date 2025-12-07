@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from "vitest";
 
 /**
  * Content Script Tests
@@ -10,58 +10,58 @@ import { describe, it, expect, beforeEach, vi } from 'vitest';
  * 4. Handles responses from background script
  */
 
-describe('Content Script', () => {
+describe("Content Script", () => {
   beforeEach(() => {
     // Clear DOM
-    document.body.innerHTML = '';
+    document.body.innerHTML = "";
 
     // Clear all mocks
     vi.clearAllMocks();
 
     // Mock window.location
-    Object.defineProperty(window, 'location', {
+    Object.defineProperty(window, "location", {
       value: {
-        href: 'https://www.facebook.com/groups/123456/posts/',
-        pathname: '/groups/123456/posts/',
+        href: "https://www.facebook.com/groups/123456/posts/",
+        pathname: "/groups/123456/posts/",
       },
       writable: true,
     });
   });
 
-  describe('URL Detection', () => {
-    it('should detect Facebook group URL', () => {
-      const url = 'https://www.facebook.com/groups/123456/';
+  describe("URL Detection", () => {
+    it("should detect Facebook group URL", () => {
+      const url = "https://www.facebook.com/groups/123456/";
       const groupIdMatch = url.match(/facebook\.com\/groups\/([^/]+)/);
 
       expect(groupIdMatch).toBeTruthy();
-      expect(groupIdMatch?.[1]).toBe('123456');
+      expect(groupIdMatch?.[1]).toBe("123456");
     });
 
-    it('should detect Facebook group posts page', () => {
-      const url = 'https://www.facebook.com/groups/123456/posts/';
+    it("should detect Facebook group posts page", () => {
+      const url = "https://www.facebook.com/groups/123456/posts/";
       const groupIdMatch = url.match(/facebook\.com\/groups\/([^/]+)/);
 
       expect(groupIdMatch).toBeTruthy();
-      expect(groupIdMatch?.[1]).toBe('123456');
+      expect(groupIdMatch?.[1]).toBe("123456");
     });
 
-    it('should not match non-group Facebook pages', () => {
-      const url = 'https://www.facebook.com/profile/123';
+    it("should not match non-group Facebook pages", () => {
+      const url = "https://www.facebook.com/profile/123";
       const groupIdMatch = url.match(/facebook\.com\/groups\/([^/]+)/);
 
       expect(groupIdMatch).toBeNull();
     });
 
-    it('should extract group ID from permalink URLs', () => {
-      const url = 'https://www.facebook.com/groups/123456/permalink/789/';
+    it("should extract group ID from permalink URLs", () => {
+      const url = "https://www.facebook.com/groups/123456/permalink/789/";
       const groupIdMatch = url.match(/facebook\.com\/groups\/([^/]+)/);
 
-      expect(groupIdMatch?.[1]).toBe('123456');
+      expect(groupIdMatch?.[1]).toBe("123456");
     });
   });
 
-  describe('Scraping Integration', () => {
-    it('should scrape posts and send to background', async () => {
+  describe("Scraping Integration", () => {
+    it("should scrape posts and send to background", async () => {
       // Mock Facebook group page with posts
       document.body.innerHTML = `
         <div data-pagelet="GroupFeed">
@@ -84,19 +84,19 @@ describe('Content Script', () => {
         runtime: {
           sendMessage: sendMessageMock,
         },
-      } as any;
+      } as unknown as typeof chrome;
 
       // Import scraper (in real code, content script will import this)
-      const { scrapeGroupPosts } = await import('../lib/scraper');
+      const { scrapeGroupPosts } = await import("../lib/scraper");
 
-      const groupId = '123456';
+      const groupId = "123456";
       const posts = scrapeGroupPosts(groupId);
 
       expect(posts).toHaveLength(1);
 
       // Content script should send these posts to background
       await chrome.runtime.sendMessage({
-        type: 'SCRAPE_POSTS',
+        type: "SCRAPE_POSTS",
         payload: {
           groupId,
           posts,
@@ -104,22 +104,22 @@ describe('Content Script', () => {
       });
 
       expect(sendMessageMock).toHaveBeenCalledWith({
-        type: 'SCRAPE_POSTS',
+        type: "SCRAPE_POSTS",
         payload: {
           groupId,
           posts: expect.arrayContaining([
             expect.objectContaining({
               id: expect.any(String),
-              groupId: '123456',
-              authorName: 'John Doe',
-              contentHtml: expect.stringContaining('Test post'),
+              groupId: "123456",
+              authorName: "John Doe",
+              contentHtml: expect.stringContaining("Test post"),
             }),
           ]),
         },
       });
     });
 
-    it('should handle empty scrape results', async () => {
+    it("should handle empty scrape results", async () => {
       // Mock Facebook page with no posts
       document.body.innerHTML = `
         <div data-pagelet="GroupFeed">
@@ -127,15 +127,15 @@ describe('Content Script', () => {
         </div>
       `;
 
-      const { scrapeGroupPosts } = await import('../lib/scraper');
+      const { scrapeGroupPosts } = await import("../lib/scraper");
 
-      const groupId = '123456';
+      const groupId = "123456";
       const posts = scrapeGroupPosts(groupId);
 
       expect(posts).toEqual([]);
     });
 
-    it('should extract group info from page', async () => {
+    it("should extract group info from page", async () => {
       document.body.innerHTML = `
         <div>
           <h1>
@@ -144,19 +144,19 @@ describe('Content Script', () => {
         </div>
       `;
 
-      const { extractGroupInfo } = await import('../lib/scraper');
+      const { extractGroupInfo } = await import("../lib/scraper");
 
       const info = extractGroupInfo();
 
       expect(info).toEqual({
-        name: 'Test Group Name',
-        url: expect.stringContaining('123456'),
+        name: "Test Group Name",
+        url: expect.stringContaining("123456"),
       });
     });
   });
 
-  describe('Message Handling', () => {
-    it('should handle successful scrape response', async () => {
+  describe("Message Handling", () => {
+    it("should handle successful scrape response", async () => {
       const sendMessageMock = vi.fn().mockResolvedValue({
         success: true,
         count: 5,
@@ -166,32 +166,32 @@ describe('Content Script', () => {
         runtime: {
           sendMessage: sendMessageMock,
         },
-      } as any;
+      } as unknown as typeof chrome;
 
       const response = await chrome.runtime.sendMessage({
-        type: 'SCRAPE_POSTS',
-        payload: { groupId: '123', posts: [] },
+        type: "SCRAPE_POSTS",
+        payload: { groupId: "123", posts: [] },
       });
 
       expect(response.success).toBe(true);
       expect(response.count).toBe(5);
     });
 
-    it('should handle scrape errors', async () => {
+    it("should handle scrape errors", async () => {
       const sendMessageMock = vi.fn().mockResolvedValue({
         success: false,
-        error: 'Failed to save posts',
+        error: "Failed to save posts",
       });
 
       global.chrome = {
         runtime: {
           sendMessage: sendMessageMock,
         },
-      } as any;
+      } as unknown as typeof chrome;
 
       const response = await chrome.runtime.sendMessage({
-        type: 'SCRAPE_POSTS',
-        payload: { groupId: '123', posts: [] },
+        type: "SCRAPE_POSTS",
+        payload: { groupId: "123", posts: [] },
       });
 
       expect(response.success).toBe(false);
@@ -199,8 +199,8 @@ describe('Content Script', () => {
     });
   });
 
-  describe('Scraping Trigger', () => {
-    it('should trigger scrape on page load', () => {
+  describe("Scraping Trigger", () => {
+    it("should trigger scrape on page load", () => {
       // In real implementation, content script will:
       // 1. Wait for DOM to load
       // 2. Check if on Facebook group page
@@ -212,7 +212,7 @@ describe('Content Script', () => {
       expect(isGroupPage).toBe(true);
     });
 
-    it('should trigger scrape on scroll to bottom', () => {
+    it("should trigger scrape on scroll to bottom", () => {
       // Facebook lazy-loads posts, so we need to trigger scrape
       // when user scrolls to bottom to load more posts
 
@@ -225,17 +225,20 @@ describe('Content Script', () => {
       };
 
       // Mock scroll position near bottom
-      Object.defineProperty(window, 'scrollY', { value: 1000, writable: true });
-      Object.defineProperty(document.documentElement, 'scrollHeight', {
+      Object.defineProperty(window, "scrollY", { value: 1000, writable: true });
+      Object.defineProperty(document.documentElement, "scrollHeight", {
         value: 1200,
         writable: true,
       });
-      Object.defineProperty(window, 'innerHeight', { value: 150, writable: true });
+      Object.defineProperty(window, "innerHeight", {
+        value: 150,
+        writable: true,
+      });
 
       expect(isNearBottom()).toBe(true);
     });
 
-    it('should not trigger scrape too frequently', () => {
+    it("should not trigger scrape too frequently", () => {
       // Use debounce to avoid scraping on every scroll event
       let lastScrapeTime = 0;
       const minInterval = 2000; // 2 seconds
@@ -254,34 +257,36 @@ describe('Content Script', () => {
     });
   });
 
-  describe('Error Handling', () => {
-    it('should handle scraper errors gracefully', () => {
+  describe("Error Handling", () => {
+    it("should handle scraper errors gracefully", () => {
       // If scraper throws, content script should catch and log
-      const mockError = new Error('Scraper failed');
+      const mockError = new Error("Scraper failed");
 
       expect(() => {
         try {
           throw mockError;
         } catch (error) {
-          console.error('Scraping error:', error);
+          console.error("Scraping error:", error);
           // Content script should not crash
         }
       }).not.toThrow();
     });
 
-    it('should handle message send failures', async () => {
-      const sendMessageMock = vi.fn().mockRejectedValue(new Error('Network error'));
+    it("should handle message send failures", async () => {
+      const sendMessageMock = vi
+        .fn()
+        .mockRejectedValue(new Error("Network error"));
 
       global.chrome = {
         runtime: {
           sendMessage: sendMessageMock,
         },
-      } as any;
+      } as unknown as typeof chrome;
 
       try {
         await chrome.runtime.sendMessage({
-          type: 'SCRAPE_POSTS',
-          payload: { groupId: '123', posts: [] },
+          type: "SCRAPE_POSTS",
+          payload: { groupId: "123", posts: [] },
         });
       } catch (error) {
         expect(error).toBeTruthy();

@@ -1,4 +1,4 @@
-import { scrapeGroupPosts, extractGroupInfo } from "../lib/scraper";
+import { extractGroupInfo, scrapeGroupPosts } from "../lib/scraper";
 
 export default defineContentScript({
   matches: ["*://*.facebook.com/*"],
@@ -6,7 +6,7 @@ export default defineContentScript({
   main() {
     // Only run on Facebook group pages
     const groupIdMatch = window.location.href.match(
-      /facebook\.com\/groups\/([^/]+)/
+      /facebook\.com\/groups\/([^/]+)/,
     );
     if (!groupIdMatch) {
       return; // Not a group page
@@ -29,7 +29,7 @@ export default defineContentScript({
     window.addEventListener("scroll", handleScroll, { passive: true });
 
     // Optional: Listen for messages from background script
-    chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+    chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
       if (message.type === "TRIGGER_SCRAPE") {
         scrapeAndSend().then(() => {
           sendResponse({ success: true });
@@ -81,12 +81,12 @@ export default defineContentScript({
 
         if (response.success) {
           console.log(
-            `[FB Aggregator] Successfully saved ${response.count} new posts`
+            `[FB Aggregator] Successfully saved ${response.count} new posts`,
           );
         } else {
           console.error(
             "[FB Aggregator] Failed to save posts:",
-            response.error
+            response.error,
           );
         }
       } catch (error) {

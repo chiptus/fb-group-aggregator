@@ -1,5 +1,5 @@
-import { describe, it, expect, beforeEach } from "vitest";
-import { scrapeGroupPosts, extractGroupInfo } from "./scraper";
+import { beforeEach, describe, expect, it } from "vitest";
+import { extractGroupInfo, scrapeGroupPosts } from "./scraper";
 
 describe("Facebook Scraper", () => {
   beforeEach(() => {

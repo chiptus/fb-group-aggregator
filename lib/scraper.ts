@@ -1,4 +1,4 @@
-import type { Post } from './types';
+import type { Post } from "./types";
 
 /**
  * Scrapes posts from a Facebook group page
@@ -6,9 +6,9 @@ import type { Post } from './types';
  * @returns Array of scraped posts (without scrapedAt and seen fields)
  */
 export function scrapeGroupPosts(
-  groupId: string
-): Omit<Post, 'scrapedAt' | 'seen'>[] {
-  const posts: Omit<Post, 'scrapedAt' | 'seen'>[] = [];
+  groupId: string,
+): Omit<Post, "scrapedAt" | "seen">[] {
+  const posts: Omit<Post, "scrapedAt" | "seen">[] = [];
 
   // Find the group feed container
   const feedContainer = document.querySelector('[data-pagelet="GroupFeed"]');
@@ -26,7 +26,7 @@ export function scrapeGroupPosts(
         posts.push(post);
       }
     } catch (error) {
-      console.error('Error extracting post:', error);
+      console.error("Error extracting post:", error);
       // Continue to next post
     }
   });
@@ -39,8 +39,8 @@ export function scrapeGroupPosts(
  */
 function extractPostData(
   element: HTMLElement,
-  groupId: string
-): Omit<Post, 'scrapedAt' | 'seen'> | null {
+  groupId: string,
+): Omit<Post, "scrapedAt" | "seen"> | null {
   // Extract post ID from data-ft attribute
   const postId = extractPostId(element);
   if (!postId) {
@@ -75,7 +75,7 @@ function extractPostData(
  */
 function extractPostId(element: HTMLElement): string | null {
   // Strategy 1: data-ft attribute (legacy)
-  const dataFt = element.getAttribute('data-ft');
+  const dataFt = element.getAttribute("data-ft");
   if (dataFt) {
     try {
       const ftData = JSON.parse(dataFt);
@@ -90,26 +90,28 @@ function extractPostId(element: HTMLElement): string | null {
   // Strategy 2: Extract from permalink URL
   const permalinkLink = element.querySelector('a[href*="/posts/"]');
   if (permalinkLink) {
-    const href = permalinkLink.getAttribute('href') || '';
+    const href = permalinkLink.getAttribute("href") || "";
     const match = href.match(/\/posts\/(\d+)/);
-    if (match && match[1]) {
+    if (match?.[1]) {
       return match[1];
     }
   }
 
   // Strategy 3: Look for aria-label with post/comment identifier
-  const ariaLabel = element.getAttribute('aria-label') || '';
+  const ariaLabel = element.getAttribute("aria-label") || "";
   // Skip comments - we only want main posts
-  if (ariaLabel.toLowerCase().includes('comment')) {
+  if (ariaLabel.toLowerCase().includes("comment")) {
     return null;
   }
 
   // Strategy 4: Generate ID from timestamp link if this is a post
-  const timestampLink = element.querySelector('a[href*="/groups/"][href*="/posts/"]');
+  const timestampLink = element.querySelector(
+    'a[href*="/groups/"][href*="/posts/"]',
+  );
   if (timestampLink) {
-    const href = timestampLink.getAttribute('href') || '';
+    const href = timestampLink.getAttribute("href") || "";
     const match = href.match(/\/posts\/(\d+)/);
-    if (match && match[1]) {
+    if (match?.[1]) {
       return match[1];
     }
   }
@@ -124,37 +126,37 @@ function extractPostId(element: HTMLElement): string | null {
 function extractAuthorName(element: HTMLElement): string {
   // Strategy 1: Find user link (most reliable)
   const authorLink = element.querySelector('a[href*="/user/"]');
-  if (authorLink && authorLink.textContent?.trim()) {
+  if (authorLink?.textContent?.trim()) {
     return authorLink.textContent.trim();
   }
 
   // Strategy 2: Check aria-label for author name
-  const ariaLabel = element.getAttribute('aria-label') || '';
+  const ariaLabel = element.getAttribute("aria-label") || "";
   // Match patterns like "Post by John Doe" or "Comment by John Doe"
   const byMatch = ariaLabel.match(/(?:Post|Comment) by ([^,]+)/i);
-  if (byMatch && byMatch[1]) {
+  if (byMatch?.[1]) {
     return byMatch[1].trim();
   }
 
   // Strategy 3: Find first non-permalink link with text
-  const links = element.querySelectorAll('a');
+  const links = element.querySelectorAll("a");
   for (const link of Array.from(links)) {
-    const href = link.getAttribute('href') || '';
-    const text = link.textContent?.trim() || '';
+    const href = link.getAttribute("href") || "";
+    const text = link.textContent?.trim() || "";
     // Skip empty links, timestamp links (like "4d"), and permalink links
     if (
       text &&
       text.length > 1 &&
       !/^\d+[smhdw]$/.test(text) && // Skip "4d", "2h", etc.
-      !href.includes('/posts/') &&
-      !href.includes('Permalink') &&
-      text !== 'Permalink'
+      !href.includes("/posts/") &&
+      !href.includes("Permalink") &&
+      text !== "Permalink"
     ) {
       return text;
     }
   }
 
-  return 'Unknown';
+  return "Unknown";
 }
 
 /**
@@ -164,7 +166,7 @@ function extractContentHtml(element: HTMLElement): string {
   // Look for the message container
   const messageContainer = element.querySelector('[data-ad-preview="message"]');
   if (!messageContainer) {
-    return '';
+    return "";
   }
 
   // Get the inner content (usually in a div with dir="auto")
@@ -181,9 +183,9 @@ function extractContentHtml(element: HTMLElement): string {
  */
 function extractTimestamp(element: HTMLElement): number {
   // Strategy 1: abbr element with data-utime attribute (most accurate)
-  const timeElement = element.querySelector('abbr[data-utime]');
+  const timeElement = element.querySelector("abbr[data-utime]");
   if (timeElement) {
-    const utime = timeElement.getAttribute('data-utime');
+    const utime = timeElement.getAttribute("data-utime");
     if (utime) {
       // Facebook stores Unix timestamp in seconds, convert to milliseconds
       return parseInt(utime, 10) * 1000;
@@ -191,9 +193,11 @@ function extractTimestamp(element: HTMLElement): number {
   }
 
   // Strategy 2: Look for aria-label timestamp pattern
-  const ariaLabel = element.getAttribute('aria-label') || '';
+  const ariaLabel = element.getAttribute("aria-label") || "";
   // Match patterns like "4 days ago", "2 hours ago", etc.
-  const timeMatch = ariaLabel.match(/(\d+)\s*(second|minute|hour|day|week|month|year)s?\s*ago/i);
+  const timeMatch = ariaLabel.match(
+    /(\d+)\s*(second|minute|hour|day|week|month|year)s?\s*ago/i,
+  );
   if (timeMatch) {
     const value = parseInt(timeMatch[1], 10);
     const unit = timeMatch[2].toLowerCase();
@@ -213,9 +217,9 @@ function extractTimestamp(element: HTMLElement): number {
   }
 
   // Strategy 3: Look for relative time in links (like "4d")
-  const links = element.querySelectorAll('a');
+  const links = element.querySelectorAll("a");
   for (const link of Array.from(links)) {
-    const text = link.textContent?.trim() || '';
+    const text = link.textContent?.trim() || "";
     const relativeMatch = text.match(/^(\d+)([smhdw])$/);
     if (relativeMatch) {
       const value = parseInt(relativeMatch[1], 10);
@@ -249,17 +253,19 @@ function constructPostUrl(groupId: string, postId: string): string {
  * Extracts group information from the current page
  */
 export function extractGroupInfo(): { name: string; url: string } {
-  let name = '';
+  let name = "";
   let url = window.location.href;
 
   // Try to find group name from header
-  const groupLink = document.querySelector('h1 a, [role="main"] a[href*="/groups/"]');
+  const groupLink = document.querySelector(
+    'h1 a, [role="main"] a[href*="/groups/"]',
+  );
   if (groupLink) {
-    name = groupLink.textContent?.trim() || '';
-    const href = groupLink.getAttribute('href');
+    name = groupLink.textContent?.trim() || "";
+    const href = groupLink.getAttribute("href");
     if (href) {
       // Construct full URL if it's a relative path
-      url = href.startsWith('http') ? href : `https://www.facebook.com${href}`;
+      url = href.startsWith("http") ? href : `https://www.facebook.com${href}`;
     }
   }
 

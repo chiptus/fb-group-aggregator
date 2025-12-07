@@ -1,4 +1,4 @@
-import { z } from 'zod';
+import { z } from "zod";
 
 // Zod schemas for runtime validation
 export const SubscriptionSchema = z.object({

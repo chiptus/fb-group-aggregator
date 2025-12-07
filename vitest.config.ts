@@ -1,5 +1,5 @@
+import path from "node:path";
 import { defineConfig } from "vitest/config";
-import path from "path";
 import { WxtVitest } from "wxt/testing/vitest-plugin";
 
 export default defineConfig({
