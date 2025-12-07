@@ -12,7 +12,7 @@ A Chrome/Firefox browser extension that aggregates posts from multiple Facebook 
 - **Validation**: Zod for runtime type safety
 - **Package Manager**: pnpm
 
-## Project Status: Phase 3 Complete ✅
+## Project Status: Phase 4 Complete ✅
 
 ### ✅ Phase 0: Test Infrastructure (COMPLETED)
 - [x] Configure Vitest with WXT plugin
@@ -157,26 +157,55 @@ Implement the background service worker that:
 
 ---
 
-## 📋 Phase 4: Dashboard UI (PLANNED)
+## ✅ Phase 4: Dashboard UI (COMPLETED)
 
 ### Objectives
 Build the main dashboard where users view aggregated posts.
 
 ### Features
-- [ ] Post list with filtering by subscription
-- [ ] Mark posts as seen/unseen
-- [ ] Search and filter posts
-- [ ] View post content with formatting
-- [ ] Open original Facebook post
-- [ ] Pagination/infinite scroll
+- [x] Post list with filtering by subscription
+- [x] Mark posts as seen/unseen
+- [x] Search and filter posts
+- [x] View post content with formatting
+- [x] Open original Facebook post
+- [~] Pagination/infinite scroll (Deferred - all posts loaded at once for MVP)
 
-### Files to Create
-- `entrypoints/dashboard/` - Dashboard entry point directory
-- `entrypoints/dashboard/index.html` - Dashboard HTML
-- `entrypoints/dashboard/main.tsx` - Dashboard React entry
-- `entrypoints/dashboard/App.tsx` - Main dashboard component
-- `entrypoints/dashboard/components/` - UI components
-- `entrypoints/dashboard/App.test.tsx` - Dashboard tests
+### Files Created/Updated
+- [entrypoints/dashboard/index.html](../entrypoints/dashboard/index.html) - Dashboard HTML with proper title
+- [entrypoints/dashboard/main.tsx](../entrypoints/dashboard/main.tsx) - Dashboard React entry point (existing)
+- [entrypoints/dashboard/App.tsx](../entrypoints/dashboard/App.tsx) - Main dashboard component with full functionality
+- [entrypoints/dashboard/App.test.tsx](../entrypoints/dashboard/App.test.tsx) - 11 comprehensive tests for dashboard
+
+**Test Count:** 11 tests passing (54 total with all phases)
+
+### Implementation Highlights
+- **TDD Approach**: All features test-driven with comprehensive coverage
+- **Subscription Filtering**: Sidebar selector for filtering posts by subscription or viewing all
+- **Search**: Real-time search filtering by post content and author name
+- **Post Management**: Mark posts as seen/unseen with optimistic UI updates
+- **Sorting**: Posts sorted by timestamp (newest first)
+- **Empty States**: Graceful handling when no posts exist
+- **Facebook Integration**: Click to open original posts in new tab
+- **Responsive Design**: Clean Tailwind CSS styling with proper spacing
+- **Type Safety**: Full TypeScript with proper type inference
+- **Performance**: useMemo for filtered posts calculation
+
+### Dashboard Features
+1. **Header**: Shows app title and unseen post count
+2. **Sidebar**: Subscription selector with "All Posts" option
+3. **Search Bar**: Filter posts by content or author
+4. **Post Cards**: Display author, timestamp, content (HTML), and actions
+5. **Post Actions**:
+   - Mark as seen/unseen
+   - Open on Facebook (new tab)
+
+### Technical Details
+- Uses `listSubscriptions()`, `listGroups()`, `listPosts()` from storage API
+- Updates posts via `markPostAsSeen(postId, seen)`
+- Filters posts by group subscription IDs
+- Handles HTML content safely with dangerouslySetInnerHTML (Facebook content)
+- Loading state during initial data fetch
+- Error handling with console logging
 
 ---
 
@@ -229,7 +258,7 @@ End-to-end testing and refinement.
 3. Refactor if needed
 4. All code must have test coverage
 
-**Current Test Coverage**: 43 tests across 4 test files
+**Current Test Coverage**: 54 tests across 5 test files
 
 ---
 
@@ -252,7 +281,7 @@ End-to-end testing and refinement.
 
 1. **Review this file** to understand current progress
 2. **Run tests** to verify everything works: `pnpm test:run`
-3. **Start Phase 4**: Dashboard UI (post viewing and management)
+3. **Start Phase 5**: Popup UI (subscription and group management)
 4. **Check [CLAUDE.md](../CLAUDE.md)** for WXT framework conventions
 5. **Check [lib/SCRAPER-NOTES.md](../lib/SCRAPER-NOTES.md)** for scraper maintenance info
 
@@ -278,4 +307,4 @@ pnpm zip              # Package for distribution
 
 ---
 
-**Last Updated**: 2025-12-07 (Phase 3 complete, 43 tests passing, file colocation applied)
+**Last Updated**: 2025-12-07 (Phase 4 complete, 54 tests passing, Dashboard UI implemented with TDD)
