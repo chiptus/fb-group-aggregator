@@ -45,15 +45,18 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 **Colocation Rules**:
 - **Prefer colocation**: Test files should be placed next to the code they test
+- **Test naming**: Test files should be named `<filename>.test.ts` matching the file they test
 - **Entrypoints with subdirectories**: For entrypoints, create a subdirectory and use `index.ts` for the main file:
   ```
   entrypoints/
     background/
-      index.ts              # Main background script
-      background.test.ts    # Tests for background script
+      index.ts                      # Main background script entry point
+      background-handler.ts         # Background handler logic
+      background-handler.test.ts    # Tests for background-handler.ts
     content/
-      index.ts              # Main content script
-      content.test.ts       # Tests for content script
+      index.ts                      # Main content script
+      content-logic.ts              # Content script logic (if separated)
+      content-logic.test.ts         # Tests for content-logic.ts
   ```
 - **Library files**: Keep test files adjacent in the same directory:
   ```
@@ -63,7 +66,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
     scraper.ts
     scraper.test.ts
   ```
-- **Benefits**: Easier to find related tests, ensures tests move with code, better IDE navigation
+- **Benefits**: Easier to find related tests, ensures tests move with code, better IDE navigation, clear test-to-code mapping
 
 **Why not test/ directory?**
 - WXT treats files in `entrypoints/` as potential entrypoints, which can cause build conflicts
@@ -88,7 +91,8 @@ Browser extensions in WXT use distinct entry points, each with a specific role:
    - Coordinates storage operations and deduplication
    - Handles messages from content script
    - Uses `defineBackground()` from WXT
-   - Tests: [entrypoints/background/background.test.ts](entrypoints/background/background.test.ts)
+   - Logic: [entrypoints/background/background-handler.ts](entrypoints/background/background-handler.ts)
+   - Tests: [entrypoints/background/background-handler.test.ts](entrypoints/background/background-handler.test.ts)
 
 2. **Content Script** ([entrypoints/content/index.ts](entrypoints/content/index.ts))
    - Injected into Facebook group pages matching:
@@ -97,7 +101,7 @@ Browser extensions in WXT use distinct entry points, each with a specific role:
    - Has DOM access to scrape posts
    - Sends scraped posts to background script via messaging
    - Uses `defineContentScript()` with `matches` array
-   - Tests: [entrypoints/content/content.test.ts](entrypoints/content/content.test.ts)
+   - Tests: Needs tests (see Phase 6 in PROJECT-PLAN.md)
 
 3. **Popup UI** ([entrypoints/popup/](entrypoints/popup/))
    - React application for the extension's popup interface

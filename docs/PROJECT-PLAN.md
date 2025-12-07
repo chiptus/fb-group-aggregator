@@ -121,7 +121,7 @@ Implement the background service worker that:
 ### Files Created/Updated
 - [entrypoints/background/index.ts](../entrypoints/background/index.ts) - Background script entry point
 - [entrypoints/background/background-handler.ts](../entrypoints/background/background-handler.ts) - Testable message handling logic (colocated)
-- [entrypoints/background/background.test.ts](../entrypoints/background/background.test.ts) - 10 tests for background script (colocated)
+- [entrypoints/background/background-handler.test.ts](../entrypoints/background/background-handler.test.ts) - 10 tests for background handler (colocated)
 - [lib/types.ts](../lib/types.ts) - Updated message types and added ScrapePostsResponse
 
 **Test Count:** 10 tests passing (43 total with all phases)
