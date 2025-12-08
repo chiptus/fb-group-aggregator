@@ -142,11 +142,11 @@ describe("Dashboard App", () => {
 			).toBeInTheDocument();
 		});
 
-		// Find and click the mark as seen button for post1
-		const markSeenButtons = screen.getAllByRole("button", {
-			name: /mark as seen/i,
+		// Find and click the mark as seen button for post1 (from John Doe)
+		const markSeenButton = screen.getByRole("button", {
+			name: /Mark post from John Doe as seen/i,
 		});
-		await user.click(markSeenButtons[0]);
+		await user.click(markSeenButton);
 
 		// Should call storage.markPostAsSeen with seen: true
 		await waitFor(() => {
@@ -163,11 +163,11 @@ describe("Dashboard App", () => {
 			expect(screen.getByText(/Junior Frontend opening/)).toBeInTheDocument();
 		});
 
-		// Find and click the mark as unseen button for post3 (which is already seen)
-		const markUnseenButtons = screen.getAllByRole("button", {
-			name: /mark as unseen/i,
+		// Find and click the mark as unseen button for post3 (from Bob Wilson, which is already seen)
+		const markUnseenButton = screen.getByRole("button", {
+			name: /Mark post from Bob Wilson as unseen/i,
 		});
-		await user.click(markUnseenButtons[0]);
+		await user.click(markUnseenButton);
 
 		// Should call storage.markPostAsSeen with seen: false
 		await waitFor(() => {

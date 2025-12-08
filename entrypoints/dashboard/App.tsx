@@ -136,7 +136,7 @@ function App() {
 			<header className="bg-white shadow-sm">
 				<div className="max-w-7xl mx-auto px-4 py-4">
 					<h1 className="text-2xl font-bold">FB Group Aggregator</h1>
-					<p className="text-sm text-gray-600">
+					<p className="text-sm text-gray-600" aria-live="polite">
 						{unseenCount} unseen post{unseenCount !== 1 ? "s" : ""}
 					</p>
 				</div>
@@ -144,13 +144,15 @@ function App() {
 
 			<div className="max-w-7xl mx-auto px-4 py-6 flex gap-6">
 				{/* Sidebar - Subscriptions */}
-				<aside className="w-64 flex-shrink-0">
+				<nav className="w-64 flex-shrink-0" aria-label="Subscription filters">
 					<div className="bg-white rounded-lg shadow p-4">
 						<h2 className="font-semibold mb-3">Subscriptions</h2>
 						<div className="space-y-1">
 							<button
 								type="button"
 								onClick={() => setSelectedSubscriptionId(null)}
+								aria-pressed={selectedSubscriptionId === null}
+								aria-label="Show all posts from all subscriptions"
 								className={`w-full text-left px-3 py-2 rounded ${
 									selectedSubscriptionId === null
 										? "bg-blue-100 text-blue-900"
@@ -164,6 +166,8 @@ function App() {
 									key={sub.id}
 									type="button"
 									onClick={() => setSelectedSubscriptionId(sub.id)}
+									aria-pressed={selectedSubscriptionId === sub.id}
+									aria-label={`Filter posts by ${sub.name} subscription`}
 									className={`w-full text-left px-3 py-2 rounded ${
 										selectedSubscriptionId === sub.id
 											? "bg-blue-100 text-blue-900"
@@ -175,28 +179,37 @@ function App() {
 							))}
 						</div>
 					</div>
-				</aside>
+				</nav>
 
 				{/* Main content - Posts */}
 				<main className="flex-1">
 					{/* Search */}
 					<div className="mb-4">
+						<label htmlFor="search-posts" className="sr-only">
+							Search posts by content or author
+						</label>
 						<input
-							type="text"
+							id="search-posts"
+							type="search"
 							placeholder="Search posts..."
 							value={searchQuery}
 							onChange={(e) => setSearchQuery(e.target.value)}
+							aria-label="Search posts by content or author"
 							className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
 						/>
 					</div>
 
 					{/* Posts list */}
 					{filteredPosts.length === 0 ? (
-						<div className="bg-white rounded-lg shadow p-8 text-center">
+						<output className="block bg-white rounded-lg shadow p-8 text-center">
 							<p className="text-gray-600">No posts found</p>
-						</div>
+						</output>
 					) : (
-						<div className="space-y-4">
+						<div
+							className="space-y-4"
+							role="feed"
+							aria-label="Facebook group posts"
+						>
 							{filteredPosts.map((post) => (
 								<article
 									key={post.id}
@@ -215,6 +228,11 @@ function App() {
 											<button
 												type="button"
 												onClick={() => handleToggleSeen(post.id, post.seen)}
+												aria-label={
+													post.seen
+														? `Mark post from ${post.authorName} as unseen`
+														: `Mark post from ${post.authorName} as seen`
+												}
 												className="text-sm text-blue-600 hover:text-blue-800"
 											>
 												{post.seen ? "Mark as unseen" : "Mark as seen"}
@@ -231,6 +249,7 @@ function App() {
 									<button
 										type="button"
 										onClick={() => handleOpenPost(post.url)}
+										aria-label={`Open post from ${post.authorName} on Facebook in new tab`}
 										className="text-sm text-blue-600 hover:text-blue-800"
 									>
 										Open on Facebook
