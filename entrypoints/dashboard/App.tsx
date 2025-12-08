@@ -80,11 +80,6 @@ function App() {
 		markPostSeen.mutate({ postId, seen: !currentSeen });
 	};
 
-	// Handle opening Facebook post
-	const handleOpenPost = (url: string) => {
-		window.open(url, "_blank");
-	};
-
 	if (isLoading) {
 		return <LoadingSpinner />;
 	}
@@ -142,7 +137,6 @@ function App() {
 										post={post}
 										group={group}
 										onToggleSeen={handleToggleSeen}
-										onOpenPost={handleOpenPost}
 									/>
 								);
 							})}

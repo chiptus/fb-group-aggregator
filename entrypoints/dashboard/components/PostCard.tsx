@@ -5,15 +5,9 @@ interface PostCardProps {
 	post: Post;
 	group?: Group;
 	onToggleSeen: (postId: string, currentSeen: boolean) => void;
-	onOpenPost: (url: string) => void;
 }
 
-export function PostCard({
-	post,
-	group,
-	onToggleSeen,
-	onOpenPost,
-}: PostCardProps) {
+export function PostCard({ post, group, onToggleSeen }: PostCardProps) {
 	return (
 		<article className="bg-white rounded-lg shadow p-6">
 			<div className="flex justify-between items-start mb-3">
@@ -46,14 +40,15 @@ export function PostCard({
 					__html: DOMPurify.sanitize(post.contentHtml),
 				}}
 			/>
-			<button
-				type="button"
-				onClick={() => onOpenPost(post.url)}
+			<a
+				href={post.url}
+				target="_blank"
+				rel="noopener noreferrer"
 				aria-label={`Open post from ${post.authorName} on Facebook in new tab`}
 				className="text-sm text-blue-600 hover:text-blue-800"
 			>
 				Open on Facebook
-			</button>
+			</a>
 		</article>
 	);
 }

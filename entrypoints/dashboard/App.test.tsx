@@ -227,12 +227,7 @@ describe("Dashboard App", () => {
 		});
 	});
 
-	it("should open Facebook post in new tab when clicking on post", async () => {
-		const user = userEvent.setup();
-		const windowOpenSpy = vi
-			.spyOn(window, "open")
-			.mockImplementation(() => null);
-
+	it("should have link to open Facebook post in new tab", async () => {
 		renderWithQuery(<App />);
 
 		await waitFor(() => {
@@ -241,16 +236,15 @@ describe("Dashboard App", () => {
 			).toBeInTheDocument();
 		});
 
-		// Click on "Open on Facebook" link
+		// Check that "Open on Facebook" links have correct attributes
 		const openLinks = screen.getAllByText(/open on facebook/i);
-		await user.click(openLinks[0]);
-
-		expect(windowOpenSpy).toHaveBeenCalledWith(
+		expect(openLinks[0]).toBeInTheDocument();
+		expect(openLinks[0]).toHaveAttribute(
+			"href",
 			"https://facebook.com/groups/react-jobs/posts/1",
-			"_blank",
 		);
-
-		windowOpenSpy.mockRestore();
+		expect(openLinks[0]).toHaveAttribute("target", "_blank");
+		expect(openLinks[0]).toHaveAttribute("rel", "noopener noreferrer");
 	});
 
 	it("should handle empty state when no posts exist", async () => {
