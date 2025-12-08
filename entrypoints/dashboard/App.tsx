@@ -1,15 +1,15 @@
 import { useMemo, useState } from "react";
-import { ErrorDisplay } from "./components/ErrorDisplay";
-import { LoadingSpinner } from "./components/LoadingSpinner";
-import { PostCard } from "./components/PostCard";
-import { SearchBar } from "./components/SearchBar";
-import { SubscriptionSidebar } from "./components/SubscriptionSidebar";
 import {
 	useGroups,
 	useMarkPostSeen,
 	usePosts,
 	useSubscriptions,
-} from "./hooks/useDashboardData";
+} from "@/lib/hooks/useStorageData";
+import { ErrorDisplay } from "./components/ErrorDisplay";
+import { LoadingSpinner } from "./components/LoadingSpinner";
+import { PostCard } from "./components/PostCard";
+import { SearchBar } from "./components/SearchBar";
+import { SubscriptionSidebar } from "./components/SubscriptionSidebar";
 
 function App() {
 	const [selectedSubscriptionId, setSelectedSubscriptionId] = useState<
