@@ -266,4 +266,85 @@ describe("Dashboard App", () => {
 			expect(posts[2]).toHaveTextContent(/Junior Frontend opening/);
 		});
 	});
+
+	describe("Error Handling", () => {
+		it("should display error message when loading posts fails", async () => {
+			vi.mocked(storage.listPosts).mockRejectedValue(
+				new Error("Failed to load posts"),
+			);
+
+			renderWithQuery(<App />);
+
+			await waitFor(() => {
+				expect(screen.getByText(/Failed to load posts/i)).toBeInTheDocument();
+			});
+
+			// Error should have role="alert" for accessibility
+			const errorContainer = screen.getByRole("alert");
+			expect(errorContainer).toBeInTheDocument();
+		});
+
+		it("should display error message when loading subscriptions fails", async () => {
+			vi.mocked(storage.listSubscriptions).mockRejectedValue(
+				new Error("Failed to load subscriptions"),
+			);
+
+			renderWithQuery(<App />);
+
+			await waitFor(() => {
+				expect(screen.getByText(/Failed to load posts/i)).toBeInTheDocument();
+			});
+		});
+
+		it("should display error message when loading groups fails", async () => {
+			vi.mocked(storage.listGroups).mockRejectedValue(
+				new Error("Failed to load groups"),
+			);
+
+			renderWithQuery(<App />);
+
+			await waitFor(() => {
+				expect(screen.getByText(/Failed to load posts/i)).toBeInTheDocument();
+			});
+		});
+
+		it("should show reload button when error occurs", async () => {
+			vi.mocked(storage.listPosts).mockRejectedValue(
+				new Error("Failed to load posts"),
+			);
+
+			renderWithQuery(<App />);
+
+			await waitFor(() => {
+				const reloadButton = screen.getByRole("button", {
+					name: /reload page/i,
+				});
+				expect(reloadButton).toBeInTheDocument();
+			});
+		});
+
+		it("should reload page when clicking reload button", async () => {
+			const reloadFn = vi.fn();
+			Object.defineProperty(window, "location", {
+				value: { reload: reloadFn },
+				writable: true,
+			});
+
+			vi.mocked(storage.listPosts).mockRejectedValue(
+				new Error("Failed to load posts"),
+			);
+
+			const user = userEvent.setup();
+			renderWithQuery(<App />);
+
+			await waitFor(() => {
+				expect(screen.getByText(/Failed to load posts/i)).toBeInTheDocument();
+			});
+
+			const reloadButton = screen.getByRole("button", { name: /reload page/i });
+			await user.click(reloadButton);
+
+			expect(reloadFn).toHaveBeenCalled();
+		});
+	});
 });

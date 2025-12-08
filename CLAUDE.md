@@ -206,6 +206,38 @@ Content Script → Background:
 **Components**: shadcn/ui for polished UI components
 **Testing**: Vitest + @testing-library/react
 
+### React and TypeScript Coding Standards
+
+**IMPORTANT**: Follow these coding standards consistently across the codebase.
+
+**Function Declarations**:
+- **Prefer named function declarations** over arrow functions for regular functions and event handlers
+- Use `function handleClick() {}` instead of `const handleClick = () => {}`
+- Benefits: Better stack traces, hoisting, more explicit intent
+
+**React Query Usage**:
+- **Do NOT destructure query hook results** directly
+- ❌ Bad: `const { data, isLoading, error } = useQuery()`
+- ✅ Good: `const query = useQuery()` then access `query.data`, `query.isLoading`, `query.error`
+- Benefits: More explicit, easier to refactor, clearer ownership of properties
+
+**Example**:
+```typescript
+// ❌ Bad
+const { data: posts = [], isLoading, error } = usePosts();
+const handleClick = (id: string) => {
+  // ...
+};
+
+// ✅ Good
+const postsQuery = usePosts();
+const posts = postsQuery.data ?? [];
+
+function handleClick(id: string) {
+  // ...
+}
+```
+
 ### TypeScript Configuration
 
 The project extends `.wxt/tsconfig.json` with custom options:

@@ -18,30 +18,27 @@ function App() {
 	const [searchQuery, setSearchQuery] = useState("");
 
 	// Fetch data using react-query
-	const {
-		data: subscriptions = [],
-		isLoading: isLoadingSubscriptions,
-		error: subscriptionsError,
-	} = useSubscriptions();
-	const {
-		data: groups = [],
-		isLoading: isLoadingGroups,
-		error: groupsError,
-	} = useGroups();
-	const {
-		data: posts = [],
-		isLoading: isLoadingPosts,
-		error: postsError,
-	} = usePosts();
+	const subscriptionsQuery = useSubscriptions();
+	const groupsQuery = useGroups();
+	const postsQuery = usePosts();
 
 	// Mutation for marking posts as seen
 	const markPostSeen = useMarkPostSeen();
 
+	// Extract data with defaults
+	const subscriptions = subscriptionsQuery.data ?? [];
+	const groups = groupsQuery.data ?? [];
+	const posts = postsQuery.data ?? [];
+
 	// Combined loading state
-	const isLoading = isLoadingSubscriptions || isLoadingGroups || isLoadingPosts;
+	const isLoading =
+		subscriptionsQuery.isLoading ||
+		groupsQuery.isLoading ||
+		postsQuery.isLoading;
 
 	// Combined error state
-	const error = subscriptionsError || groupsError || postsError;
+	const error =
+		subscriptionsQuery.error || groupsQuery.error || postsQuery.error;
 
 	// Filter posts by subscription and search query
 	const filteredPosts = useMemo(() => {
@@ -76,9 +73,9 @@ function App() {
 	);
 
 	// Handle marking post as seen/unseen
-	const handleToggleSeen = (postId: string, currentSeen: boolean) => {
+	function handleToggleSeen(postId: string, currentSeen: boolean) {
 		markPostSeen.mutate({ postId, seen: !currentSeen });
-	};
+	}
 
 	if (isLoading) {
 		return <LoadingSpinner />;
@@ -95,7 +92,6 @@ function App() {
 
 	return (
 		<div className="min-h-screen bg-gray-50">
-			{/* Header */}
 			<header className="bg-white shadow-sm">
 				<div className="max-w-7xl mx-auto px-4 py-4">
 					<h1 className="text-2xl font-bold">FB Group Aggregator</h1>
@@ -106,19 +102,15 @@ function App() {
 			</header>
 
 			<div className="max-w-7xl mx-auto px-4 py-6 flex gap-6">
-				{/* Sidebar - Subscriptions */}
 				<SubscriptionSidebar
 					subscriptions={subscriptions}
 					selectedSubscriptionId={selectedSubscriptionId}
 					onSelectSubscription={setSelectedSubscriptionId}
 				/>
 
-				{/* Main content - Posts */}
 				<main className="flex-1">
-					{/* Search */}
 					<SearchBar value={searchQuery} onChange={setSearchQuery} />
 
-					{/* Posts list */}
 					{filteredPosts.length === 0 ? (
 						<output className="block bg-white rounded-lg shadow p-8 text-center">
 							<p className="text-gray-600">No posts found</p>
