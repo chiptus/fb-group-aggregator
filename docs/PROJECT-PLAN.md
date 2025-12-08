@@ -12,7 +12,7 @@ A Chrome/Firefox browser extension that aggregates posts from multiple Facebook 
 - **Validation**: Zod for runtime type safety
 - **Package Manager**: pnpm
 
-## Project Status: Phase 4 Complete ✅
+## Project Status: Phase 5 Complete ✅
 
 ### ✅ Phase 0: Test Infrastructure (COMPLETED)
 - [x] Configure Vitest with WXT plugin
@@ -209,23 +209,59 @@ Build the main dashboard where users view aggregated posts.
 
 ---
 
-## 📋 Phase 5: Popup UI (PLANNED)
+## ✅ Phase 5: Popup UI (COMPLETED)
 
 ### Objectives
 Build the extension popup for quick actions and management.
 
 ### Features
-- [ ] Subscription CRUD (create, rename, delete)
-- [ ] Group management (add, remove, enable/disable)
-- [ ] Assign groups to subscriptions
-- [ ] View recent posts count
-- [ ] Quick link to dashboard
-- [ ] Settings
+- [x] Subscription CRUD (create, rename, delete)
+- [x] Group management (enable/disable, assign to subscription, delete)
+- [x] Assign groups to subscriptions
+- [x] View recent posts count (unseen posts badge)
+- [x] Quick link to dashboard
+- [~] Settings (Deferred - not needed for MVP)
 
-### Files to Update
-- [entrypoints/popup/App.tsx](entrypoints/popup/App.tsx) - Currently placeholder
-- `entrypoints/popup/components/` - Popup components
-- `entrypoints/popup/App.test.tsx` - Popup tests
+### Files Created/Updated
+- [entrypoints/popup/App.tsx](../entrypoints/popup/App.tsx) - Full-featured popup with tabbed interface
+- [entrypoints/popup/App.test.tsx](../entrypoints/popup/App.test.tsx) - 21 comprehensive tests for popup
+- [entrypoints/popup/main.tsx](../entrypoints/popup/main.tsx) - Entry point with QueryClientProvider
+- [entrypoints/popup/index.html](../entrypoints/popup/index.html) - Updated title
+- [lib/hooks/useStorageData.ts](../lib/hooks/useStorageData.ts) - Shared React Query hooks for storage operations
+
+**Test Count:** 21 tests passing (80 total with all phases)
+
+### Implementation Highlights
+- **TDD Approach**: All features test-driven with comprehensive coverage
+- **React Query Integration**: Centralized state management with shared hooks
+- **Tabbed Interface**: Three tabs (Overview, Subscriptions, Groups) for organized navigation
+- **Overview Tab**:
+  - Unseen posts count badge
+  - "Open Dashboard" button
+  - Statistics cards (subscriptions, groups, total posts)
+- **Subscriptions Tab**:
+  - List all subscriptions
+  - Inline editing with save/cancel
+  - Delete with confirmation modal
+  - "Add Subscription" form
+  - Empty state messaging
+- **Groups Tab**:
+  - List all groups with name and URL
+  - Enable/disable toggle for each group
+  - Dropdown to assign group to subscription
+  - Delete button per group
+  - Empty state messaging
+- **Shared Hooks**: Consolidated React Query hooks in `lib/hooks/useStorageData.ts`
+- **Type Safety**: Full TypeScript with proper type inference
+- **Responsive Design**: Clean Tailwind CSS styling optimized for popup size (384px x 600px)
+
+### Technical Details
+- Uses shared React Query hooks from `lib/hooks/useStorageData.ts`
+- Mutations with optimistic updates where appropriate
+- Automatic cache invalidation on mutations
+- Loading and error states for all data operations
+- No destructuring of query results (follows project conventions)
+- Named function declarations (no arrow functions for handlers)
 
 ---
 
@@ -281,8 +317,8 @@ End-to-end testing and refinement.
 
 1. **Review this file** to understand current progress
 2. **Run tests** to verify everything works: `pnpm test:run`
-3. **Start Phase 5**: Popup UI (subscription and group management)
-4. **Check [CLAUDE.md](../CLAUDE.md)** for WXT framework conventions
+3. **Start Phase 6**: Integration & Polish (content script tests, manual testing, performance)
+4. **Check [CLAUDE.md](../CLAUDE.md)** for WXT framework conventions and React Query guidelines
 5. **Check [lib/SCRAPER-NOTES.md](../lib/SCRAPER-NOTES.md)** for scraper maintenance info
 
 ---
@@ -307,4 +343,4 @@ pnpm zip              # Package for distribution
 
 ---
 
-**Last Updated**: 2025-12-07 (Phase 4 complete, 54 tests passing, Dashboard UI implemented with TDD)
+**Last Updated**: 2025-12-08 (Phase 5 complete, 80 tests passing, Popup UI implemented with React Query and TDD)

@@ -250,6 +250,106 @@ const posts = postsQuery.data ?? [];
 function handleToggle(id: string) { markSeen(id); }
 ```
 
+### React Query State Management
+
+**Shared Hooks Location**:
+- All storage-related React Query hooks are centralized in `lib/hooks/useStorageData.ts`
+- DO NOT create duplicate hooks in component directories
+- Import from the shared location: `import { useSubscriptions, usePosts } from '@/lib/hooks/useStorageData'`
+
+**Data Fetching Hooks**:
+- `useSubscriptions()` - Fetch all subscriptions
+- `useGroups()` - Fetch all groups
+- `usePosts()` - Fetch all posts
+
+**Mutation Hooks**:
+- `useCreateSubscription()` - Create new subscription
+- `useUpdateSubscription()` - Update subscription properties
+- `useDeleteSubscription()` - Delete subscription
+- `useUpdateGroup()` - Update group properties (enabled, subscriptionIds)
+- `useDeleteGroup()` - Delete group
+- `useMarkPostSeen()` - Mark post as seen/unseen (with optimistic updates)
+
+**Usage Pattern**:
+```typescript
+function MyComponent() {
+  // Queries - use descriptive variable names with "Query" suffix
+  const subscriptionsQuery = useSubscriptions();
+  const groupsQuery = useGroups();
+
+  // Mutations - use descriptive names with "Mutation" suffix
+  const createSubscriptionMutation = useCreateSubscription();
+  const updateGroupMutation = useUpdateGroup();
+
+  // Extract data with nullish coalescing
+  const subscriptions = subscriptionsQuery.data ?? [];
+  const groups = groupsQuery.data ?? [];
+
+  // Combine loading/error states
+  const isLoading = subscriptionsQuery.isLoading || groupsQuery.isLoading;
+  const error = subscriptionsQuery.error || groupsQuery.error;
+
+  // Call mutations with mutateAsync for async/await
+  async function handleCreate() {
+    try {
+      await createSubscriptionMutation.mutateAsync('New Sub');
+    } catch (err) {
+      console.error('Failed:', err);
+    }
+  }
+}
+```
+
+**QueryClientProvider Setup**:
+- Each React entry point (popup, dashboard) must wrap the app with `QueryClientProvider`
+- Configure default options for staleTime and refetchOnWindowFocus
+- Example in `entrypoints/popup/main.tsx` and `entrypoints/dashboard/main.tsx`
+
+### Component Size Guidelines
+
+**Keep Components Small and Focused**:
+- A component should do ONE thing well
+- If a component exceeds 150 lines, consider breaking it down
+- Extract repeated UI patterns into smaller components
+- Separate business logic into custom hooks
+
+**Component Extraction Signals**:
+- Repeated JSX patterns (2+ occurrences)
+- Distinct UI sections that can stand alone
+- Complex conditional rendering that obscures the main component
+- Event handlers that could be reused
+
+**Good Examples**:
+```typescript
+// GOOD: Small, focused components
+function SubscriptionCard({ subscription, onEdit, onDelete }) {
+  return (
+    <div className="card">
+      <span>{subscription.name}</span>
+      <button onClick={() => onEdit(subscription)}>Edit</button>
+      <button onClick={() => onDelete(subscription.id)}>Delete</button>
+    </div>
+  );
+}
+
+// GOOD: Complex logic in custom hooks
+function useSubscriptionManagement() {
+  const subscriptionsQuery = useSubscriptions();
+  const createMutation = useCreateSubscription();
+  const updateMutation = useUpdateSubscription();
+
+  // ... hook logic
+
+  return { subscriptions, create, update, isLoading };
+}
+```
+
+**Avoid**:
+- Monolithic components with 200+ lines
+- Mixing data fetching, business logic, and complex UI in one component
+- Deeply nested conditional rendering (> 3 levels)
+- Repeated JSX blocks within the same component
+
 ### TypeScript Configuration
 
 The project extends `.wxt/tsconfig.json` with custom options:
