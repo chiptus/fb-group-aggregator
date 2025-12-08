@@ -78,8 +78,8 @@ function App() {
 			);
 		}
 
-		// Sort by timestamp (newest first)
-		return result.sort((a, b) => b.timestamp - a.timestamp);
+		// Sort by timestamp (newest first) - create new array to avoid mutation
+		return [...result].sort((a, b) => b.timestamp - a.timestamp);
 	}, [posts, groups, selectedSubscriptionId, searchQuery]);
 
 	// Calculate unseen post count
