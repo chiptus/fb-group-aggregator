@@ -10,6 +10,7 @@ import type { Group, Post, Subscription } from "@/lib/types";
 
 function App() {
 	const [loading, setLoading] = useState(true);
+	const [error, setError] = useState<string | null>(null);
 	const [subscriptions, setSubscriptions] = useState<Subscription[]>([]);
 	const [groups, setGroups] = useState<Group[]>([]);
 	const [posts, setPosts] = useState<Post[]>([]);
@@ -20,6 +21,8 @@ function App() {
 
 	// Load data on mount
 	useEffect(() => {
+		let isMounted = true;
+
 		const loadData = async () => {
 			try {
 				const [subs, grps, psts] = await Promise.all([
@@ -27,16 +30,30 @@ function App() {
 					listGroups(),
 					listPosts(),
 				]);
-				setSubscriptions(subs);
-				setGroups(grps);
-				setPosts(psts);
-			} catch (error) {
-				console.error("Failed to load data:", error);
+				if (isMounted) {
+					setSubscriptions(subs);
+					setGroups(grps);
+					setPosts(psts);
+					setError(null);
+				}
+			} catch (err) {
+				console.error("Failed to load data:", err);
+				if (isMounted) {
+					setError(
+						"Failed to load posts. Please refresh the page or check your extension storage.",
+					);
+				}
 			} finally {
-				setLoading(false);
+				if (isMounted) {
+					setLoading(false);
+				}
 			}
 		};
 		loadData();
+
+		return () => {
+			isMounted = false;
+		};
 	}, []);
 
 	// Filter posts by subscription and search query
@@ -92,6 +109,23 @@ function App() {
 		return (
 			<div className="flex items-center justify-center min-h-screen">
 				<p className="text-lg">Loading...</p>
+			</div>
+		);
+	}
+
+	if (error) {
+		return (
+			<div className="flex items-center justify-center min-h-screen">
+				<div className="text-center">
+					<p className="text-lg text-red-600 mb-4">{error}</p>
+					<button
+						type="button"
+						onClick={() => window.location.reload()}
+						className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+					>
+						Reload Page
+					</button>
+				</div>
 			</div>
 		);
 	}
