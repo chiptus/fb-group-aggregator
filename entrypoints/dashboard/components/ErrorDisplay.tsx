@@ -5,7 +5,7 @@ interface ErrorDisplayProps {
 
 export function ErrorDisplay({ message, onRetry }: ErrorDisplayProps) {
 	return (
-		<div className="flex items-center justify-center min-h-screen">
+		<div className="flex items-center justify-center min-h-screen" role="alert">
 			<div className="text-center">
 				<p className="text-lg text-red-600 mb-4">{message}</p>
 				{onRetry && (
