@@ -205,7 +205,7 @@ Build the main dashboard where users view aggregated posts.
 - Filters posts by group subscription IDs
 - Handles HTML content safely with DOMPurify sanitization before rendering with dangerouslySetInnerHTML (Facebook content)
 - Loading state during initial data fetch
-- Error handling with console logging
+- Error handling with user-friendly error messages and reload option
 
 ---
 

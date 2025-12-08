@@ -112,9 +112,9 @@ function App() {
 					<SearchBar value={searchQuery} onChange={setSearchQuery} />
 
 					{filteredPosts.length === 0 ? (
-						<output className="block bg-white rounded-lg shadow p-8 text-center">
+						<div className="block bg-white rounded-lg shadow p-8 text-center">
 							<p className="text-gray-600">No posts found</p>
-						</output>
+						</div>
 					) : (
 						<div
 							className="space-y-4"
