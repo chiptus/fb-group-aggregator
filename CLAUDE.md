@@ -206,6 +206,50 @@ Content Script → Background:
 **Components**: shadcn/ui for polished UI components
 **Testing**: Vitest + @testing-library/react
 
+### React and TypeScript Coding Standards
+
+**Function Declaration Rules**:
+- Use named function declarations for event handlers and regular functions
+- DO NOT use arrow functions for these cases
+```typescript
+// INVALID
+const handleClick = (id: string) => { /* ... */ };
+const processData = () => { /* ... */ };
+
+// VALID
+function handleClick(id: string) { /* ... */ }
+function processData() { /* ... */ }
+```
+
+**React Query Hook Usage**:
+- DO NOT destructure query results
+- Access properties via dot notation
+```typescript
+// INVALID
+const { data: posts = [], isLoading, error } = usePosts();
+const { data, isLoading: loading } = useQuery();
+
+// VALID
+const postsQuery = usePosts();
+const posts = postsQuery.data ?? [];
+const isLoading = postsQuery.isLoading;
+
+const query = useQuery();
+const data = query.data;
+```
+
+**Pattern Matching**:
+```typescript
+// INVALID: Destructuring queries + arrow function
+const { data: posts = [] } = usePosts();
+const handleToggle = (id: string) => { markSeen(id); };
+
+// VALID: Direct access + named function
+const postsQuery = usePosts();
+const posts = postsQuery.data ?? [];
+function handleToggle(id: string) { markSeen(id); }
+```
+
 ### TypeScript Configuration
 
 The project extends `.wxt/tsconfig.json` with custom options:
@@ -225,6 +269,45 @@ The project extends `.wxt/tsconfig.json` with custom options:
 3. **Hot Reload**: Changes to content scripts and popup are automatically reloaded
 4. **Type Checking**: Run `pnpm compile` to verify TypeScript before committing
 5. **Testing**: Run `pnpm test` for watch mode, `pnpm test:run` for CI
+
+## Git and Commit Practices
+
+**Commit Granularity**:
+- Create one commit per logical change
+- Do NOT combine multiple concerns (feature + refactor, multiple features, multiple fixes)
+- Each commit must be complete and independently revertible
+- Run tests before each commit
+
+**Commit Message Format**:
+```
+type(scope): imperative description under 72 chars
+
+Optional body with detailed explanation.
+```
+
+**Types**: `feat`, `fix`, `refactor`, `test`, `docs`, `style`, `chore`
+
+**Commit Triggers** (create commit after):
+- Implementing single feature → `feat(scope): add feature X`
+- Fixing single bug → `fix(scope): correct behavior Y`
+- Refactoring single component → `refactor(scope): simplify component Z`
+- Adding tests for feature → `test(scope): add tests for feature X`
+- Updating documentation → `docs(scope): document pattern Y`
+
+**Pattern Matching**:
+```
+VALID:
+fix(dashboard): add XSS protection with DOMPurify
+feat(dashboard): add animated loading spinner
+refactor(dashboard): replace callback with anchor tag
+test(dashboard): add error handling test coverage
+
+INVALID:
+fix: various improvements              # Too vague, multiple concerns
+update: add features and fix bugs      # Multiple types mixed
+wip: dashboard changes                 # Not descriptive, not complete
+feat(dashboard): add spinner, fix XSS  # Multiple changes in one commit
+```
 
 ## Testing Strategy
 
