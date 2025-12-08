@@ -1,3 +1,4 @@
+import DOMPurify from "dompurify";
 import { useEffect, useMemo, useState } from "react";
 import {
 	listGroups,
@@ -188,8 +189,10 @@ function App() {
 									</div>
 									<div
 										className="prose max-w-none mb-3"
-										// biome-ignore lint/security/noDangerouslySetInnerHtml: Content is from Facebook posts
-										dangerouslySetInnerHTML={{ __html: post.contentHtml }}
+										// biome-ignore lint/security/noDangerouslySetInnerHtml: Content is sanitized with DOMPurify
+										dangerouslySetInnerHTML={{
+											__html: DOMPurify.sanitize(post.contentHtml),
+										}}
 									/>
 									<button
 										type="button"
