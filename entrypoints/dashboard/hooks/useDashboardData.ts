@@ -1,0 +1,74 @@
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import {
+	listGroups,
+	listPosts,
+	listSubscriptions,
+	markPostAsSeen,
+} from "@/lib/storage";
+import type { Post } from "@/lib/types";
+
+// Query keys
+export const queryKeys = {
+	subscriptions: ["subscriptions"] as const,
+	groups: ["groups"] as const,
+	posts: ["posts"] as const,
+};
+
+// Fetch subscriptions
+export function useSubscriptions() {
+	return useQuery({
+		queryKey: queryKeys.subscriptions,
+		queryFn: listSubscriptions,
+	});
+}
+
+// Fetch groups
+export function useGroups() {
+	return useQuery({
+		queryKey: queryKeys.groups,
+		queryFn: listGroups,
+	});
+}
+
+// Fetch posts
+export function usePosts() {
+	return useQuery({
+		queryKey: queryKeys.posts,
+		queryFn: listPosts,
+	});
+}
+
+// Mark post as seen/unseen
+export function useMarkPostSeen() {
+	const queryClient = useQueryClient();
+
+	return useMutation({
+		mutationFn: ({ postId, seen }: { postId: string; seen: boolean }) =>
+			markPostAsSeen(postId, seen),
+		onMutate: async ({ postId, seen }) => {
+			// Cancel outgoing refetches
+			await queryClient.cancelQueries({ queryKey: queryKeys.posts });
+
+			// Snapshot the previous value
+			const previousPosts = queryClient.getQueryData<Post[]>(queryKeys.posts);
+
+			// Optimistically update to the new value
+			queryClient.setQueryData<Post[]>(queryKeys.posts, (old) =>
+				old?.map((p) => (p.id === postId ? { ...p, seen } : p)),
+			);
+
+			// Return context with the snapshot
+			return { previousPosts };
+		},
+		onError: (_err, _variables, context) => {
+			// Rollback on error
+			if (context?.previousPosts) {
+				queryClient.setQueryData(queryKeys.posts, context.previousPosts);
+			}
+		},
+		onSettled: () => {
+			// Refetch after mutation
+			queryClient.invalidateQueries({ queryKey: queryKeys.posts });
+		},
+	});
+}

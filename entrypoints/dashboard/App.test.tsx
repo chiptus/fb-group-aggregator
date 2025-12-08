@@ -1,3 +1,4 @@
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
@@ -13,6 +14,22 @@ vi.mock("@/lib/storage", () => ({
 }));
 
 import * as storage from "@/lib/storage";
+
+// Helper to render with react-query
+function renderWithQuery(component: React.ReactElement) {
+	const queryClient = new QueryClient({
+		defaultOptions: {
+			queries: {
+				retry: false,
+				gcTime: 0,
+			},
+		},
+	});
+
+	return render(
+		<QueryClientProvider client={queryClient}>{component}</QueryClientProvider>,
+	);
+}
 
 describe("Dashboard App", () => {
 	const mockSubscriptions: Subscription[] = [
@@ -82,12 +99,12 @@ describe("Dashboard App", () => {
 	});
 
 	it("should render loading state initially", () => {
-		render(<App />);
+		renderWithQuery(<App />);
 		expect(screen.getByText(/loading/i)).toBeInTheDocument();
 	});
 
 	it("should load and display subscriptions", async () => {
-		render(<App />);
+		renderWithQuery(<App />);
 
 		await waitFor(() => {
 			expect(screen.getByText("Tech Jobs")).toBeInTheDocument();
@@ -96,7 +113,7 @@ describe("Dashboard App", () => {
 	});
 
 	it("should display all posts when no subscription is selected", async () => {
-		render(<App />);
+		renderWithQuery(<App />);
 
 		await waitFor(() => {
 			expect(
@@ -109,7 +126,7 @@ describe("Dashboard App", () => {
 
 	it("should filter posts by selected subscription", async () => {
 		const user = userEvent.setup();
-		render(<App />);
+		renderWithQuery(<App />);
 
 		// Wait for initial load
 		await waitFor(() => {
@@ -134,7 +151,7 @@ describe("Dashboard App", () => {
 	it("should allow marking posts as seen", async () => {
 		vi.mocked(storage.markPostAsSeen).mockResolvedValue();
 		const user = userEvent.setup();
-		render(<App />);
+		renderWithQuery(<App />);
 
 		await waitFor(() => {
 			expect(
@@ -157,7 +174,7 @@ describe("Dashboard App", () => {
 	it("should allow marking posts as unseen", async () => {
 		vi.mocked(storage.markPostAsSeen).mockResolvedValue();
 		const user = userEvent.setup();
-		render(<App />);
+		renderWithQuery(<App />);
 
 		await waitFor(() => {
 			expect(screen.getByText(/Junior Frontend opening/)).toBeInTheDocument();
@@ -176,7 +193,7 @@ describe("Dashboard App", () => {
 	});
 
 	it("should display unseen post count", async () => {
-		render(<App />);
+		renderWithQuery(<App />);
 
 		await waitFor(() => {
 			// 2 unseen posts (post1, post2)
@@ -186,7 +203,7 @@ describe("Dashboard App", () => {
 
 	it("should handle search functionality", async () => {
 		const user = userEvent.setup();
-		render(<App />);
+		renderWithQuery(<App />);
 
 		await waitFor(() => {
 			expect(
@@ -216,7 +233,7 @@ describe("Dashboard App", () => {
 			.spyOn(window, "open")
 			.mockImplementation(() => null);
 
-		render(<App />);
+		renderWithQuery(<App />);
 
 		await waitFor(() => {
 			expect(
@@ -238,7 +255,7 @@ describe("Dashboard App", () => {
 
 	it("should handle empty state when no posts exist", async () => {
 		vi.mocked(storage.listPosts).mockResolvedValue([]);
-		render(<App />);
+		renderWithQuery(<App />);
 
 		await waitFor(() => {
 			expect(screen.getByText(/no posts found/i)).toBeInTheDocument();
@@ -246,7 +263,7 @@ describe("Dashboard App", () => {
 	});
 
 	it("should sort posts by timestamp (newest first)", async () => {
-		render(<App />);
+		renderWithQuery(<App />);
 
 		await waitFor(() => {
 			const posts = screen.getAllByRole("article");

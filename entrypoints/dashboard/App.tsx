@@ -1,60 +1,47 @@
-import DOMPurify from "dompurify";
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
+import { ErrorDisplay } from "./components/ErrorDisplay";
+import { LoadingSpinner } from "./components/LoadingSpinner";
+import { PostCard } from "./components/PostCard";
+import { SearchBar } from "./components/SearchBar";
+import { SubscriptionSidebar } from "./components/SubscriptionSidebar";
 import {
-	listGroups,
-	listPosts,
-	listSubscriptions,
-	markPostAsSeen,
-} from "@/lib/storage";
-import type { Group, Post, Subscription } from "@/lib/types";
+	useGroups,
+	useMarkPostSeen,
+	usePosts,
+	useSubscriptions,
+} from "./hooks/useDashboardData";
 
 function App() {
-	const [loading, setLoading] = useState(true);
-	const [error, setError] = useState<string | null>(null);
-	const [subscriptions, setSubscriptions] = useState<Subscription[]>([]);
-	const [groups, setGroups] = useState<Group[]>([]);
-	const [posts, setPosts] = useState<Post[]>([]);
 	const [selectedSubscriptionId, setSelectedSubscriptionId] = useState<
 		string | null
 	>(null);
 	const [searchQuery, setSearchQuery] = useState("");
 
-	// Load data on mount
-	useEffect(() => {
-		let isMounted = true;
+	// Fetch data using react-query
+	const {
+		data: subscriptions = [],
+		isLoading: isLoadingSubscriptions,
+		error: subscriptionsError,
+	} = useSubscriptions();
+	const {
+		data: groups = [],
+		isLoading: isLoadingGroups,
+		error: groupsError,
+	} = useGroups();
+	const {
+		data: posts = [],
+		isLoading: isLoadingPosts,
+		error: postsError,
+	} = usePosts();
 
-		const loadData = async () => {
-			try {
-				const [subs, grps, psts] = await Promise.all([
-					listSubscriptions(),
-					listGroups(),
-					listPosts(),
-				]);
-				if (isMounted) {
-					setSubscriptions(subs);
-					setGroups(grps);
-					setPosts(psts);
-					setError(null);
-				}
-			} catch (err) {
-				console.error("Failed to load data:", err);
-				if (isMounted) {
-					setError(
-						"Failed to load posts. Please refresh the page or check your extension storage.",
-					);
-				}
-			} finally {
-				if (isMounted) {
-					setLoading(false);
-				}
-			}
-		};
-		loadData();
+	// Mutation for marking posts as seen
+	const markPostSeen = useMarkPostSeen();
 
-		return () => {
-			isMounted = false;
-		};
-	}, []);
+	// Combined loading state
+	const isLoading = isLoadingSubscriptions || isLoadingGroups || isLoadingPosts;
+
+	// Combined error state
+	const error = subscriptionsError || groupsError || postsError;
 
 	// Filter posts by subscription and search query
 	const filteredPosts = useMemo(() => {
@@ -89,15 +76,8 @@ function App() {
 	);
 
 	// Handle marking post as seen/unseen
-	const handleToggleSeen = async (postId: string, currentSeen: boolean) => {
-		try {
-			await markPostAsSeen(postId, !currentSeen);
-			setPosts((prev) =>
-				prev.map((p) => (p.id === postId ? { ...p, seen: !currentSeen } : p)),
-			);
-		} catch (error) {
-			console.error("Failed to update post:", error);
-		}
+	const handleToggleSeen = (postId: string, currentSeen: boolean) => {
+		markPostSeen.mutate({ postId, seen: !currentSeen });
 	};
 
 	// Handle opening Facebook post
@@ -105,29 +85,16 @@ function App() {
 		window.open(url, "_blank");
 	};
 
-	if (loading) {
-		return (
-			<div className="flex flex-col items-center justify-center min-h-screen gap-4">
-				<div className="w-12 h-12 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin" />
-				<p className="text-lg text-gray-600">Loading posts...</p>
-			</div>
-		);
+	if (isLoading) {
+		return <LoadingSpinner />;
 	}
 
 	if (error) {
 		return (
-			<div className="flex items-center justify-center min-h-screen">
-				<div className="text-center">
-					<p className="text-lg text-red-600 mb-4">{error}</p>
-					<button
-						type="button"
-						onClick={() => window.location.reload()}
-						className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
-					>
-						Reload Page
-					</button>
-				</div>
-			</div>
+			<ErrorDisplay
+				message="Failed to load posts. Please refresh the page or check your extension storage."
+				onRetry={() => window.location.reload()}
+			/>
 		);
 	}
 
@@ -145,60 +112,16 @@ function App() {
 
 			<div className="max-w-7xl mx-auto px-4 py-6 flex gap-6">
 				{/* Sidebar - Subscriptions */}
-				<nav className="w-64 flex-shrink-0" aria-label="Subscription filters">
-					<div className="bg-white rounded-lg shadow p-4">
-						<h2 className="font-semibold mb-3">Subscriptions</h2>
-						<div className="space-y-1">
-							<button
-								type="button"
-								onClick={() => setSelectedSubscriptionId(null)}
-								aria-pressed={selectedSubscriptionId === null}
-								aria-label="Show all posts from all subscriptions"
-								className={`w-full text-left px-3 py-2 rounded ${
-									selectedSubscriptionId === null
-										? "bg-blue-100 text-blue-900"
-										: "hover:bg-gray-100"
-								}`}
-							>
-								All Posts
-							</button>
-							{subscriptions.map((sub) => (
-								<button
-									key={sub.id}
-									type="button"
-									onClick={() => setSelectedSubscriptionId(sub.id)}
-									aria-pressed={selectedSubscriptionId === sub.id}
-									aria-label={`Filter posts by ${sub.name} subscription`}
-									className={`w-full text-left px-3 py-2 rounded ${
-										selectedSubscriptionId === sub.id
-											? "bg-blue-100 text-blue-900"
-											: "hover:bg-gray-100"
-									}`}
-								>
-									{sub.name}
-								</button>
-							))}
-						</div>
-					</div>
-				</nav>
+				<SubscriptionSidebar
+					subscriptions={subscriptions}
+					selectedSubscriptionId={selectedSubscriptionId}
+					onSelectSubscription={setSelectedSubscriptionId}
+				/>
 
 				{/* Main content - Posts */}
 				<main className="flex-1">
 					{/* Search */}
-					<div className="mb-4">
-						<label htmlFor="search-posts" className="sr-only">
-							Search posts by content or author
-						</label>
-						<input
-							id="search-posts"
-							type="search"
-							placeholder="Search posts..."
-							value={searchQuery}
-							onChange={(e) => setSearchQuery(e.target.value)}
-							aria-label="Search posts by content or author"
-							className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-						/>
-					</div>
+					<SearchBar value={searchQuery} onChange={setSearchQuery} />
 
 					{/* Posts list */}
 					{filteredPosts.length === 0 ? (
@@ -214,55 +137,13 @@ function App() {
 							{filteredPosts.map((post) => {
 								const group = groups.find((g) => g.id === post.groupId);
 								return (
-									<article
+									<PostCard
 										key={post.id}
-										className="bg-white rounded-lg shadow p-6"
-									>
-										<div className="flex justify-between items-start mb-3">
-											<div>
-												<h3 className="font-semibold text-gray-900">
-													{post.authorName}
-												</h3>
-												<p className="text-sm text-gray-500">
-													{group && (
-														<span className="text-blue-600">
-															{group.name} •{" "}
-														</span>
-													)}
-													{new Date(post.timestamp).toLocaleString()}
-												</p>
-											</div>
-											<div className="flex gap-2">
-												<button
-													type="button"
-													onClick={() => handleToggleSeen(post.id, post.seen)}
-													aria-label={
-														post.seen
-															? `Mark post from ${post.authorName} as unseen`
-															: `Mark post from ${post.authorName} as seen`
-													}
-													className="text-sm text-blue-600 hover:text-blue-800"
-												>
-													{post.seen ? "Mark as unseen" : "Mark as seen"}
-												</button>
-											</div>
-										</div>
-										<div
-											className="prose max-w-none mb-3"
-											// biome-ignore lint/security/noDangerouslySetInnerHtml: Content is sanitized with DOMPurify
-											dangerouslySetInnerHTML={{
-												__html: DOMPurify.sanitize(post.contentHtml),
-											}}
-										/>
-										<button
-											type="button"
-											onClick={() => handleOpenPost(post.url)}
-											aria-label={`Open post from ${post.authorName} on Facebook in new tab`}
-											className="text-sm text-blue-600 hover:text-blue-800"
-										>
-											Open on Facebook
-										</button>
-									</article>
+										post={post}
+										group={group}
+										onToggleSeen={handleToggleSeen}
+										onOpenPost={handleOpenPost}
+									/>
 								);
 							})}
 						</div>
