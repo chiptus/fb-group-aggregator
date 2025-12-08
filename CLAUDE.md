@@ -258,6 +258,44 @@ The project extends `.wxt/tsconfig.json` with custom options:
 4. **Type Checking**: Run `pnpm compile` to verify TypeScript before committing
 5. **Testing**: Run `pnpm test` for watch mode, `pnpm test:run` for CI
 
+## Git and Commit Practices
+
+**IMPORTANT**: Follow these commit practices for maintainable git history.
+
+**Small and Atomic Commits**:
+- **Make commits small and focused** - Each commit should address a single concern
+- **One logical change per commit** - Don't mix refactoring with new features
+- **Keep commits atomic** - Each commit should be a complete, working change that could be reverted independently
+- **Benefits**: Easier code review, simpler git bisect, clearer history, easier to revert specific changes
+
+**Good Examples**:
+```
+✅ fix(dashboard): add XSS protection with DOMPurify
+✅ feat(dashboard): add animated loading spinner
+✅ refactor(dashboard): replace onOpenPost callback with semantic anchor tag
+✅ test(dashboard): add comprehensive error handling test coverage
+```
+
+**Bad Examples**:
+```
+❌ fix: various dashboard improvements
+❌ update: add features, fix bugs, refactor code
+❌ wip: dashboard changes
+```
+
+**Commit Message Format**:
+- Use conventional commit format: `type(scope): description`
+- Types: `feat`, `fix`, `refactor`, `test`, `docs`, `style`, `chore`
+- Keep first line under 72 characters
+- Add detailed explanation in commit body if needed
+
+**When to Commit**:
+- After implementing a single feature
+- After fixing a single bug
+- After refactoring a specific component
+- After adding tests for a specific feature
+- Before switching to a different task
+
 ## Testing Strategy
 
 **Framework**: Vitest (fast, Vite-native, great TypeScript support)
