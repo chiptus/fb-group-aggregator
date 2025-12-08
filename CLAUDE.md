@@ -208,34 +208,46 @@ Content Script → Background:
 
 ### React and TypeScript Coding Standards
 
-**IMPORTANT**: Follow these coding standards consistently across the codebase.
-
-**Function Declarations**:
-- **Prefer named function declarations** over arrow functions for regular functions and event handlers
-- Use `function handleClick() {}` instead of `const handleClick = () => {}`
-- Benefits: Better stack traces, hoisting, more explicit intent
-
-**React Query Usage**:
-- **Do NOT destructure query hook results** directly
-- ❌ Bad: `const { data, isLoading, error } = useQuery()`
-- ✅ Good: `const query = useQuery()` then access `query.data`, `query.isLoading`, `query.error`
-- Benefits: More explicit, easier to refactor, clearer ownership of properties
-
-**Example**:
+**Function Declaration Rules**:
+- Use named function declarations for event handlers and regular functions
+- DO NOT use arrow functions for these cases
 ```typescript
-// ❌ Bad
-const { data: posts = [], isLoading, error } = usePosts();
-const handleClick = (id: string) => {
-  // ...
-};
+// INVALID
+const handleClick = (id: string) => { /* ... */ };
+const processData = () => { /* ... */ };
 
-// ✅ Good
+// VALID
+function handleClick(id: string) { /* ... */ }
+function processData() { /* ... */ }
+```
+
+**React Query Hook Usage**:
+- DO NOT destructure query results
+- Access properties via dot notation
+```typescript
+// INVALID
+const { data: posts = [], isLoading, error } = usePosts();
+const { data, isLoading: loading } = useQuery();
+
+// VALID
 const postsQuery = usePosts();
 const posts = postsQuery.data ?? [];
+const isLoading = postsQuery.isLoading;
 
-function handleClick(id: string) {
-  // ...
-}
+const query = useQuery();
+const data = query.data;
+```
+
+**Pattern Matching**:
+```typescript
+// INVALID: Destructuring queries + arrow function
+const { data: posts = [] } = usePosts();
+const handleToggle = (id: string) => { markSeen(id); };
+
+// VALID: Direct access + named function
+const postsQuery = usePosts();
+const posts = postsQuery.data ?? [];
+function handleToggle(id: string) { markSeen(id); }
 ```
 
 ### TypeScript Configuration
@@ -260,41 +272,42 @@ The project extends `.wxt/tsconfig.json` with custom options:
 
 ## Git and Commit Practices
 
-**IMPORTANT**: Follow these commit practices for maintainable git history.
-
-**Small and Atomic Commits**:
-- **Make commits small and focused** - Each commit should address a single concern
-- **One logical change per commit** - Don't mix refactoring with new features
-- **Keep commits atomic** - Each commit should be a complete, working change that could be reverted independently
-- **Benefits**: Easier code review, simpler git bisect, clearer history, easier to revert specific changes
-
-**Good Examples**:
-```
-✅ fix(dashboard): add XSS protection with DOMPurify
-✅ feat(dashboard): add animated loading spinner
-✅ refactor(dashboard): replace onOpenPost callback with semantic anchor tag
-✅ test(dashboard): add comprehensive error handling test coverage
-```
-
-**Bad Examples**:
-```
-❌ fix: various dashboard improvements
-❌ update: add features, fix bugs, refactor code
-❌ wip: dashboard changes
-```
+**Commit Granularity**:
+- Create one commit per logical change
+- Do NOT combine multiple concerns (feature + refactor, multiple features, multiple fixes)
+- Each commit must be complete and independently revertible
+- Run tests before each commit
 
 **Commit Message Format**:
-- Use conventional commit format: `type(scope): description`
-- Types: `feat`, `fix`, `refactor`, `test`, `docs`, `style`, `chore`
-- Keep first line under 72 characters
-- Add detailed explanation in commit body if needed
+```
+type(scope): imperative description under 72 chars
 
-**When to Commit**:
-- After implementing a single feature
-- After fixing a single bug
-- After refactoring a specific component
-- After adding tests for a specific feature
-- Before switching to a different task
+Optional body with detailed explanation.
+```
+
+**Types**: `feat`, `fix`, `refactor`, `test`, `docs`, `style`, `chore`
+
+**Commit Triggers** (create commit after):
+- Implementing single feature → `feat(scope): add feature X`
+- Fixing single bug → `fix(scope): correct behavior Y`
+- Refactoring single component → `refactor(scope): simplify component Z`
+- Adding tests for feature → `test(scope): add tests for feature X`
+- Updating documentation → `docs(scope): document pattern Y`
+
+**Pattern Matching**:
+```
+VALID:
+fix(dashboard): add XSS protection with DOMPurify
+feat(dashboard): add animated loading spinner
+refactor(dashboard): replace callback with anchor tag
+test(dashboard): add error handling test coverage
+
+INVALID:
+fix: various improvements              # Too vague, multiple concerns
+update: add features and fix bugs      # Multiple types mixed
+wip: dashboard changes                 # Not descriptive, not complete
+feat(dashboard): add spinner, fix XSS  # Multiple changes in one commit
+```
 
 ## Testing Strategy
 
