@@ -198,7 +198,7 @@ describe("Popup - App", () => {
 				tabs: {
 					create: mockOpen,
 				},
-			} as typeof chrome;
+			} as unknown as typeof chrome;
 
 			renderWithQuery(<App />);
 
