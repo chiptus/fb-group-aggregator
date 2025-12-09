@@ -334,17 +334,6 @@ function SubscriptionCard({ subscription, onEdit, onDelete }) {
     </div>
   );
 }
-
-// GOOD: Complex logic in custom hooks
-function useSubscriptionManagement() {
-  const subscriptionsQuery = useSubscriptions();
-  const createMutation = useCreateSubscription();
-  const updateMutation = useUpdateSubscription();
-
-  // ... hook logic
-
-  return { subscriptions, create, update, isLoading };
-}
 ```
 
 **Avoid**:
