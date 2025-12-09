@@ -6,7 +6,7 @@ interface SubscriptionListItemProps {
 	subscription: Subscription;
 	isEditing: boolean;
 	onStartEdit: () => void;
-	onSaveEdit: (name: string) => void;
+	onEditSuccess: () => void;
 	onCancelEdit: () => void;
 	onDelete: () => void;
 }
@@ -15,7 +15,7 @@ export function SubscriptionListItem({
 	subscription,
 	isEditing,
 	onStartEdit,
-	onSaveEdit,
+	onEditSuccess,
 	onCancelEdit,
 	onDelete,
 }: SubscriptionListItemProps) {
@@ -23,8 +23,9 @@ export function SubscriptionListItem({
 		<div className="border rounded-lg p-3">
 			{isEditing ? (
 				<SubscriptionForm
+					subscriptionId={subscription.id}
 					initialValue={subscription.name}
-					onSubmit={onSaveEdit}
+					onSuccess={onEditSuccess}
 					onCancel={onCancelEdit}
 				/>
 			) : (

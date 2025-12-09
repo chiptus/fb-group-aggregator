@@ -1,22 +1,51 @@
 import { useForm } from "@tanstack/react-form";
+import {
+	useCreateSubscription,
+	useUpdateSubscription,
+} from "@/lib/hooks/useStorageData";
 
 interface SubscriptionFormProps {
+	subscriptionId?: string;
 	initialValue?: string;
-	onSubmit: (name: string) => void;
+	onSuccess?: () => void;
 	onCancel: () => void;
 }
 
 export function SubscriptionForm({
+	subscriptionId,
 	initialValue = "",
-	onSubmit,
+	onSuccess,
 	onCancel,
 }: SubscriptionFormProps) {
+	const createMutation = useCreateSubscription();
+	const updateMutation = useUpdateSubscription();
+
+	const isEditing = !!subscriptionId;
+	const mutation = isEditing ? updateMutation : createMutation;
+
 	const form = useForm({
 		defaultValues: {
 			name: initialValue,
 		},
 		onSubmit: async ({ value }) => {
-			onSubmit(value.name.trim());
+			const name = value.name.trim();
+
+			if (isEditing) {
+				updateMutation.mutate(
+					{ id: subscriptionId, updates: { name } },
+					{
+						onSuccess: () => {
+							onSuccess?.();
+						},
+					},
+				);
+			} else {
+				createMutation.mutate(name, {
+					onSuccess: () => {
+						onSuccess?.();
+					},
+				});
+			}
 		},
 	});
 
@@ -66,18 +95,27 @@ export function SubscriptionForm({
 				)}
 			</form.Field>
 
+			{mutation.error && (
+				<div className="mb-2 p-2 bg-red-50 border border-red-200 rounded text-red-700 text-xs">
+					{mutation.error instanceof Error
+						? mutation.error.message
+						: "An error occurred"}
+				</div>
+			)}
+
 			<div className="flex gap-2">
 				<button
 					type="submit"
-					disabled={!form.state.canSubmit}
+					disabled={!form.state.canSubmit || mutation.isPending}
 					className="flex-1 bg-blue-600 text-white px-3 py-2 rounded text-sm hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
 				>
-					{initialValue ? "Save" : "Create"}
+					{mutation.isPending ? "Saving..." : initialValue ? "Save" : "Create"}
 				</button>
 				<button
 					type="button"
 					onClick={onCancel}
-					className="flex-1 bg-gray-300 text-gray-700 px-3 py-2 rounded text-sm hover:bg-gray-400"
+					disabled={mutation.isPending}
+					className="flex-1 bg-gray-300 text-gray-700 px-3 py-2 rounded text-sm hover:bg-gray-400 disabled:opacity-50 disabled:cursor-not-allowed"
 				>
 					Cancel
 				</button>

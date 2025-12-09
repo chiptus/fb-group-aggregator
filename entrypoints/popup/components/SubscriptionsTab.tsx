@@ -1,19 +1,14 @@
 import { useState } from "react";
 import {
-	useCreateSubscription,
 	useDeleteSubscription,
 	useSubscriptions,
-	useUpdateSubscription,
 } from "@/lib/hooks/useStorageData";
-import type { Subscription } from "@/lib/types";
 import { DeleteConfirmationModal } from "./DeleteConfirmationModal";
 import { SubscriptionForm } from "./SubscriptionForm";
 import { SubscriptionListItem } from "./SubscriptionListItem";
 
 export function SubscriptionsTab() {
 	const subscriptionsQuery = useSubscriptions();
-	const createSubscriptionMutation = useCreateSubscription();
-	const updateSubscriptionMutation = useUpdateSubscription();
 	const deleteSubscriptionMutation = useDeleteSubscription();
 
 	const subscriptions = subscriptionsQuery.data ?? [];
@@ -23,50 +18,12 @@ export function SubscriptionsTab() {
 	const [deletingSubId, setDeletingSubId] = useState<string | null>(null);
 	const [mutationError, setMutationError] = useState<string | null>(null);
 
-	function handleCreateSubscription(name: string) {
-		setMutationError(null);
-		createSubscriptionMutation.mutate(name, {
-			onSuccess: () => {
-				setShowSubForm(false);
-			},
-			onError: (err) => {
-				const message =
-					err instanceof Error ? err.message : "Failed to create subscription";
-				setMutationError(message);
-			},
-		});
-	}
-
 	function handleCancelForm() {
 		setShowSubForm(false);
 	}
 
 	function handleStartEditSubscription(subId: string) {
 		setEditingSubId(subId);
-	}
-
-	function handleSaveSubscription(name: string) {
-		if (!editingSubId) return;
-
-		setMutationError(null);
-		updateSubscriptionMutation.mutate(
-			{
-				id: editingSubId,
-				updates: { name },
-			},
-			{
-				onSuccess: () => {
-					setEditingSubId(null);
-				},
-				onError: (err) => {
-					const message =
-						err instanceof Error
-							? err.message
-							: "Failed to update subscription";
-					setMutationError(message);
-				},
-			},
-		);
 	}
 
 	function handleCancelEdit() {
@@ -134,7 +91,7 @@ export function SubscriptionsTab() {
 						subscription={sub}
 						isEditing={editingSubId === sub.id}
 						onStartEdit={() => handleStartEditSubscription(sub.id)}
-						onSaveEdit={handleSaveSubscription}
+						onEditSuccess={() => setEditingSubId(null)}
 						onCancelEdit={handleCancelEdit}
 						onDelete={() => setDeletingSubId(sub.id)}
 					/>
@@ -143,7 +100,7 @@ export function SubscriptionsTab() {
 
 			{showSubForm && (
 				<SubscriptionForm
-					onSubmit={handleCreateSubscription}
+					onSuccess={() => setShowSubForm(false)}
 					onCancel={handleCancelForm}
 				/>
 			)}
