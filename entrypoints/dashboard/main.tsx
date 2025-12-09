@@ -1,19 +1,12 @@
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { QueryClientProvider } from "@tanstack/react-query";
 import React from "react";
 import ReactDOM from "react-dom/client";
+import { createQueryClient } from "@/lib/queryClient";
 import App from "./App.tsx";
 import "./style.css";
 import "@/assets/tailwind.css";
 
-const queryClient = new QueryClient({
-	defaultOptions: {
-		queries: {
-			refetchOnWindowFocus: false,
-			retry: 1,
-			staleTime: 5 * 60 * 1000, // 5 minutes
-		},
-	},
-});
+const queryClient = createQueryClient();
 
 const rootElement = document.getElementById("root");
 if (rootElement) {
