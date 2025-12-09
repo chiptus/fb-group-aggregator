@@ -140,7 +140,7 @@ Core TypeScript interfaces defined in [lib/types.ts](lib/types.ts):
 - `id`: string - Facebook group ID
 - `url`: string - Full Facebook group URL
 - `name`: string - Group display name
-- `subscriptionIds`: string[] - Array of subscription IDs (supports multi-subscription in data model)
+- `subscriptionIds`: string[] - Array of subscription IDs (data model supports multiple, but current UI only allows single subscription per group)
 - `addedAt`: number - Unix timestamp
 - `lastScrapedAt`: number | null - Last scrape timestamp
 - `enabled`: boolean - Whether scraping is enabled
