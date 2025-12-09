@@ -1,12 +1,12 @@
 import type { Subscription } from "@/lib/types";
 
+import { SubscriptionForm } from "./SubscriptionForm";
+
 interface SubscriptionListItemProps {
 	subscription: Subscription;
 	isEditing: boolean;
-	editValue: string;
-	onEditValueChange: (value: string) => void;
 	onStartEdit: () => void;
-	onSaveEdit: () => void;
+	onSaveEdit: (name: string) => void;
 	onCancelEdit: () => void;
 	onDelete: () => void;
 }
@@ -14,39 +14,19 @@ interface SubscriptionListItemProps {
 export function SubscriptionListItem({
 	subscription,
 	isEditing,
-	editValue,
-	onEditValueChange,
 	onStartEdit,
 	onSaveEdit,
 	onCancelEdit,
 	onDelete,
 }: SubscriptionListItemProps) {
 	return (
-		<div className="border rounded-lg p-3 flex items-center justify-between">
+		<div className="border rounded-lg p-3">
 			{isEditing ? (
-				<div className="flex-1 flex items-center gap-2">
-					<input
-						type="text"
-						value={editValue}
-						onChange={(e) => onEditValueChange(e.target.value)}
-						className="flex-1 border rounded px-2 py-1 text-sm"
-						placeholder="Subscription name"
-					/>
-					<button
-						type="button"
-						onClick={onSaveEdit}
-						className="bg-blue-600 text-white px-3 py-1 rounded text-sm hover:bg-blue-700"
-					>
-						Save
-					</button>
-					<button
-						type="button"
-						onClick={onCancelEdit}
-						className="bg-gray-300 text-gray-700 px-3 py-1 rounded text-sm hover:bg-gray-400"
-					>
-						Cancel
-					</button>
-				</div>
+				<SubscriptionForm
+					initialValue={subscription.name}
+					onSubmit={onSaveEdit}
+					onCancel={onCancelEdit}
+				/>
 			) : (
 				<>
 					<span className="font-medium text-sm">{subscription.name}</span>
