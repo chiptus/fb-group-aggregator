@@ -289,13 +289,16 @@ function MyComponent() {
   const isLoading = subscriptionsQuery.isLoading || groupsQuery.isLoading;
   const error = subscriptionsQuery.error || groupsQuery.error;
 
-  // Call mutations with mutateAsync for async/await
-  async function handleCreate() {
-    try {
-      await createSubscriptionMutation.mutateAsync('New Sub');
-    } catch (err) {
-      console.error('Failed:', err);
-    }
+  // Call mutations with callbacks (not mutateAsync)
+  function handleCreate() {
+    createSubscriptionMutation.mutate('New Sub', {
+      onSuccess: () => {
+        // Handle success (e.g., close form, reset state)
+      },
+      onError: (err) => {
+        console.error('Failed:', err);
+      },
+    });
   }
 }
 ```

@@ -14,38 +14,44 @@ export function GroupsTab() {
 	const groups = groupsQuery.data ?? [];
 	const subscriptions = subscriptionsQuery.data ?? [];
 
-	async function handleToggleGroup(groupId: string, enabled: boolean) {
-		try {
-			await updateGroupMutation.mutateAsync({
+	function handleToggleGroup(groupId: string, enabled: boolean) {
+		updateGroupMutation.mutate(
+			{
 				id: groupId,
 				updates: { enabled },
-			});
-		} catch (err) {
-			console.error("Failed to toggle group:", err);
-		}
+			},
+			{
+				onError: (err) => {
+					console.error("Failed to toggle group:", err);
+				},
+			},
+		);
 	}
 
-	async function handleAssignGroupToSubscription(
+	function handleAssignGroupToSubscription(
 		groupId: string,
 		subscriptionId: string,
 	) {
-		try {
-			const subscriptionIds = subscriptionId ? [subscriptionId] : [];
-			await updateGroupMutation.mutateAsync({
+		const subscriptionIds = subscriptionId ? [subscriptionId] : [];
+		updateGroupMutation.mutate(
+			{
 				id: groupId,
 				updates: { subscriptionIds },
-			});
-		} catch (err) {
-			console.error("Failed to assign group:", err);
-		}
+			},
+			{
+				onError: (err) => {
+					console.error("Failed to assign group:", err);
+				},
+			},
+		);
 	}
 
-	async function handleDeleteGroup(groupId: string) {
-		try {
-			await deleteGroupMutation.mutateAsync(groupId);
-		} catch (err) {
-			console.error("Failed to delete group:", err);
-		}
+	function handleDeleteGroup(groupId: string) {
+		deleteGroupMutation.mutate(groupId, {
+			onError: (err) => {
+				console.error("Failed to delete group:", err);
+			},
+		});
 	}
 
 	return (

@@ -23,16 +23,18 @@ export function SubscriptionsTab() {
 	const [subFormValue, setSubFormValue] = useState("");
 	const [deletingSubId, setDeletingSubId] = useState<string | null>(null);
 
-	async function handleCreateSubscription() {
+	function handleCreateSubscription() {
 		if (!subFormValue.trim()) return;
 
-		try {
-			await createSubscriptionMutation.mutateAsync(subFormValue.trim());
-			setSubFormValue("");
-			setShowSubForm(false);
-		} catch (err) {
-			console.error("Failed to create subscription:", err);
-		}
+		createSubscriptionMutation.mutate(subFormValue.trim(), {
+			onSuccess: () => {
+				setSubFormValue("");
+				setShowSubForm(false);
+			},
+			onError: (err) => {
+				console.error("Failed to create subscription:", err);
+			},
+		});
 	}
 
 	function handleCancelForm() {
@@ -45,19 +47,24 @@ export function SubscriptionsTab() {
 		setSubFormValue(sub.name);
 	}
 
-	async function handleSaveSubscription() {
+	function handleSaveSubscription() {
 		if (!editingSubId || !subFormValue.trim()) return;
 
-		try {
-			await updateSubscriptionMutation.mutateAsync({
+		updateSubscriptionMutation.mutate(
+			{
 				id: editingSubId,
 				updates: { name: subFormValue.trim() },
-			});
-			setEditingSubId(null);
-			setSubFormValue("");
-		} catch (err) {
-			console.error("Failed to update subscription:", err);
-		}
+			},
+			{
+				onSuccess: () => {
+					setEditingSubId(null);
+					setSubFormValue("");
+				},
+				onError: (err) => {
+					console.error("Failed to update subscription:", err);
+				},
+			},
+		);
 	}
 
 	function handleCancelEdit() {
@@ -65,15 +72,17 @@ export function SubscriptionsTab() {
 		setSubFormValue("");
 	}
 
-	async function handleConfirmDeleteSubscription() {
+	function handleConfirmDeleteSubscription() {
 		if (!deletingSubId) return;
 
-		try {
-			await deleteSubscriptionMutation.mutateAsync(deletingSubId);
-			setDeletingSubId(null);
-		} catch (err) {
-			console.error("Failed to delete subscription:", err);
-		}
+		deleteSubscriptionMutation.mutate(deletingSubId, {
+			onSuccess: () => {
+				setDeletingSubId(null);
+			},
+			onError: (err) => {
+				console.error("Failed to delete subscription:", err);
+			},
+		});
 	}
 
 	return (
