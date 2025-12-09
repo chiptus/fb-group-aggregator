@@ -1,3 +1,12 @@
+import {
+	Dialog,
+	DialogContent,
+	DialogDescription,
+	DialogFooter,
+	DialogHeader,
+	DialogTitle,
+} from "@/components/ui/dialog";
+
 interface DeleteConfirmationModalProps {
 	isOpen: boolean;
 	onConfirm: () => void;
@@ -11,29 +20,30 @@ export function DeleteConfirmationModal({
 	onCancel,
 	message,
 }: DeleteConfirmationModalProps) {
-	if (!isOpen) return null;
-
 	return (
-		<div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
-			<div className="bg-white p-6 rounded-lg max-w-sm">
-				<p className="mb-4">{message}</p>
-				<div className="flex gap-2">
-					<button
-						type="button"
-						onClick={onConfirm}
-						className="flex-1 bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700"
-					>
-						Confirm
-					</button>
+		<Dialog open={isOpen} onOpenChange={(open) => !open && onCancel()}>
+			<DialogContent className="sm:max-w-md">
+				<DialogHeader>
+					<DialogTitle>Confirm Deletion</DialogTitle>
+					<DialogDescription>{message}</DialogDescription>
+				</DialogHeader>
+				<DialogFooter className="gap-2 sm:gap-0">
 					<button
 						type="button"
 						onClick={onCancel}
-						className="flex-1 bg-gray-300 text-gray-700 px-4 py-2 rounded hover:bg-gray-400"
+						className="flex-1 bg-gray-300 text-gray-700 px-4 py-2 rounded hover:bg-gray-400 transition-colors"
 					>
 						Cancel
 					</button>
-				</div>
-			</div>
-		</div>
+					<button
+						type="button"
+						onClick={onConfirm}
+						className="flex-1 bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700 transition-colors"
+					>
+						Confirm
+					</button>
+				</DialogFooter>
+			</DialogContent>
+		</Dialog>
 	);
 }
