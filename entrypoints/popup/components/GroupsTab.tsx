@@ -5,6 +5,7 @@ import {
 	useUpdateGroup,
 } from "@/lib/hooks/storage/useGroups";
 import { useSubscriptions } from "@/lib/hooks/storage/useSubscriptions";
+import { GroupItem } from "./GroupItem";
 
 export function GroupsTab() {
 	const groupsQuery = useGroups();
@@ -108,57 +109,14 @@ export function GroupsTab() {
 
 			<div className="space-y-3">
 				{groups.map((group) => (
-					<div key={group.id} className="border rounded-lg p-3 space-y-2">
-						<div className="flex items-start justify-between">
-							<div className="flex-1">
-								<h3 className="font-medium text-sm">{group.name}</h3>
-								<p className="text-xs text-gray-500 truncate">{group.url}</p>
-							</div>
-							<button
-								type="button"
-								onClick={() => handleDeleteGroup(group.id)}
-								className="text-red-600 hover:text-red-800 text-xs ml-2"
-								aria-label={`Delete ${group.name}`}
-							>
-								Delete
-							</button>
-						</div>
-
-						<div className="flex items-center justify-between">
-							<label className="flex items-center gap-2 text-sm">
-								<input
-									type="checkbox"
-									role="switch"
-									checked={group.enabled}
-									aria-checked={group.enabled}
-									onChange={(e) =>
-										handleToggleGroup(group.id, e.target.checked)
-									}
-									className="rounded"
-									aria-label={`Enable ${group.name}`}
-								/>
-								<span className="text-xs text-gray-600">
-									{group.enabled ? "Enabled" : "Disabled"}
-								</span>
-							</label>
-
-							<select
-								value={group.subscriptionIds[0] || ""}
-								onChange={(e) =>
-									handleAssignGroupToSubscription(group.id, e.target.value)
-								}
-								className="border rounded px-2 py-1 text-xs"
-								aria-label={`Subscription for ${group.name}`}
-							>
-								<option value="">No subscription</option>
-								{subscriptions.map((sub) => (
-									<option key={sub.id} value={sub.id}>
-										{sub.name}
-									</option>
-								))}
-							</select>
-						</div>
-					</div>
+					<GroupItem
+						key={group.id}
+						group={group}
+						subscriptions={subscriptions}
+						onToggle={handleToggleGroup}
+						onAssign={handleAssignGroupToSubscription}
+						onDelete={handleDeleteGroup}
+					/>
 				))}
 			</div>
 		</div>
