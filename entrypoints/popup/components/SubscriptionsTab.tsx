@@ -22,17 +22,21 @@ export function SubscriptionsTab() {
 	const [editingSubId, setEditingSubId] = useState<string | null>(null);
 	const [subFormValue, setSubFormValue] = useState("");
 	const [deletingSubId, setDeletingSubId] = useState<string | null>(null);
+	const [mutationError, setMutationError] = useState<string | null>(null);
 
 	function handleCreateSubscription() {
 		if (!subFormValue.trim()) return;
 
+		setMutationError(null);
 		createSubscriptionMutation.mutate(subFormValue.trim(), {
 			onSuccess: () => {
 				setSubFormValue("");
 				setShowSubForm(false);
 			},
 			onError: (err) => {
-				console.error("Failed to create subscription:", err);
+				const message =
+					err instanceof Error ? err.message : "Failed to create subscription";
+				setMutationError(message);
 			},
 		});
 	}
@@ -50,6 +54,7 @@ export function SubscriptionsTab() {
 	function handleSaveSubscription() {
 		if (!editingSubId || !subFormValue.trim()) return;
 
+		setMutationError(null);
 		updateSubscriptionMutation.mutate(
 			{
 				id: editingSubId,
@@ -61,7 +66,11 @@ export function SubscriptionsTab() {
 					setSubFormValue("");
 				},
 				onError: (err) => {
-					console.error("Failed to update subscription:", err);
+					const message =
+						err instanceof Error
+							? err.message
+							: "Failed to update subscription";
+					setMutationError(message);
 				},
 			},
 		);
@@ -75,19 +84,50 @@ export function SubscriptionsTab() {
 	function handleConfirmDeleteSubscription() {
 		if (!deletingSubId) return;
 
+		setMutationError(null);
 		deleteSubscriptionMutation.mutate(deletingSubId, {
 			onSuccess: () => {
 				setDeletingSubId(null);
 			},
 			onError: (err) => {
-				console.error("Failed to delete subscription:", err);
+				const message =
+					err instanceof Error ? err.message : "Failed to delete subscription";
+				setMutationError(message);
+				setDeletingSubId(null);
 			},
 		});
+	}
+
+	if (subscriptionsQuery.isLoading) {
+		return (
+			<div className="p-4">
+				<p className="text-gray-500">Loading subscriptions...</p>
+			</div>
+		);
+	}
+
+	if (subscriptionsQuery.error) {
+		return (
+			<div className="p-4">
+				<p className="text-red-600 text-sm">
+					Error loading subscriptions:{" "}
+					{subscriptionsQuery.error instanceof Error
+						? subscriptionsQuery.error.message
+						: "Unknown error"}
+				</p>
+			</div>
+		);
 	}
 
 	return (
 		<div className="p-4">
 			<h2 className="text-lg font-semibold mb-4">Manage Subscriptions</h2>
+
+			{mutationError && (
+				<div className="mb-4 p-3 bg-red-50 border border-red-200 rounded text-red-700 text-sm">
+					{mutationError}
+				</div>
+			)}
 
 			{subscriptions.length === 0 && !showSubForm && (
 				<p className="text-gray-500 text-sm mb-4">

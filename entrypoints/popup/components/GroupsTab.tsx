@@ -1,3 +1,4 @@
+import { useState } from "react";
 import {
 	useDeleteGroup,
 	useGroups,
@@ -13,8 +14,10 @@ export function GroupsTab() {
 
 	const groups = groupsQuery.data ?? [];
 	const subscriptions = subscriptionsQuery.data ?? [];
+	const [mutationError, setMutationError] = useState<string | null>(null);
 
 	function handleToggleGroup(groupId: string, enabled: boolean) {
+		setMutationError(null);
 		updateGroupMutation.mutate(
 			{
 				id: groupId,
@@ -22,7 +25,9 @@ export function GroupsTab() {
 			},
 			{
 				onError: (err) => {
-					console.error("Failed to toggle group:", err);
+					const message =
+						err instanceof Error ? err.message : "Failed to toggle group";
+					setMutationError(message);
 				},
 			},
 		);
@@ -32,6 +37,7 @@ export function GroupsTab() {
 		groupId: string,
 		subscriptionId: string,
 	) {
+		setMutationError(null);
 		const subscriptionIds = subscriptionId ? [subscriptionId] : [];
 		updateGroupMutation.mutate(
 			{
@@ -40,23 +46,56 @@ export function GroupsTab() {
 			},
 			{
 				onError: (err) => {
-					console.error("Failed to assign group:", err);
+					const message =
+						err instanceof Error ? err.message : "Failed to assign group";
+					setMutationError(message);
 				},
 			},
 		);
 	}
 
 	function handleDeleteGroup(groupId: string) {
+		setMutationError(null);
 		deleteGroupMutation.mutate(groupId, {
 			onError: (err) => {
-				console.error("Failed to delete group:", err);
+				const message =
+					err instanceof Error ? err.message : "Failed to delete group";
+				setMutationError(message);
 			},
 		});
+	}
+
+	const isLoading = groupsQuery.isLoading || subscriptionsQuery.isLoading;
+	const error = groupsQuery.error || subscriptionsQuery.error;
+
+	if (isLoading) {
+		return (
+			<div className="p-4">
+				<p className="text-gray-500">Loading groups...</p>
+			</div>
+		);
+	}
+
+	if (error) {
+		return (
+			<div className="p-4">
+				<p className="text-red-600 text-sm">
+					Error loading groups:{" "}
+					{error instanceof Error ? error.message : "Unknown error"}
+				</p>
+			</div>
+		);
 	}
 
 	return (
 		<div className="p-4">
 			<h2 className="text-lg font-semibold mb-4">Manage Groups</h2>
+
+			{mutationError && (
+				<div className="mb-4 p-3 bg-red-50 border border-red-200 rounded text-red-700 text-sm">
+					{mutationError}
+				</div>
+			)}
 
 			{groups.length === 0 && (
 				<p className="text-gray-500 text-sm mb-4">

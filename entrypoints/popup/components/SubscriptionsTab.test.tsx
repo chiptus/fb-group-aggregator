@@ -35,6 +35,8 @@ describe("SubscriptionsTab", () => {
 	});
 
 	it('should show "Add Subscription" button', async () => {
+		vi.mocked(storage.listSubscriptions).mockResolvedValue([]);
+
 		renderWithQuery(<SubscriptionsTab />);
 
 		await waitFor(() => {
@@ -56,6 +58,12 @@ describe("SubscriptionsTab", () => {
 		vi.mocked(storage.listSubscriptions).mockResolvedValue([newSubscription]);
 
 		renderWithQuery(<SubscriptionsTab />);
+
+		await waitFor(() => {
+			expect(
+				screen.getByRole("button", { name: /add subscription/i }),
+			).toBeInTheDocument();
+		});
 
 		await user.click(screen.getByRole("button", { name: /add subscription/i }));
 

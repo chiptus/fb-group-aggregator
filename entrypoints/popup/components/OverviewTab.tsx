@@ -1,4 +1,3 @@
-import { useMemo } from "react";
 import {
 	useGroups,
 	usePosts,
@@ -14,8 +13,34 @@ export function OverviewTab() {
 	const groups = groupsQuery.data ?? [];
 	const posts = postsQuery.data ?? [];
 
+	const isLoading =
+		subscriptionsQuery.isLoading ||
+		groupsQuery.isLoading ||
+		postsQuery.isLoading;
+	const error =
+		subscriptionsQuery.error || groupsQuery.error || postsQuery.error;
+
 	function handleOpenDashboard() {
 		chrome.tabs.create({ url: "/dashboard.html" });
+	}
+
+	if (isLoading) {
+		return (
+			<div className="p-4">
+				<p className="text-gray-500">Loading...</p>
+			</div>
+		);
+	}
+
+	if (error) {
+		return (
+			<div className="p-4">
+				<p className="text-red-600 text-sm">
+					Error loading data:{" "}
+					{error instanceof Error ? error.message : "Unknown error"}
+				</p>
+			</div>
+		);
 	}
 
 	return (
