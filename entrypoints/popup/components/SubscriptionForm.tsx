@@ -1,8 +1,17 @@
 import { useForm } from "@tanstack/react-form";
+import { z } from "zod";
 import {
 	useCreateSubscription,
 	useUpdateSubscription,
 } from "@/lib/hooks/useStorageData";
+
+const subscriptionSchema = z.object({
+	name: z
+		.string()
+		.min(1, "Subscription name is required")
+		.min(2, "Name must be at least 2 characters")
+		.transform((val) => val.trim()),
+});
 
 interface SubscriptionFormProps {
 	subscriptionId?: string;
@@ -28,7 +37,10 @@ export function SubscriptionForm({
 			name: initialValue,
 		},
 		onSubmit: async ({ value }) => {
-			const name = value.name.trim();
+			const result = subscriptionSchema.safeParse(value);
+			if (!result.success) return;
+
+			const name = result.data.name;
 
 			if (isEditing) {
 				updateMutation.mutate(
@@ -62,11 +74,9 @@ export function SubscriptionForm({
 				name="name"
 				validators={{
 					onChange: ({ value }) => {
-						if (!value || !value.trim()) {
-							return "Subscription name is required";
-						}
-						if (value.trim().length < 2) {
-							return "Name must be at least 2 characters";
+						const result = subscriptionSchema.shape.name.safeParse(value);
+						if (!result.success) {
+							return result.error.errors[0]?.message || "Invalid input";
 						}
 						return undefined;
 					},
