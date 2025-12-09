@@ -17,9 +17,29 @@ function App() {
 			<TabNavigation activeTab={activeTab} onTabChange={setActiveTab} />
 
 			<div className="flex-1 overflow-y-auto">
-				{activeTab === "overview" && <OverviewTab />}
-				{activeTab === "subscriptions" && <SubscriptionsTab />}
-				{activeTab === "groups" && <GroupsTab />}
+				{activeTab === "overview" && (
+					<div
+						role="tabpanel"
+						id="overview-panel"
+						aria-labelledby="overview-tab"
+					>
+						<OverviewTab />
+					</div>
+				)}
+				{activeTab === "subscriptions" && (
+					<div
+						role="tabpanel"
+						id="subscriptions-panel"
+						aria-labelledby="subscriptions-tab"
+					>
+						<SubscriptionsTab />
+					</div>
+				)}
+				{activeTab === "groups" && (
+					<div role="tabpanel" id="groups-panel" aria-labelledby="groups-tab">
+						<GroupsTab />
+					</div>
+				)}
 			</div>
 		</div>
 	);

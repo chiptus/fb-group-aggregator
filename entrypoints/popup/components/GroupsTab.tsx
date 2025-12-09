@@ -45,6 +45,9 @@ export function GroupsTab() {
 				updates: { subscriptionIds },
 			},
 			{
+				onSuccess: () => {
+					setMutationError(null);
+				},
 				onError: (err) => {
 					const message =
 						err instanceof Error ? err.message : "Failed to assign group";

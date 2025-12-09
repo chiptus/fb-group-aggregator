@@ -11,7 +11,9 @@ export function TabNavigation({ activeTab, onTabChange }: TabNavigationProps) {
 			<button
 				type="button"
 				role="tab"
+				id="overview-tab"
 				aria-selected={activeTab === "overview"}
+				aria-controls="overview-panel"
 				onClick={() => onTabChange("overview")}
 				className={`flex-1 px-4 py-2 text-sm font-medium ${
 					activeTab === "overview"
@@ -24,7 +26,9 @@ export function TabNavigation({ activeTab, onTabChange }: TabNavigationProps) {
 			<button
 				type="button"
 				role="tab"
+				id="subscriptions-tab"
 				aria-selected={activeTab === "subscriptions"}
+				aria-controls="subscriptions-panel"
 				onClick={() => onTabChange("subscriptions")}
 				className={`flex-1 px-4 py-2 text-sm font-medium ${
 					activeTab === "subscriptions"
@@ -37,7 +41,9 @@ export function TabNavigation({ activeTab, onTabChange }: TabNavigationProps) {
 			<button
 				type="button"
 				role="tab"
+				id="groups-tab"
 				aria-selected={activeTab === "groups"}
+				aria-controls="groups-panel"
 				onClick={() => onTabChange("groups")}
 				className={`flex-1 px-4 py-2 text-sm font-medium ${
 					activeTab === "groups"
