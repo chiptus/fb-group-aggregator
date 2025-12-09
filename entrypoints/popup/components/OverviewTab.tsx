@@ -1,8 +1,6 @@
-import {
-	useGroups,
-	usePosts,
-	useSubscriptions,
-} from "@/lib/hooks/useStorageData";
+import { useGroups } from "@/lib/hooks/storage/useGroups";
+import { usePosts } from "@/lib/hooks/storage/usePosts";
+import { useSubscriptions } from "@/lib/hooks/storage/useSubscriptions";
 
 export function OverviewTab() {
 	const subscriptionsQuery = useSubscriptions();

@@ -2,9 +2,9 @@ import { useState } from "react";
 import {
 	useDeleteSubscription,
 	useSubscriptions,
-} from "@/lib/hooks/useStorageData";
+} from "@/lib/hooks/storage/useSubscriptions";
+import { CreateSubscriptionForm } from "./CreateSubscriptionForm";
 import { DeleteConfirmationModal } from "./DeleteConfirmationModal";
-import { SubscriptionForm } from "./SubscriptionForm";
 import { SubscriptionListItem } from "./SubscriptionListItem";
 
 export function SubscriptionsTab() {
@@ -99,7 +99,7 @@ export function SubscriptionsTab() {
 			</div>
 
 			{showSubForm && (
-				<SubscriptionForm
+				<CreateSubscriptionForm
 					onSuccess={() => setShowSubForm(false)}
 					onCancel={handleCancelForm}
 				/>

@@ -1,5 +1,5 @@
 import { useMemo } from "react";
-import { usePosts } from "@/lib/hooks/useStorageData";
+import { usePosts } from "@/lib/hooks/storage/usePosts";
 
 export function PopupHeader() {
 	const postsQuery = usePosts();

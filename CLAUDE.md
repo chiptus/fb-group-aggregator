@@ -73,6 +73,27 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - The subdirectory pattern (`entrypoints/feature/index.ts`) solves this while maintaining colocation
 - Test files use `*.test.ts` suffix, which WXT ignores during builds
 
+### Import Patterns
+
+**No Barrel Exports**:
+- DO NOT create `index.ts` files that re-export from other modules (barrel exports)
+- Always import directly from the specific file where the code is defined
+- This improves tree-shaking, makes dependencies explicit, and simplifies maintenance
+
+```typescript
+// ❌ BAD: Using barrel export
+import { useSubscriptions } from "@/lib/hooks/useStorageData"; // re-exports from multiple files
+
+// ✅ GOOD: Direct import from specific file
+import { useSubscriptions } from "@/lib/hooks/storage/useSubscriptions";
+```
+
+**Rationale**:
+- Barrel exports obscure dependencies and make refactoring harder
+- Direct imports make it clear which file contains which code
+- Better IDE navigation and faster builds
+- Avoids circular dependency issues
+
 ### WXT Framework
 
 This project uses WXT, a framework for building browser extensions with:

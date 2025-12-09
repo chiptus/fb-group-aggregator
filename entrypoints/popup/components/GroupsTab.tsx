@@ -2,9 +2,9 @@ import { useState } from "react";
 import {
 	useDeleteGroup,
 	useGroups,
-	useSubscriptions,
 	useUpdateGroup,
-} from "@/lib/hooks/useStorageData";
+} from "@/lib/hooks/storage/useGroups";
+import { useSubscriptions } from "@/lib/hooks/storage/useSubscriptions";
 
 export function GroupsTab() {
 	const groupsQuery = useGroups();

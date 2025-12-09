@@ -1,6 +1,6 @@
 import type { Subscription } from "@/lib/types";
 
-import { SubscriptionForm } from "./SubscriptionForm";
+import { EditSubscriptionForm } from "./EditSubscriptionForm";
 
 interface SubscriptionListItemProps {
 	subscription: Subscription;
@@ -22,9 +22,9 @@ export function SubscriptionListItem({
 	return (
 		<div className="border rounded-lg p-3">
 			{isEditing ? (
-				<SubscriptionForm
+				<EditSubscriptionForm
 					subscriptionId={subscription.id}
-					initialValue={subscription.name}
+					initialName={subscription.name}
 					onSuccess={onEditSuccess}
 					onCancel={onCancelEdit}
 				/>
