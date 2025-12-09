@@ -17,13 +17,11 @@ export function CreateSubscriptionForm({
 		defaultValues: {
 			name: "",
 		},
+		validators: {
+			onChange: subscriptionSchema,
+		},
 		onSubmit: async ({ value }) => {
-			const result = subscriptionSchema.safeParse(value);
-			if (!result.success) return;
-
-			const name = result.data.name;
-
-			createMutation.mutate(name, {
+			createMutation.mutate(value.name, {
 				onSuccess: () => {
 					onSuccess?.();
 				},
@@ -43,13 +41,7 @@ export function CreateSubscriptionForm({
 			<form.Field
 				name="name"
 				validators={{
-					onChange: ({ value }) => {
-						const result = subscriptionSchema.shape.name.safeParse(value);
-						if (!result.success) {
-							return result.error.errors[0]?.message || "Invalid input";
-						}
-						return undefined;
-					},
+					onChange: subscriptionSchema.shape.name,
 				}}
 			>
 				{(field) => (
@@ -68,7 +60,7 @@ export function CreateSubscriptionForm({
 						/>
 						{field.state.meta.errors.length > 0 && (
 							<p className="text-red-600 text-xs mt-1">
-								{field.state.meta.errors[0]}
+								{String(field.state.meta.errors[0])}
 							</p>
 						)}
 					</div>
