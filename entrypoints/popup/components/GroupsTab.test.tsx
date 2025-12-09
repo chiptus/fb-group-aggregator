@@ -2,7 +2,7 @@ import { screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import * as storage from "@/lib/storage";
-import { renderWithQuery } from "../test-utils";
+import { renderWithQuery } from "@/test/test-utils";
 import { GroupsTab } from "./GroupsTab";
 
 vi.mock("@/lib/storage", () => ({

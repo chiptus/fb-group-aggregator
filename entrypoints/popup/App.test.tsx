@@ -2,8 +2,8 @@ import { screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import * as storage from "@/lib/storage";
+import { renderWithQuery } from "@/test/test-utils";
 import App from "./App";
-import { renderWithQuery } from "./test-utils";
 
 vi.mock("@/lib/storage", () => ({
 	listSubscriptions: vi.fn(),

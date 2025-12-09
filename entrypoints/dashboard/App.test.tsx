@@ -1,8 +1,8 @@
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { render, screen, waitFor } from "@testing-library/react";
+import { screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { Group, Post, Subscription } from "@/lib/types";
+import { renderWithQuery } from "@/test/test-utils";
 import App from "./App";
 
 // Mock the storage module
@@ -14,22 +14,6 @@ vi.mock("@/lib/storage", () => ({
 }));
 
 import * as storage from "@/lib/storage";
-
-// Helper to render with react-query
-function renderWithQuery(component: React.ReactElement) {
-	const queryClient = new QueryClient({
-		defaultOptions: {
-			queries: {
-				retry: false,
-				gcTime: 0,
-			},
-		},
-	});
-
-	return render(
-		<QueryClientProvider client={queryClient}>{component}</QueryClientProvider>,
-	);
-}
 
 describe("Dashboard App", () => {
 	const mockSubscriptions: Subscription[] = [
