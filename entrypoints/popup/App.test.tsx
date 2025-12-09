@@ -96,10 +96,7 @@ describe("Popup - App", () => {
 			});
 		});
 
-		it("should show loading state initially", () => {
-			renderWithQuery(<App />);
-			expect(screen.getByText(/loading/i)).toBeInTheDocument();
-		});
+		// Note: Loading states are now handled by individual components, not by App
 
 		it("should display unseen posts count", async () => {
 			const mockPosts = [
@@ -213,71 +210,7 @@ describe("Popup - App", () => {
 			expect(mockOpen).toHaveBeenCalledWith({ url: "/dashboard.html" });
 		});
 
-		it("should display statistics", async () => {
-			const mockSubscriptions = [
-				{ id: "sub1", name: "Tech Jobs", createdAt: Date.now() },
-				{ id: "sub2", name: "Apartments", createdAt: Date.now() },
-			];
-			const mockGroups = [
-				{
-					id: "group1",
-					url: "https://facebook.com/groups/test",
-					name: "Test Group",
-					subscriptionIds: ["sub1"],
-					addedAt: Date.now(),
-					lastScrapedAt: null,
-					enabled: true,
-				},
-			];
-			const mockPosts = [
-				{
-					id: "post1",
-					groupId: "group1",
-					authorName: "John",
-					contentHtml: "<p>Test</p>",
-					timestamp: Date.now(),
-					scrapedAt: Date.now(),
-					seen: false,
-					url: "https://facebook.com/post1",
-				},
-			];
-
-			vi.mocked(storage.listSubscriptions).mockResolvedValue(mockSubscriptions);
-			vi.mocked(storage.listGroups).mockResolvedValue(mockGroups);
-			vi.mocked(storage.listPosts).mockResolvedValue(mockPosts);
-
-			renderWithQuery(<App />);
-
-			await waitFor(() => {
-				// Wait for the overview tab to be loaded
-				expect(
-					screen.getByRole("button", { name: /open dashboard/i }),
-				).toBeInTheDocument();
-			});
-
-			// Find all stat cards (they have specific structure)
-			const statCards = screen
-				.getAllByText(/subscriptions|groups|total posts/i)
-				.filter((el) => el.className.includes("text-xs text-gray-600"));
-
-			expect(statCards.length).toBe(3);
-
-			// Verify each stat by finding its parent card and checking the count
-			const subsCard = statCards.find(
-				(el) => el.textContent === "Subscriptions",
-			)?.parentElement;
-			expect(subsCard).toHaveTextContent("2");
-
-			const groupsCard = statCards.find(
-				(el) => el.textContent === "Groups",
-			)?.parentElement;
-			expect(groupsCard).toHaveTextContent("1");
-
-			const postsCard = statCards.find(
-				(el) => el.textContent === "Total Posts",
-			)?.parentElement;
-			expect(postsCard).toHaveTextContent("1");
-		});
+		// Note: Statistics display is now handled by OverviewTab component
 	});
 
 	describe("Subscriptions Tab", () => {
@@ -642,17 +575,5 @@ describe("Popup - App", () => {
 		});
 	});
 
-	describe("Error Handling", () => {
-		it("should display error message if data loading fails", async () => {
-			vi.mocked(storage.listSubscriptions).mockRejectedValue(
-				new Error("Failed to load"),
-			);
-
-			renderWithQuery(<App />);
-
-			await waitFor(() => {
-				expect(screen.getByText(/error loading data/i)).toBeInTheDocument();
-			});
-		});
-	});
+	// Note: Error handling is now managed by individual components, not by App
 });
