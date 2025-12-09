@@ -78,4 +78,40 @@ describe("PopupHeader", () => {
 			expect(screen.getByText("0")).toBeInTheDocument();
 		});
 	});
+
+	it("should display loading state", () => {
+		vi.mocked(storage.listPosts).mockImplementation(
+			() => new Promise(() => {}),
+		);
+
+		renderWithQuery(<PopupHeader />);
+
+		expect(screen.getByText("...")).toBeInTheDocument();
+	});
+
+	it("should display error state", async () => {
+		vi.mocked(storage.listPosts).mockRejectedValue(
+			new Error("Failed to fetch posts"),
+		);
+
+		renderWithQuery(<PopupHeader />);
+
+		await waitFor(() => {
+			expect(screen.getByText("-")).toBeInTheDocument();
+			expect(
+				screen.getByText(/Error: Failed to fetch posts/i),
+			).toBeInTheDocument();
+		});
+	});
+
+	it("should display generic error when error is not an Error instance", async () => {
+		vi.mocked(storage.listPosts).mockRejectedValue("Unknown error");
+
+		renderWithQuery(<PopupHeader />);
+
+		await waitFor(() => {
+			expect(screen.getByText("-")).toBeInTheDocument();
+			expect(screen.getByText(/Error: Failed to load/i)).toBeInTheDocument();
+		});
+	});
 });
