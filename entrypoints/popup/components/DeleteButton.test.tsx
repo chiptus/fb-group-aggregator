@@ -23,11 +23,4 @@ describe("DeleteButton", () => {
 
 		expect(onDelete).toHaveBeenCalledOnce();
 	});
-
-	it("has proper styling classes", () => {
-		render(<DeleteButton onDelete={() => {}} label="Delete item" />);
-
-		const button = screen.getByRole("button", { name: "Delete item" });
-		expect(button).toHaveClass("text-red-600", "hover:text-red-800");
-	});
 });

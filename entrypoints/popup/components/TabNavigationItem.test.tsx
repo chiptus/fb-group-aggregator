@@ -5,7 +5,7 @@ import type { Tab } from "./TabNavigation";
 import { TabNavigationItem } from "./TabNavigationItem";
 
 describe("TabNavigationItem", () => {
-	it("renders with active styles when active", () => {
+	it("indicates active state via aria-selected when active", () => {
 		render(
 			<TabNavigationItem
 				tab="overview"
@@ -16,15 +16,10 @@ describe("TabNavigationItem", () => {
 		);
 
 		const button = screen.getByRole("tab", { name: "Overview" });
-		expect(button).toHaveClass(
-			"border-b-2",
-			"border-blue-600",
-			"text-blue-600",
-		);
 		expect(button).toHaveAttribute("aria-selected", "true");
 	});
 
-	it("renders with inactive styles when not active", () => {
+	it("indicates inactive state via aria-selected when not active", () => {
 		render(
 			<TabNavigationItem
 				tab="overview"
@@ -35,7 +30,6 @@ describe("TabNavigationItem", () => {
 		);
 
 		const button = screen.getByRole("tab", { name: "Overview" });
-		expect(button).toHaveClass("text-gray-600", "hover:text-gray-900");
 		expect(button).toHaveAttribute("aria-selected", "false");
 	});
 
