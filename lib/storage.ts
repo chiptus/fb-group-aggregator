@@ -40,6 +40,26 @@ export async function listSubscriptions(): Promise<Subscription[]> {
 	return z.array(SubscriptionSchema).parse(data);
 }
 
+export async function updateSubscription(
+	id: string,
+	updates: Partial<Omit<Subscription, "id" | "createdAt">>,
+): Promise<Subscription> {
+	const result = await chrome.storage.local.get(STORAGE_KEYS.SUBSCRIPTIONS);
+	const data = result.subscriptions || [];
+	const subscriptions = z.array(SubscriptionSchema).parse(data);
+	const index = subscriptions.findIndex((s: Subscription) => s.id === id);
+
+	if (index === -1) {
+		throw new Error(`Subscription with id ${id} not found`);
+	}
+
+	const updated = { ...subscriptions[index], ...updates };
+	subscriptions[index] = updated;
+	await chrome.storage.local.set({ subscriptions });
+
+	return updated;
+}
+
 export async function deleteSubscription(id: string): Promise<void> {
 	const result = await chrome.storage.local.get(STORAGE_KEYS.SUBSCRIPTIONS);
 	const data = result.subscriptions || [];
@@ -78,14 +98,21 @@ export async function listGroups(): Promise<Group[]> {
 export async function updateGroup(
 	id: string,
 	updates: Partial<Omit<Group, "id" | "addedAt">>,
-): Promise<void> {
+): Promise<Group> {
 	const result = await chrome.storage.local.get(STORAGE_KEYS.GROUPS);
 	const data = result.groups || [];
 	const groups = z.array(GroupSchema).parse(data);
-	const updatedGroups = groups.map((g: Group) =>
-		g.id === id ? { ...g, ...updates } : g,
-	);
-	await chrome.storage.local.set({ groups: updatedGroups });
+	const index = groups.findIndex((g: Group) => g.id === id);
+
+	if (index === -1) {
+		throw new Error(`Group with id ${id} not found`);
+	}
+
+	const updated = { ...groups[index], ...updates };
+	groups[index] = updated;
+	await chrome.storage.local.set({ groups });
+
+	return updated;
 }
 
 export async function deleteGroup(id: string): Promise<void> {

@@ -1,50 +1,21 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import {
-	listGroups,
-	listPosts,
-	listSubscriptions,
-	markPostAsSeen,
-} from "@/lib/storage";
+import * as storage from "@/lib/storage";
 import type { Post } from "@/lib/types";
+import { queryKeys } from "./queryKeys";
 
-// Query keys
-export const queryKeys = {
-	subscriptions: ["subscriptions"] as const,
-	groups: ["groups"] as const,
-	posts: ["posts"] as const,
-};
-
-// Fetch subscriptions
-export function useSubscriptions() {
-	return useQuery({
-		queryKey: queryKeys.subscriptions,
-		queryFn: listSubscriptions,
-	});
-}
-
-// Fetch groups
-export function useGroups() {
-	return useQuery({
-		queryKey: queryKeys.groups,
-		queryFn: listGroups,
-	});
-}
-
-// Fetch posts
 export function usePosts() {
 	return useQuery({
 		queryKey: queryKeys.posts,
-		queryFn: listPosts,
+		queryFn: () => storage.listPosts(),
 	});
 }
 
-// Mark post as seen/unseen
 export function useMarkPostSeen() {
 	const queryClient = useQueryClient();
 
 	return useMutation({
 		mutationFn: ({ postId, seen }: { postId: string; seen: boolean }) =>
-			markPostAsSeen(postId, seen),
+			storage.markPostAsSeen(postId, seen),
 		onMutate: async ({ postId, seen }) => {
 			// Cancel outgoing refetches
 			await queryClient.cancelQueries({ queryKey: queryKeys.posts });

@@ -1,15 +1,12 @@
 import { useMemo, useState } from "react";
+import { useGroups } from "@/lib/hooks/storage/useGroups";
+import { useMarkPostSeen, usePosts } from "@/lib/hooks/storage/usePosts";
+import { useSubscriptions } from "@/lib/hooks/storage/useSubscriptions";
 import { ErrorDisplay } from "./components/ErrorDisplay";
 import { LoadingSpinner } from "./components/LoadingSpinner";
 import { PostCard } from "./components/PostCard";
 import { SearchBar } from "./components/SearchBar";
 import { SubscriptionSidebar } from "./components/SubscriptionSidebar";
-import {
-	useGroups,
-	useMarkPostSeen,
-	usePosts,
-	useSubscriptions,
-} from "./hooks/useDashboardData";
 
 function App() {
 	const [selectedSubscriptionId, setSelectedSubscriptionId] = useState<
