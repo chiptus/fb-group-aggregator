@@ -41,12 +41,12 @@
 		"class-variance-authority": "^0.7.1",
 		"clsx": "^2.1.1",
 		"dompurify": "^3.3.0",
-		"lucide-react": "^0.556.0",
+		"lucide-react": "^0.559.0",
 		"react": "^19.1.1",
 		"react-dom": "^19.1.1",
 		"tailwind-merge": "^3.4.0",
 		"tailwindcss": "^4.1.17",
-		"zod": "^3.25.76"
+		"zod": "^4.1.13"
 	},
 	"devDependencies": {
 		"@biomejs/biome": "^2.3.8",
