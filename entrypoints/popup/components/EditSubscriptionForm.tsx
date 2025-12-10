@@ -67,7 +67,10 @@ export function EditSubscriptionForm({
 						/>
 						{field.state.meta.errors.length > 0 && (
 							<p className="text-red-600 text-xs mt-1">
-								{String(field.state.meta.errors[0])}
+								{typeof field.state.meta.errors[0] === "string"
+									? field.state.meta.errors[0]
+									: (field.state.meta.errors[0] as { message?: string })
+											?.message || "Invalid input"}
 							</p>
 						)}
 					</div>
