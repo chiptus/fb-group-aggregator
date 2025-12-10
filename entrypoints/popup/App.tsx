@@ -3,9 +3,7 @@ import { GroupsTab } from "./components/GroupsTab";
 import { OverviewTab } from "./components/OverviewTab";
 import { PopupHeader } from "./components/PopupHeader";
 import { SubscriptionsTab } from "./components/SubscriptionsTab";
-import { TabNavigation } from "./components/TabNavigation";
-
-type Tab = "overview" | "subscriptions" | "groups";
+import { type Tab, TabNavigation } from "./components/TabNavigation";
 
 function App() {
 	const [activeTab, setActiveTab] = useState<Tab>("overview");
