@@ -13,4 +13,7 @@ export default defineConfig({
 			chromium: "/Applications/Chromium.app/Contents/MacOS/Chromium",
 		},
 	},
+	manifest: {
+		permissions: ["storage"],
+	},
 });

@@ -11,13 +11,15 @@ export function scrapeGroupPosts(
 	const posts: Omit<Post, "scrapedAt" | "seen">[] = [];
 
 	// Find the group feed container
-	const feedContainer = document.querySelector('[data-pagelet="GroupFeed"]');
+	const feedContainer = document.querySelector('[role="feed"]');
 	if (!feedContainer) {
 		return posts;
 	}
 
 	// Find all post articles
-	const postElements = feedContainer.querySelectorAll('[role="article"]');
+	const postElements = feedContainer.querySelectorAll(
+		".x1n2onr6.xh8yej3.x1ja2u2z.xod5an3",
+	);
 
 	postElements.forEach((postElement) => {
 		try {

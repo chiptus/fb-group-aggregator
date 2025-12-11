@@ -284,6 +284,10 @@ End-to-end testing and refinement.
 - [ ] Documentation updates
 - [ ] Build and package extension
 
+### Issues
+- [ ] use wxt storgage api https://wxt.dev/storage.html
+- [ ] when I open a group I don't see "subscribe" button
+
 ---
 
 ## Development Methodology
@@ -301,9 +305,9 @@ End-to-end testing and refinement.
 ## Known Issues & Limitations
 
 ### Facebook Scraper
-- Relative timestamps are approximate (months = 30 days)
-- May capture comments if Facebook changes aria-label patterns
-- Facebook DOM changes frequently - requires monitoring
+- Relative timestamps are approximate (months = 30 days) - there's a way to get from the message
+- May capture comments if Facebook changes aria-label patterns - no need for comments
+- Facebook DOM changes frequently - requires monitoring - we will need a test to detect there were changes
 - No distinction between post types (photo/text/link/video)
 
 ### Maintenance Required
