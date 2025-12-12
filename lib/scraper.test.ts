@@ -11,8 +11,8 @@ describe("Facebook Scraper", () => {
 		it("should extract posts from Facebook group page", () => {
 			// Mock Facebook group posts HTML structure
 			document.body.innerHTML = `
-        <div data-pagelet="GroupFeed">
-          <div role="article" data-ft='{"mf_story_key":"12345"}'>
+        <div role="feed">
+          <div role="article" data-ft='{"mf_story_key":"12345"}' class="x1n2onr6 xh8yej3 x1ja2u2z xod5an3">
             <div>
               <a href="/user/johndoe">John Doe</a>
             </div>
@@ -22,7 +22,7 @@ describe("Facebook Scraper", () => {
             <abbr data-utime="1704067200">2 hours ago</abbr>
             <a href="/groups/testgroup/posts/12345/">Permalink</a>
           </div>
-          <div role="article" data-ft='{"mf_story_key":"67890"}'>
+          <div role="article" data-ft='{"mf_story_key":"67890"}' class="x1n2onr6 xh8yej3 x1ja2u2z xod5an3">
             <div>
               <a href="/user/janedoe">Jane Doe</a>
             </div>
@@ -61,8 +61,8 @@ describe("Facebook Scraper", () => {
 
 		it("should handle posts with missing author gracefully", () => {
 			document.body.innerHTML = `
-        <div data-pagelet="GroupFeed">
-          <div role="article" data-ft='{"mf_story_key":"12345"}'>
+        <div role="feed">
+          <div role="article" data-ft='{"mf_story_key":"12345"}' class="x1n2onr6 xh8yej3 x1ja2u2z xod5an3">
             <div data-ad-preview="message">
               <div dir="auto">Post without author</div>
             </div>
@@ -80,8 +80,8 @@ describe("Facebook Scraper", () => {
 
 		it("should handle posts with missing content gracefully", () => {
 			document.body.innerHTML = `
-        <div data-pagelet="GroupFeed">
-          <div role="article" data-ft='{"mf_story_key":"12345"}'>
+        <div role="feed">
+          <div role="article" data-ft='{"mf_story_key":"12345"}' class="x1n2onr6 xh8yej3 x1ja2u2z xod5an3">
             <div>
               <a href="/user/johndoe">John Doe</a>
             </div>
@@ -99,8 +99,8 @@ describe("Facebook Scraper", () => {
 
 		it("should handle posts with missing timestamp gracefully", () => {
 			document.body.innerHTML = `
-        <div data-pagelet="GroupFeed">
-          <div role="article" data-ft='{"mf_story_key":"12345"}'>
+        <div role="feed">
+          <div role="article" data-ft='{"mf_story_key":"12345"}' class="x1n2onr6 xh8yej3 x1ja2u2z xod5an3">
             <div>
               <a href="/user/johndoe">John Doe</a>
             </div>
@@ -123,7 +123,7 @@ describe("Facebook Scraper", () => {
 
 		it("should skip posts without post ID", () => {
 			document.body.innerHTML = `
-        <div data-pagelet="GroupFeed">
+        <div role="feed">
           <div role="article">
             <div>
               <a href="/user/johndoe">John Doe</a>
@@ -142,7 +142,7 @@ describe("Facebook Scraper", () => {
 
 		it("should return empty array when no posts found", () => {
 			document.body.innerHTML = `
-        <div data-pagelet="GroupFeed">
+        <div role="feed">
           <div>No posts here</div>
         </div>
       `;
@@ -162,8 +162,8 @@ describe("Facebook Scraper", () => {
 
 		it("should extract contentHtml with formatting preserved", () => {
 			document.body.innerHTML = `
-        <div data-pagelet="GroupFeed">
-          <div role="article" data-ft='{"mf_story_key":"12345"}'>
+        <div role="feed">
+          <div role="article" data-ft='{"mf_story_key":"12345"}' class="x1n2onr6 xh8yej3 x1ja2u2z xod5an3">
             <div>
               <a href="/user/johndoe">John Doe</a>
             </div>
@@ -191,8 +191,8 @@ describe("Facebook Scraper", () => {
 
 		it("should construct correct post URL", () => {
 			document.body.innerHTML = `
-        <div data-pagelet="GroupFeed">
-          <div role="article" data-ft='{"mf_story_key":"12345"}'>
+        <div role="feed">
+          <div role="article" data-ft='{"mf_story_key":"12345"}' class="x1n2onr6 xh8yej3 x1ja2u2z xod5an3">
             <div>
               <a href="/user/johndoe">John Doe</a>
             </div>
@@ -215,8 +215,8 @@ describe("Facebook Scraper", () => {
 			const unixTimestamp = 1704067200; // Jan 1, 2024 00:00:00 GMT
 
 			document.body.innerHTML = `
-        <div data-pagelet="GroupFeed">
-          <div role="article" data-ft='{"mf_story_key":"12345"}'>
+        <div role="feed">
+          <div role="article" data-ft='{"mf_story_key":"12345"}' class="x1n2onr6 xh8yej3 x1ja2u2z xod5an3">
             <div>
               <a href="/user/johndoe">John Doe</a>
             </div>
