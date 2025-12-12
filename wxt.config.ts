@@ -11,7 +11,9 @@ export default defineConfig({
 	webExt: {
 		binaries: {
 			chromium: "/Applications/Chromium.app/Contents/MacOS/Chromium",
+			vivaldi: "/Applications/Vivaldi.app/Contents/MacOS/Vivaldi",
 		},
+		chromiumArgs: ["--user-data-dir=./.wxt/chrome-data"],
 	},
 	manifest: {
 		permissions: ["storage"],
