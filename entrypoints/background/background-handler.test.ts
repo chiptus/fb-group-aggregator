@@ -3,7 +3,7 @@ import { createGroup, listGroups, listPosts } from "@/lib/storage";
 import type { ExtensionMessage, Post } from "@/lib/types";
 import { handleScrapePosts, messageListener } from "./background-handler";
 
-describe("Background Script - Message Handling", () => {
+describe.sequential("Background Script - Message Handling", () => {
 	beforeEach(async () => {
 		// Clear storage before each test
 		await chrome.storage.local.clear();

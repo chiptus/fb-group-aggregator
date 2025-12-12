@@ -1,3 +1,4 @@
+import { storage } from "wxt/utils/storage";
 import { z } from "zod";
 import {
 	type Group,
@@ -10,9 +11,9 @@ import {
 
 // Storage keys
 const STORAGE_KEYS = {
-	SUBSCRIPTIONS: "subscriptions",
-	GROUPS: "groups",
-	POSTS: "posts",
+	SUBSCRIPTIONS: "local:subscriptions",
+	GROUPS: "local:groups",
+	POSTS: "local:posts",
 } as const;
 
 /**
@@ -26,17 +27,17 @@ export async function createSubscription(name: string): Promise<Subscription> {
 		createdAt: Date.now(),
 	};
 
-	const result = await chrome.storage.local.get(STORAGE_KEYS.SUBSCRIPTIONS);
-	const subscriptions = (result.subscriptions as Subscription[]) || [];
+	const subscriptions =
+		(await storage.getItem<Subscription[]>(STORAGE_KEYS.SUBSCRIPTIONS)) || [];
 	subscriptions.push(subscription);
-	await chrome.storage.local.set({ subscriptions });
+	await storage.setItem(STORAGE_KEYS.SUBSCRIPTIONS, subscriptions);
 
 	return subscription;
 }
 
 export async function listSubscriptions(): Promise<Subscription[]> {
-	const result = await chrome.storage.local.get(STORAGE_KEYS.SUBSCRIPTIONS);
-	const data = result.subscriptions || [];
+	const data =
+		(await storage.getItem<Subscription[]>(STORAGE_KEYS.SUBSCRIPTIONS)) || [];
 	return z.array(SubscriptionSchema).parse(data);
 }
 
@@ -44,8 +45,8 @@ export async function updateSubscription(
 	id: string,
 	updates: Partial<Omit<Subscription, "id" | "createdAt">>,
 ): Promise<Subscription> {
-	const result = await chrome.storage.local.get(STORAGE_KEYS.SUBSCRIPTIONS);
-	const data = result.subscriptions || [];
+	const data =
+		(await storage.getItem<Subscription[]>(STORAGE_KEYS.SUBSCRIPTIONS)) || [];
 	const subscriptions = z.array(SubscriptionSchema).parse(data);
 	const index = subscriptions.findIndex((s: Subscription) => s.id === id);
 
@@ -55,17 +56,17 @@ export async function updateSubscription(
 
 	const updated = { ...subscriptions[index], ...updates };
 	subscriptions[index] = updated;
-	await chrome.storage.local.set({ subscriptions });
+	await storage.setItem(STORAGE_KEYS.SUBSCRIPTIONS, subscriptions);
 
 	return updated;
 }
 
 export async function deleteSubscription(id: string): Promise<void> {
-	const result = await chrome.storage.local.get(STORAGE_KEYS.SUBSCRIPTIONS);
-	const data = result.subscriptions || [];
+	const data =
+		(await storage.getItem<Subscription[]>(STORAGE_KEYS.SUBSCRIPTIONS)) || [];
 	const subscriptions = z.array(SubscriptionSchema).parse(data);
 	const filtered = subscriptions.filter((s: Subscription) => s.id !== id);
-	await chrome.storage.local.set({ subscriptions: filtered });
+	await storage.setItem(STORAGE_KEYS.SUBSCRIPTIONS, filtered);
 }
 
 /**
@@ -81,17 +82,15 @@ export async function createGroup(
 		lastScrapedAt: null,
 	};
 
-	const result = await chrome.storage.local.get(STORAGE_KEYS.GROUPS);
-	const groups = (result.groups as Group[]) || [];
+	const groups = (await storage.getItem<Group[]>(STORAGE_KEYS.GROUPS)) || [];
 	groups.push(group);
-	await chrome.storage.local.set({ groups });
+	await storage.setItem(STORAGE_KEYS.GROUPS, groups);
 
 	return group;
 }
 
 export async function listGroups(): Promise<Group[]> {
-	const result = await chrome.storage.local.get(STORAGE_KEYS.GROUPS);
-	const data = result.groups || [];
+	const data = (await storage.getItem<Group[]>(STORAGE_KEYS.GROUPS)) || [];
 	return z.array(GroupSchema).parse(data);
 }
 
@@ -99,8 +98,7 @@ export async function updateGroup(
 	id: string,
 	updates: Partial<Omit<Group, "id" | "addedAt">>,
 ): Promise<Group> {
-	const result = await chrome.storage.local.get(STORAGE_KEYS.GROUPS);
-	const data = result.groups || [];
+	const data = (await storage.getItem<Group[]>(STORAGE_KEYS.GROUPS)) || [];
 	const groups = z.array(GroupSchema).parse(data);
 	const index = groups.findIndex((g: Group) => g.id === id);
 
@@ -110,22 +108,20 @@ export async function updateGroup(
 
 	const updated = { ...groups[index], ...updates };
 	groups[index] = updated;
-	await chrome.storage.local.set({ groups });
+	await storage.setItem(STORAGE_KEYS.GROUPS, groups);
 
 	return updated;
 }
 
 export async function deleteGroup(id: string): Promise<void> {
-	const result = await chrome.storage.local.get(STORAGE_KEYS.GROUPS);
-	const data = result.groups || [];
+	const data = (await storage.getItem<Group[]>(STORAGE_KEYS.GROUPS)) || [];
 	const groups = z.array(GroupSchema).parse(data);
 	const filtered = groups.filter((g: Group) => g.id !== id);
-	await chrome.storage.local.set({ groups: filtered });
+	await storage.setItem(STORAGE_KEYS.GROUPS, filtered);
 }
 
 export async function findGroupByUrl(url: string): Promise<Group | undefined> {
-	const result = await chrome.storage.local.get(STORAGE_KEYS.GROUPS);
-	const data = result.groups || [];
+	const data = (await storage.getItem<Group[]>(STORAGE_KEYS.GROUPS)) || [];
 	const groups = z.array(GroupSchema).parse(data);
 	return groups.find((g: Group) => g.url === url);
 }
@@ -137,8 +133,7 @@ export async function findGroupByUrl(url: string): Promise<Group | undefined> {
 export async function createPosts(
 	newPosts: Omit<Post, "scrapedAt" | "seen">[],
 ): Promise<void> {
-	const result = await chrome.storage.local.get(STORAGE_KEYS.POSTS);
-	const data = result.posts || [];
+	const data = (await storage.getItem<Post[]>(STORAGE_KEYS.POSTS)) || [];
 	const posts = z.array(PostSchema).parse(data);
 
 	// Deduplicate: only add posts that don't already exist
@@ -152,24 +147,20 @@ export async function createPosts(
 		}));
 
 	const allPosts = [...posts, ...postsToAdd];
-	await chrome.storage.local.set({ posts: allPosts });
+	await storage.setItem(STORAGE_KEYS.POSTS, allPosts);
 }
 
 export async function listPosts(): Promise<Post[]> {
-	const result = await chrome.storage.local.get(STORAGE_KEYS.POSTS);
-	const data = result.posts || [];
+	const data = (await storage.getItem<Post[]>(STORAGE_KEYS.POSTS)) || [];
 	return z.array(PostSchema).parse(data);
 }
 
 export async function listPostsBySubscription(
 	subscriptionId: string,
 ): Promise<Post[]> {
-	const result = await chrome.storage.local.get([
-		STORAGE_KEYS.GROUPS,
-		STORAGE_KEYS.POSTS,
-	]);
-	const groupsData = result.groups || [];
-	const postsData = result.posts || [];
+	const groupsData =
+		(await storage.getItem<Group[]>(STORAGE_KEYS.GROUPS)) || [];
+	const postsData = (await storage.getItem<Post[]>(STORAGE_KEYS.POSTS)) || [];
 
 	const groups = z.array(GroupSchema).parse(groupsData);
 	const posts = z.array(PostSchema).parse(postsData);
@@ -187,20 +178,18 @@ export async function markPostAsSeen(
 	postId: string,
 	seen: boolean,
 ): Promise<void> {
-	const result = await chrome.storage.local.get(STORAGE_KEYS.POSTS);
-	const data = result.posts || [];
+	const data = (await storage.getItem<Post[]>(STORAGE_KEYS.POSTS)) || [];
 	const posts = z.array(PostSchema).parse(data);
 	const updatedPosts = posts.map((p: Post) =>
 		p.id === postId ? { ...p, seen } : p,
 	);
-	await chrome.storage.local.set({ posts: updatedPosts });
+	await storage.setItem(STORAGE_KEYS.POSTS, updatedPosts);
 }
 
 export async function deleteOldPosts(daysOld: number): Promise<void> {
-	const result = await chrome.storage.local.get(STORAGE_KEYS.POSTS);
-	const data = result.posts || [];
+	const data = (await storage.getItem<Post[]>(STORAGE_KEYS.POSTS)) || [];
 	const posts = z.array(PostSchema).parse(data);
 	const cutoffTime = Date.now() - daysOld * 24 * 60 * 60 * 1000;
 	const recentPosts = posts.filter((p: Post) => p.timestamp >= cutoffTime);
-	await chrome.storage.local.set({ posts: recentPosts });
+	await storage.setItem(STORAGE_KEYS.POSTS, recentPosts);
 }
