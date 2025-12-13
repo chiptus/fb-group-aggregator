@@ -162,31 +162,57 @@ function extractGroupId(url: string): string | null {
 function extractGroupName(link: HTMLAnchorElement, container: Element): string {
 	// Strategy 1: Link text content (most common)
 	const linkText = link.textContent?.trim();
-	if (linkText && linkText.length > 0) {
+	if (linkText && linkText.length > 0 && linkText.length < 200) {
+		console.log("[Groups Scraper] Found name via link text:", linkText);
 		return linkText;
 	}
 
 	// Strategy 2: aria-label on link
 	const ariaLabel = link.getAttribute("aria-label");
-	if (ariaLabel && ariaLabel.length > 0) {
+	if (ariaLabel && ariaLabel.length > 0 && ariaLabel.length < 200) {
+		console.log("[Groups Scraper] Found name via aria-label:", ariaLabel);
 		return ariaLabel;
 	}
 
-	// Strategy 3: Look for heading elements in container
-	const heading = container.querySelector("h2, h3, h4");
-	if (heading?.textContent?.trim()) {
-		return heading.textContent.trim();
+	// Strategy 3: Look for span with group name (common in FB's structure)
+	const nameSpans = container.querySelectorAll("span");
+	for (const span of nameSpans) {
+		const text = span.textContent?.trim();
+		if (text && text.length > 2 && text.length < 200 && !text.includes("•")) {
+			// Check if this span is likely the group name (not metadata)
+			const parent = span.parentElement;
+			if (parent?.tagName === "A" || parent?.closest("a")) {
+				console.log("[Groups Scraper] Found name via span:", text);
+				return text;
+			}
+		}
 	}
 
-	// Strategy 4: Extract from URL if it's a vanity URL
+	// Strategy 4: Look for heading elements in container
+	const heading = container.querySelector("h2, h3, h4");
+	if (heading?.textContent?.trim()) {
+		const headingText = heading.textContent.trim();
+		console.log("[Groups Scraper] Found name via heading:", headingText);
+		return headingText;
+	}
+
+	// Strategy 5: Extract from URL if it's a vanity URL
 	const urlMatch = link.href.match(/\/groups\/([^/?]+)/);
 	if (urlMatch?.[1] && !/^\d+$/.test(urlMatch[1])) {
 		// Convert vanity URL to readable name (replace dashes with spaces)
-		return urlMatch[1]
+		const nameFromUrl = urlMatch[1]
 			.replace(/-/g, " ")
 			.replace(/\b\w/g, (char) => char.toUpperCase());
+		console.log("[Groups Scraper] Found name via URL:", nameFromUrl);
+		return nameFromUrl;
 	}
 
+	console.warn(
+		"[Groups Scraper] Could not extract name, using Unknown Group. Link:",
+		link.href,
+		"Container:",
+		container,
+	);
 	return "Unknown Group";
 }
 

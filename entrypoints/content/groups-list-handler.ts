@@ -13,15 +13,66 @@ const debouncedScrapeGroupsList = debounce(scrapeAndSendGroupsList, 2000);
 export function initializeGroupsListScraping(ctx: ContentScriptContext) {
 	// Set to track already-scraped group IDs to enable early stopping
 	const scrapedGroupIds = new Set<string>();
+	let isAutoScrolling = false;
+	let autoScrollAttempts = 0;
+	const MAX_AUTO_SCROLL_ATTEMPTS = 100; // Prevent infinite scrolling
 
 	// Initial scrape on page load
 	setTimeout(() => {
 		debouncedScrapeGroupsList(scrapedGroupIds);
+		// Start auto-scrolling after initial scrape
+		setTimeout(startAutoScroll, 3000);
 	}, 1500); // Slightly longer delay for groups list to render
 
-	// Scrape on scroll to load more groups
+	// Auto-scroll to load all groups
+	function startAutoScroll() {
+		if (autoScrollAttempts >= MAX_AUTO_SCROLL_ATTEMPTS) {
+			console.log("[FB Aggregator] Max auto-scroll attempts reached, stopping");
+			isAutoScrolling = false;
+			return;
+		}
+
+		if (isAutoScrolling) {
+			return; // Already scrolling
+		}
+
+		isAutoScrolling = true;
+		autoScrollAttempts++;
+
+		// Scroll to bottom
+		window.scrollTo({
+			top: document.documentElement.scrollHeight,
+			behavior: "smooth",
+		});
+
+		// Wait for new content to load, then scrape and continue scrolling
+		setTimeout(() => {
+			const previousCount = scrapedGroupIds.size;
+			debouncedScrapeGroupsList(scrapedGroupIds);
+
+			// Continue scrolling after scraping
+			setTimeout(() => {
+				const newCount = scrapedGroupIds.size;
+				isAutoScrolling = false;
+
+				// If we found new groups, continue scrolling
+				if (newCount > previousCount) {
+					console.log(
+						`[FB Aggregator] Found ${newCount - previousCount} new groups, continuing auto-scroll (${newCount} total)`,
+					);
+					startAutoScroll();
+				} else {
+					console.log(
+						`[FB Aggregator] No new groups found, auto-scroll complete (${newCount} total groups)`,
+					);
+				}
+			}, 2500); // Wait for scraping to complete
+		}, 2000); // Wait for Facebook to load more content
+	}
+
+	// Also handle manual scroll (in case auto-scroll is disabled or fails)
 	function handleScrollGroupsList() {
-		if (isNearBottomGroupsList()) {
+		if (isNearBottomGroupsList() && !isAutoScrolling) {
 			debouncedScrapeGroupsList(scrapedGroupIds);
 		}
 	}
@@ -30,7 +81,9 @@ export function initializeGroupsListScraping(ctx: ContentScriptContext) {
 		passive: true,
 	});
 
-	console.log("[FB Aggregator] Groups list scraping initialized");
+	console.log(
+		"[FB Aggregator] Groups list scraping initialized with auto-scroll",
+	);
 }
 
 /**
