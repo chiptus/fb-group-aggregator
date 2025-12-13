@@ -2,13 +2,16 @@ import { useMemo, useState } from "react";
 import { useGroups } from "@/lib/hooks/storage/useGroups";
 import { useMarkPostSeen, usePosts } from "@/lib/hooks/storage/usePosts";
 import { useSubscriptions } from "@/lib/hooks/storage/useSubscriptions";
-import { ErrorDisplay } from "./components/ErrorDisplay";
+import { GroupsPage } from "./components/GroupsPage";
 import { LoadingSpinner } from "./components/LoadingSpinner";
 import { PostCard } from "./components/PostCard";
 import { SearchBar } from "./components/SearchBar";
 import { SubscriptionSidebar } from "./components/SubscriptionSidebar";
 
+type DashboardTab = "posts" | "groups";
+
 function App() {
+	const [activeTab, setActiveTab] = useState<DashboardTab>("posts");
 	const [selectedSubscriptionId, setSelectedSubscriptionId] = useState<
 		string | null
 	>(null);
@@ -80,10 +83,19 @@ function App() {
 
 	if (error) {
 		return (
-			<ErrorDisplay
-				message="Failed to load posts. Please refresh the page or check your extension storage."
-				onRetry={() => window.location.reload()}
-			/>
+			<div className="flex flex-col items-center justify-center h-64 space-y-4">
+				<p className="text-red-600">
+					Failed to load posts. Please refresh the page or check your extension
+					storage.
+				</p>
+				<button
+					type="button"
+					onClick={() => window.location.reload()}
+					className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+				>
+					Retry
+				</button>
+			</div>
 		);
 	}
 
@@ -91,48 +103,84 @@ function App() {
 		<div className="min-h-screen bg-gray-50">
 			<header className="bg-white shadow-sm">
 				<div className="max-w-7xl mx-auto px-4 py-4">
-					<h1 className="text-2xl font-bold">FB Group Aggregator</h1>
-					<p className="text-sm text-gray-600" aria-live="polite">
-						{unseenCount} unseen post{unseenCount !== 1 ? "s" : ""}
-					</p>
+					<h1 className="text-2xl font-bold mb-2">FB Group Aggregator</h1>
+					{activeTab === "posts" && (
+						<p className="text-sm text-gray-600" aria-live="polite">
+							{unseenCount} unseen post{unseenCount !== 1 ? "s" : ""}
+						</p>
+					)}
+
+					{/* Tab Navigation */}
+					<div className="flex gap-4 mt-4 border-b border-gray-200">
+						<button
+							type="button"
+							onClick={() => setActiveTab("posts")}
+							className={`px-4 py-2 font-medium text-sm border-b-2 transition-colors ${
+								activeTab === "posts"
+									? "border-blue-500 text-blue-600"
+									: "border-transparent text-gray-600 hover:text-gray-800"
+							}`}
+							aria-current={activeTab === "posts" ? "page" : undefined}
+						>
+							Posts
+						</button>
+						<button
+							type="button"
+							onClick={() => setActiveTab("groups")}
+							className={`px-4 py-2 font-medium text-sm border-b-2 transition-colors ${
+								activeTab === "groups"
+									? "border-blue-500 text-blue-600"
+									: "border-transparent text-gray-600 hover:text-gray-800"
+							}`}
+							aria-current={activeTab === "groups" ? "page" : undefined}
+						>
+							Groups
+						</button>
+					</div>
 				</div>
 			</header>
 
-			<div className="max-w-7xl mx-auto px-4 py-6 flex gap-6">
-				<SubscriptionSidebar
-					subscriptions={subscriptions}
-					selectedSubscriptionId={selectedSubscriptionId}
-					onSelectSubscription={setSelectedSubscriptionId}
-				/>
+			{activeTab === "posts" ? (
+				<div className="max-w-7xl mx-auto px-4 py-6 flex gap-6">
+					<SubscriptionSidebar
+						subscriptions={subscriptions}
+						selectedSubscriptionId={selectedSubscriptionId}
+						onSelectSubscription={setSelectedSubscriptionId}
+					/>
 
-				<main className="flex-1">
-					<SearchBar value={searchQuery} onChange={setSearchQuery} />
+					<main className="flex-1">
+						<SearchBar value={searchQuery} onChange={setSearchQuery} />
 
-					{filteredPosts.length === 0 ? (
-						<div className="block bg-white rounded-lg shadow p-8 text-center">
-							<p className="text-gray-600">No posts found</p>
-						</div>
-					) : (
-						<div
-							className="space-y-4"
-							role="feed"
-							aria-label="Facebook group posts"
-						>
-							{filteredPosts.map((post) => {
-								const group = groups.find((g) => g.id === post.groupId);
-								return (
-									<PostCard
-										key={post.id}
-										post={post}
-										group={group}
-										onToggleSeen={handleToggleSeen}
-									/>
-								);
-							})}
-						</div>
-					)}
-				</main>
-			</div>
+						{filteredPosts.length === 0 ? (
+							<div className="block bg-white rounded-lg shadow p-8 text-center">
+								<p className="text-gray-600">No posts found</p>
+							</div>
+						) : (
+							<div
+								className="space-y-4"
+								role="feed"
+								aria-label="Facebook group posts"
+							>
+								{filteredPosts.map((post) => {
+									const group = groups.find((g) => g.id === post.groupId);
+									return (
+										<PostCard
+											key={post.id}
+											post={post}
+											group={group}
+											onToggleSeen={handleToggleSeen}
+										/>
+									);
+								})}
+							</div>
+						)}
+					</main>
+				</div>
+			) : (
+				<div className="max-w-7xl mx-auto px-4 py-6">
+					<GroupsPage />
+				</div>
+			)}
 		</div>
 	);
 }
