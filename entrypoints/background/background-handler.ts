@@ -1,6 +1,7 @@
 import type { ExtensionMessage, ScrapePostsResponse } from "@/lib/types";
 import { handleScrapeGroupsList } from "./handle-scrape-groups-list";
 import { handleScrapePosts } from "./handle-scrape-posts";
+import { scrapeSubscription } from "./scraper-orchestrator";
 
 /**
  * Message listener for runtime messages
@@ -31,6 +32,20 @@ export function messageListener(
 			.then(sendResponse)
 			.catch((error) => {
 				console.error("Error handling SCRAPE_GROUPS_LIST:", error);
+				sendResponse({
+					success: false,
+					error: error.message || "Unknown error",
+				});
+			});
+
+		return true;
+	}
+
+	if (message.type === "SCRAPE_SUBSCRIPTION") {
+		scrapeSubscription(message.payload.subscriptionId)
+			.then(sendResponse)
+			.catch((error) => {
+				console.error("Error handling SCRAPE_SUBSCRIPTION:", error);
 				sendResponse({
 					success: false,
 					error: error.message || "Unknown error",
