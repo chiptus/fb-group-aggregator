@@ -126,6 +126,45 @@ export async function findGroupByUrl(url: string): Promise<Group | undefined> {
 	return groups.find((g: Group) => g.url === url);
 }
 
+export async function getGroupsBySubscription(
+	subscriptionId: string,
+): Promise<Group[]> {
+	const data = (await storage.getItem<Group[]>(STORAGE_KEYS.GROUPS)) || [];
+	const groups = z.array(GroupSchema).parse(data);
+	return groups.filter((g: Group) =>
+		g.subscriptionIds.includes(subscriptionId),
+	);
+}
+
+export async function bulkUpdateGroups(
+	groupIds: string[],
+	updates: Partial<Omit<Group, "id" | "addedAt">>,
+): Promise<void> {
+	const data = (await storage.getItem<Group[]>(STORAGE_KEYS.GROUPS)) || [];
+	const groups = z.array(GroupSchema).parse(data);
+
+	const updatedGroups = groups.map((g: Group) =>
+		groupIds.includes(g.id) ? { ...g, ...updates } : g,
+	);
+
+	await storage.setItem(STORAGE_KEYS.GROUPS, updatedGroups);
+}
+
+export async function bulkDeleteGroups(groupIds: string[]): Promise<void> {
+	const data = (await storage.getItem<Group[]>(STORAGE_KEYS.GROUPS)) || [];
+	const groups = z.array(GroupSchema).parse(data);
+	const filtered = groups.filter((g: Group) => !groupIds.includes(g.id));
+	await storage.setItem(STORAGE_KEYS.GROUPS, filtered);
+
+	// Also delete posts from these groups
+	const postsData = (await storage.getItem<Post[]>(STORAGE_KEYS.POSTS)) || [];
+	const posts = z.array(PostSchema).parse(postsData);
+	const filteredPosts = posts.filter(
+		(p: Post) => !groupIds.includes(p.groupId),
+	);
+	await storage.setItem(STORAGE_KEYS.POSTS, filteredPosts);
+}
+
 /**
  * Posts
  */
