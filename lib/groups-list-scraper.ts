@@ -160,35 +160,52 @@ function extractGroupId(url: string): string | null {
  * Extracts the group name from the link or surrounding element
  */
 function extractGroupName(link: HTMLAnchorElement, container: Element): string {
-	// Strategy 1: Link text content (most common)
-	const linkText = link.textContent?.trim();
-	if (linkText && linkText.length > 0 && linkText.length < 200) {
-		console.log("[Groups Scraper] Found name via link text:", linkText);
-		return linkText;
+	// Strategy 1: Look for nested anchor tags with group names (FB's current structure)
+	// The group name is often in a separate <a> tag inside the container
+	const allLinks = container.querySelectorAll('a[href*="/groups/"]');
+	for (const innerLink of allLinks) {
+		const text = innerLink.textContent?.trim();
+		// Skip links with very long text (likely containing metadata)
+		// Skip links that match common action text
+		if (
+			text &&
+			text.length > 2 &&
+			text.length < 100 &&
+			!text.includes("Update responses") &&
+			!text.includes("days ago") &&
+			!text.includes("Requested to join") &&
+			!text.includes("•")
+		) {
+			console.log("[Groups Scraper] Found name via nested link:", text);
+			return text;
+		}
 	}
 
-	// Strategy 2: aria-label on link
+	// Strategy 2: Check aria-label on the main link (often has group name)
 	const ariaLabel = link.getAttribute("aria-label");
 	if (ariaLabel && ariaLabel.length > 0 && ariaLabel.length < 200) {
 		console.log("[Groups Scraper] Found name via aria-label:", ariaLabel);
 		return ariaLabel;
 	}
 
-	// Strategy 3: Look for span with group name (common in FB's structure)
-	const nameSpans = container.querySelectorAll("span");
-	for (const span of nameSpans) {
-		const text = span.textContent?.trim();
-		if (text && text.length > 2 && text.length < 200 && !text.includes("•")) {
-			// Check if this span is likely the group name (not metadata)
-			const parent = span.parentElement;
-			if (parent?.tagName === "A" || parent?.closest("a")) {
-				console.log("[Groups Scraper] Found name via span:", text);
-				return text;
-			}
+	// Strategy 3: Look for SVG with aria-label (group avatar often has group name)
+	const svg = container.querySelector("svg[aria-label]");
+	if (svg) {
+		const svgLabel = svg.getAttribute("aria-label");
+		if (svgLabel && svgLabel.length > 0 && svgLabel.length < 200) {
+			console.log("[Groups Scraper] Found name via SVG aria-label:", svgLabel);
+			return svgLabel;
 		}
 	}
 
-	// Strategy 4: Look for heading elements in container
+	// Strategy 4: Link text content from main link
+	const linkText = link.textContent?.trim();
+	if (linkText && linkText.length > 0 && linkText.length < 200) {
+		console.log("[Groups Scraper] Found name via main link text:", linkText);
+		return linkText;
+	}
+
+	// Strategy 5: Look for heading elements in container
 	const heading = container.querySelector("h2, h3, h4");
 	if (heading?.textContent?.trim()) {
 		const headingText = heading.textContent.trim();
@@ -196,7 +213,7 @@ function extractGroupName(link: HTMLAnchorElement, container: Element): string {
 		return headingText;
 	}
 
-	// Strategy 5: Extract from URL if it's a vanity URL
+	// Strategy 6: Extract from URL if it's a vanity URL
 	const urlMatch = link.href.match(/\/groups\/([^/?]+)/);
 	if (urlMatch?.[1] && !/^\d+$/.test(urlMatch[1])) {
 		// Convert vanity URL to readable name (replace dashes with spaces)
