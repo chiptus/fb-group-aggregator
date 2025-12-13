@@ -33,6 +33,13 @@ export type Subscription = z.infer<typeof SubscriptionSchema>;
 export type Group = z.infer<typeof GroupSchema>;
 export type Post = z.infer<typeof PostSchema>;
 
+// Group discovery type (for groups list scanning)
+export type GroupDiscovery = {
+	id: string;
+	name: string;
+	url: string;
+};
+
 // Extension messaging types
 export type ExtensionMessage =
 	| {
@@ -47,11 +54,40 @@ export type ExtensionMessage =
 	| {
 			type: "ADD_GROUP_TO_SUBSCRIPTION";
 			group: Omit<Group, "addedAt" | "lastScrapedAt">;
-	  };
+	  }
+	| {
+			type: "SCRAPE_GROUPS_LIST";
+			payload: {
+				groups: GroupDiscovery[];
+				totalCount: number;
+			};
+	  }
+	| {
+			type: "SCRAPE_SUBSCRIPTION";
+			payload: { subscriptionId: string };
+	  }
+	| { type: "OPEN_GROUPS_SCANNER" };
 
 // Response types
 export type ScrapePostsResponse = {
 	success: boolean;
 	count?: number;
+	error?: string;
+};
+
+export type ScrapeGroupsListResponse = {
+	success: boolean;
+	newGroupsCount?: number;
+	updatedGroupsCount?: number;
+	error?: string;
+};
+
+export type ScrapeSubscriptionResponse = {
+	success: boolean;
+	progress?: {
+		current: number;
+		total: number;
+		currentGroup?: string;
+	};
 	error?: string;
 };
