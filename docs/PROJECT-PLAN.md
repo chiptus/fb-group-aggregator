@@ -284,9 +284,6 @@ End-to-end testing and refinement.
 - [ ] Documentation updates
 - [ ] Build and package extension
 
-### Issues
-- [ ] use wxt storgage api https://wxt.dev/storage.html
-- [ ] when I open a group I don't see "subscribe" button
 
 ---
 
