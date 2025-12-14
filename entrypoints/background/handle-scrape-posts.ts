@@ -1,3 +1,4 @@
+import { createLogger } from "@/lib/logger";
 import {
 	createGroup,
 	createPosts,
@@ -6,6 +7,8 @@ import {
 	updateGroup,
 } from "@/lib/storage";
 import type { ScrapePostsResponse } from "@/lib/types";
+
+const logger = createLogger("background");
 
 /**
  * Handles SCRAPE_POSTS message from content script
@@ -41,6 +44,10 @@ export async function handleScrapePosts(payload: {
 			});
 		} else {
 			// Auto-register new group with current scrape time
+			logger.info("Auto-registering new group", {
+				groupId,
+				groupName: groupInfo.name,
+			});
 			await createGroup({
 				id: groupId,
 				name: groupInfo.name,
@@ -66,16 +73,23 @@ export async function handleScrapePosts(payload: {
 			(p) => !existingPostIds.has(p.id),
 		).length;
 
-		console.log(
-			`[Background] Saved ${newPostsCount} new posts from group ${groupId}`,
-		);
+		logger.info("Saved posts from group", {
+			groupId,
+			groupName: groupInfo.name,
+			totalPostsReceived: posts.length,
+			newPostsSaved: newPostsCount,
+			duplicatesSkipped: posts.length - newPostsCount,
+		});
 
 		return {
 			success: true,
 			count: newPostsCount,
 		};
 	} catch (error) {
-		console.error("[Background] Error in handleScrapePosts:", error);
+		logger.error("Error in handleScrapePosts", {
+			groupId,
+			error: error instanceof Error ? error.message : String(error),
+		});
 		throw error;
 	}
 }

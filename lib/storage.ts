@@ -3,6 +3,8 @@ import { z } from "zod";
 import {
 	type Group,
 	GroupSchema,
+	type LogEntry,
+	LogEntrySchema,
 	type Post,
 	PostSchema,
 	type Subscription,
@@ -14,6 +16,7 @@ const STORAGE_KEYS = {
 	SUBSCRIPTIONS: "local:subscriptions",
 	GROUPS: "local:groups",
 	POSTS: "local:posts",
+	LOGS: "local:logs",
 } as const;
 
 /**
@@ -241,4 +244,36 @@ export async function deleteOldPosts(daysOld: number): Promise<void> {
 	const cutoffTime = Date.now() - daysOld * 24 * 60 * 60 * 1000;
 	const recentPosts = posts.filter((p: Post) => p.timestamp >= cutoffTime);
 	await storage.setItem(STORAGE_KEYS.POSTS, recentPosts);
+}
+
+/**
+ * Logs
+ */
+
+const MAX_LOGS = 500; // Keep last 500 log entries
+
+export async function createLog(
+	logData: Omit<LogEntry, "id" | "timestamp">,
+): Promise<void> {
+	const data = (await storage.getItem<LogEntry[]>(STORAGE_KEYS.LOGS)) || [];
+	const logs = z.array(LogEntrySchema).parse(data);
+
+	const logEntry: LogEntry = {
+		id: crypto.randomUUID(),
+		timestamp: Date.now(),
+		...logData,
+	};
+
+	// Add new log and keep only last MAX_LOGS entries
+	const updatedLogs = [...logs, logEntry].slice(-MAX_LOGS);
+	await storage.setItem(STORAGE_KEYS.LOGS, updatedLogs);
+}
+
+export async function listLogs(): Promise<LogEntry[]> {
+	const data = (await storage.getItem<LogEntry[]>(STORAGE_KEYS.LOGS)) || [];
+	return z.array(LogEntrySchema).parse(data);
+}
+
+export async function clearLogs(): Promise<void> {
+	await storage.setItem(STORAGE_KEYS.LOGS, []);
 }

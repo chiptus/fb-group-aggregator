@@ -1,7 +1,9 @@
 import type { ContentScriptContext } from "wxt/utils/content-script-context";
 import { debounce } from "@/lib/debounce";
+import { createLogger } from "@/lib/logger";
 import { extractGroupInfo, scrapeGroupPosts } from "@/lib/scraper";
 
+const logger = createLogger("content");
 const debouncedScrape = debounce(scrapeAndSend, 2000);
 
 /**
@@ -29,9 +31,7 @@ export function initializeGroupPageScraping(
 	// Listen for messages from background script
 	chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
 		if (message.type === "TRIGGER_SCRAPE") {
-			console.log(
-				"[FB Aggregator] TRIGGER_SCRAPE received, starting scrape...",
-			);
+			logger.info("TRIGGER_SCRAPE received, starting scrape", { groupId });
 			scrapeAndSend(groupId).then(() => {
 				sendResponse({ success: true });
 			});
@@ -39,7 +39,7 @@ export function initializeGroupPageScraping(
 		}
 	});
 
-	console.log("[FB Aggregator] Group page scraping initialized");
+	logger.info("Group page scraping initialized", { groupId });
 }
 
 /**
@@ -47,17 +47,17 @@ export function initializeGroupPageScraping(
  */
 async function scrapeAndSend(groupId: string) {
 	try {
-		console.log("[FB Aggregator] Scraping posts...");
+		logger.debug("Scraping posts", { groupId });
 
 		// Scrape posts from page
 		const posts = scrapeGroupPosts(groupId);
 
 		if (posts.length === 0) {
-			console.log("[FB Aggregator] No posts found");
+			logger.debug("No posts found", { groupId });
 			return;
 		}
 
-		console.log(`[FB Aggregator] Found ${posts.length} posts`);
+		logger.info("Found posts", { groupId, postCount: posts.length });
 
 		// Extract group info
 		const groupInfo = extractGroupInfo();
@@ -73,14 +73,21 @@ async function scrapeAndSend(groupId: string) {
 		});
 
 		if (response.success) {
-			console.log(
-				`[FB Aggregator] Successfully saved ${response.count} new posts`,
-			);
+			logger.info("Successfully saved new posts", {
+				groupId,
+				savedCount: response.count,
+			});
 		} else {
-			console.error("[FB Aggregator] Failed to save posts:", response.error);
+			logger.error("Failed to save posts", {
+				groupId,
+				error: response.error,
+			});
 		}
 	} catch (error) {
-		console.error("[FB Aggregator] Scraping error:", error);
+		logger.error("Scraping error", {
+			groupId,
+			error: error instanceof Error ? error.message : String(error),
+		});
 	}
 }
 

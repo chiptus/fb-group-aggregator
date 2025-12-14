@@ -7,11 +7,12 @@ import { useMarkPostSeen, usePosts } from "@/lib/hooks/storage/usePosts";
 import { useSubscriptions } from "@/lib/hooks/storage/useSubscriptions";
 import { GroupsPage } from "./components/GroupsPage";
 import { LoadingSpinner } from "./components/LoadingSpinner";
+import { LogViewer } from "./components/LogViewer";
 import { PostCard } from "./components/PostCard";
 import { SearchBar } from "./components/SearchBar";
 import { SubscriptionSidebar } from "./components/SubscriptionSidebar";
 
-type DashboardTab = "posts" | "groups";
+type DashboardTab = "posts" | "groups" | "logs";
 
 function App() {
 	const [activeTab, setActiveTab] = useState<DashboardTab>("posts");
@@ -156,11 +157,23 @@ function App() {
 						>
 							Groups
 						</button>
+						<button
+							type="button"
+							onClick={() => setActiveTab("logs")}
+							className={`px-4 py-2 font-medium text-sm border-b-2 transition-colors ${
+								activeTab === "logs"
+									? "border-blue-500 text-blue-600"
+									: "border-transparent text-gray-600 hover:text-gray-800"
+							}`}
+							aria-current={activeTab === "logs" ? "page" : undefined}
+						>
+							Logs
+						</button>
 					</div>
 				</div>
 			</header>
 
-			{activeTab === "posts" ? (
+			{activeTab === "posts" && (
 				<div className="max-w-7xl mx-auto px-4 py-6 flex gap-6">
 					<SubscriptionSidebar
 						subscriptions={subscriptions}
@@ -196,9 +209,20 @@ function App() {
 						)}
 					</main>
 				</div>
-			) : (
+			)}
+
+			{activeTab === "groups" && (
 				<div className="max-w-7xl mx-auto px-4 py-6">
 					<GroupsPage />
+				</div>
+			)}
+
+			{activeTab === "logs" && (
+				<div
+					className="max-w-7xl mx-auto px-4 py-6"
+					style={{ height: "calc(100vh - 200px)" }}
+				>
+					<LogViewer />
 				</div>
 			)}
 		</div>

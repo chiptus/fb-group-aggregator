@@ -91,3 +91,18 @@ export type ScrapeSubscriptionResponse = {
 	};
 	error?: string;
 };
+
+// Logging types
+export type LogLevel = "debug" | "info" | "warn" | "error";
+export type LogSource = "background" | "content" | "popup" | "dashboard";
+
+export const LogEntrySchema = z.object({
+	id: z.string(),
+	timestamp: z.number(),
+	level: z.enum(["debug", "info", "warn", "error"]),
+	source: z.enum(["background", "content", "popup", "dashboard"]),
+	message: z.string(),
+	context: z.record(z.string(), z.unknown()).optional(),
+});
+
+export type LogEntry = z.infer<typeof LogEntrySchema>;

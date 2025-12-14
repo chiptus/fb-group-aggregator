@@ -1,7 +1,10 @@
+import { createLogger } from "@/lib/logger";
 import type { ExtensionMessage, ScrapePostsResponse } from "@/lib/types";
 import { handleScrapeGroupsList } from "./handle-scrape-groups-list";
 import { handleScrapePosts } from "./handle-scrape-posts";
 import { scrapeSubscription } from "./scraper-orchestrator";
+
+const logger = createLogger("background");
 
 /**
  * Message listener for runtime messages
@@ -16,7 +19,9 @@ export function messageListener(
 		handleScrapePosts(message.payload)
 			.then(sendResponse)
 			.catch((error) => {
-				console.error("Error handling SCRAPE_POSTS:", error);
+				logger.error("Error handling SCRAPE_POSTS", {
+					error: error instanceof Error ? error.message : String(error),
+				});
 				sendResponse({
 					success: false,
 					error: error.message || "Unknown error",
@@ -31,7 +36,9 @@ export function messageListener(
 		handleScrapeGroupsList(message.payload)
 			.then(sendResponse)
 			.catch((error) => {
-				console.error("Error handling SCRAPE_GROUPS_LIST:", error);
+				logger.error("Error handling SCRAPE_GROUPS_LIST", {
+					error: error instanceof Error ? error.message : String(error),
+				});
 				sendResponse({
 					success: false,
 					error: error.message || "Unknown error",
@@ -45,7 +52,10 @@ export function messageListener(
 		scrapeSubscription(message.payload.subscriptionId)
 			.then(sendResponse)
 			.catch((error) => {
-				console.error("Error handling SCRAPE_SUBSCRIPTION:", error);
+				logger.error("Error handling SCRAPE_SUBSCRIPTION", {
+					subscriptionId: message.payload.subscriptionId,
+					error: error instanceof Error ? error.message : String(error),
+				});
 				sendResponse({
 					success: false,
 					error: error.message || "Unknown error",

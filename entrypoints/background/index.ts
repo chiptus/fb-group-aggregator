@@ -1,8 +1,11 @@
+import { createLogger } from "@/lib/logger";
 import { messageListener } from "./background-handler";
 
+const logger = createLogger("background");
+
 export default defineBackground(() => {
-	console.log("FB Group Aggregator background script initialized", {
-		id: browser.runtime.id,
+	logger.info("Background script initialized", {
+		extensionId: browser.runtime.id,
 	});
 
 	// Listen for messages from content scripts

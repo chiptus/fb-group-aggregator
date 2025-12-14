@@ -1,4 +1,7 @@
+import { createLogger } from "@/lib/logger";
 import { getGroupsBySubscription } from "@/lib/storage";
+
+const logger = createLogger("background");
 
 /**
  * Orchestrates batch scraping of all groups in a subscription
@@ -9,22 +12,21 @@ export async function scrapeSubscription(subscriptionId: string): Promise<{
 	scrapedCount: number;
 	failedGroups: Array<{ groupId: string; error: string }>;
 }> {
-	console.log(
-		`[Scraper Orchestrator] Starting batch scrape for subscription ${subscriptionId}`,
-	);
+	logger.info("Starting batch scrape for subscription", { subscriptionId });
 
 	// Get all enabled groups for this subscription
 	const allGroups = await getGroupsBySubscription(subscriptionId);
 	const enabledGroups = allGroups.filter((g) => g.enabled);
 
 	if (enabledGroups.length === 0) {
-		console.log("[Scraper Orchestrator] No enabled groups found");
+		logger.info("No enabled groups found", { subscriptionId });
 		return { success: true, scrapedCount: 0, failedGroups: [] };
 	}
 
-	console.log(
-		`[Scraper Orchestrator] Found ${enabledGroups.length} enabled groups to scrape`,
-	);
+	logger.info("Found enabled groups to scrape", {
+		subscriptionId,
+		count: enabledGroups.length,
+	});
 
 	let scrapedCount = 0;
 	const failedGroups: Array<{ groupId: string; error: string }> = [];
@@ -32,27 +34,33 @@ export async function scrapeSubscription(subscriptionId: string): Promise<{
 	// Scrape each group sequentially
 	for (let i = 0; i < enabledGroups.length; i++) {
 		const group = enabledGroups[i];
-		console.log(
-			`[Scraper Orchestrator] Scraping group ${i + 1}/${enabledGroups.length}: ${group.name} (${group.id})`,
-		);
+		logger.info("Scraping group", {
+			progress: `${i + 1}/${enabledGroups.length}`,
+			groupName: group.name,
+			groupId: group.id,
+		});
 
 		try {
 			await scrapeGroupWithScrolling(group.id, group.url, group.name);
 			scrapedCount++;
-			console.log(`[Scraper Orchestrator] Successfully scraped ${group.name}`);
+			logger.info("Successfully scraped group", {
+				groupName: group.name,
+				groupId: group.id,
+			});
 
 			// Add delay between groups (rate limiting)
 			if (i < enabledGroups.length - 1) {
-				console.log("[Scraper Orchestrator] Waiting 3s before next group...");
+				logger.debug("Waiting before next group", { delayMs: 3000 });
 				await delay(3000);
 			}
 		} catch (error) {
 			const errorMessage =
 				error instanceof Error ? error.message : String(error);
-			console.error(
-				`[Scraper Orchestrator] Failed to scrape ${group.name}:`,
-				errorMessage,
-			);
+			logger.error("Failed to scrape group", {
+				groupName: group.name,
+				groupId: group.id,
+				error: errorMessage,
+			});
 			failedGroups.push({
 				groupId: group.id,
 				error: errorMessage,
@@ -61,9 +69,11 @@ export async function scrapeSubscription(subscriptionId: string): Promise<{
 		}
 	}
 
-	console.log(
-		`[Scraper Orchestrator] Batch scrape complete: ${scrapedCount} succeeded, ${failedGroups.length} failed`,
-	);
+	logger.info("Batch scrape complete", {
+		subscriptionId,
+		succeeded: scrapedCount,
+		failed: failedGroups.length,
+	});
 
 	return {
 		success: true,
@@ -116,26 +126,26 @@ async function scrapeGroupWithScrolling(
 					chrome.tabs.onUpdated.removeListener(loadListener);
 
 					// Start scrolling after page loads
-					console.log(
-						`[Scraper Orchestrator] Page loaded for ${groupName}, starting scroll sequence`,
-					);
+					logger.debug("Page loaded, starting scroll sequence", {
+						groupName,
+						groupId,
+					});
 
 					// Function to perform scrolls
 					const performScroll = () => {
 						if (scrollCount >= targetScrolls) {
 							// Scrolling complete, wait a bit then trigger scrape
-							console.log(
-								`[Scraper Orchestrator] Scroll complete for ${groupName}, waiting for content to load...`,
-							);
+							logger.debug("Scroll complete, waiting for content to load", {
+								groupName,
+								groupId,
+							});
 							setTimeout(() => {
 								// Send message to content script to trigger scraping
 								if (tabId) {
 									chrome.tabs
 										.sendMessage(tabId, { type: "TRIGGER_SCRAPE" })
 										.then(() => {
-											console.log(
-												`[Scraper Orchestrator] Scrape triggered for ${groupName}`,
-											);
+											logger.debug("Scrape triggered", { groupName, groupId });
 											// Wait for scraping to complete
 											setTimeout(() => {
 												if (tabId) {
@@ -159,9 +169,11 @@ async function scrapeGroupWithScrolling(
 
 						// Perform scroll
 						scrollCount++;
-						console.log(
-							`[Scraper Orchestrator] Scroll ${scrollCount}/${targetScrolls} for ${groupName}`,
-						);
+						logger.debug("Performing scroll", {
+							groupName,
+							groupId,
+							scroll: `${scrollCount}/${targetScrolls}`,
+						});
 
 						if (tabId) {
 							chrome.scripting
@@ -179,7 +191,12 @@ async function scrapeGroupWithScrolling(
 									setTimeout(performScroll, scrollInterval);
 								})
 								.catch((error) => {
-									console.error("Error scrolling:", error);
+									logger.warn("Error scrolling, continuing anyway", {
+										groupName,
+										groupId,
+										error:
+											error instanceof Error ? error.message : String(error),
+									});
 									// Continue anyway
 									setTimeout(performScroll, scrollInterval);
 								});
