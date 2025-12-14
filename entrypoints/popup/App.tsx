@@ -1,5 +1,4 @@
 import { useState } from "react";
-import { GroupsTab } from "./components/GroupsTab";
 import { OverviewTab } from "./components/OverviewTab";
 import { PopupHeader } from "./components/PopupHeader";
 import { SubscriptionsTab } from "./components/SubscriptionsTab";
@@ -31,11 +30,6 @@ function App() {
 						aria-labelledby="subscriptions-tab"
 					>
 						<SubscriptionsTab />
-					</div>
-				)}
-				{activeTab === "groups" && (
-					<div role="tabpanel" id="groups-panel" aria-labelledby="groups-tab">
-						<GroupsTab />
 					</div>
 				)}
 			</div>

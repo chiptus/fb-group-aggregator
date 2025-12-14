@@ -54,16 +54,16 @@ describe("TabNavigationItem", () => {
 	it("has proper ARIA attributes", () => {
 		render(
 			<TabNavigationItem
-				tab="groups"
-				label="Groups"
-				activeTab="groups"
+				tab="subscriptions"
+				label="Subscriptions"
+				activeTab="subscriptions"
 				onTabChange={() => {}}
 			/>,
 		);
 
-		const button = screen.getByRole("tab", { name: "Groups" });
-		expect(button).toHaveAttribute("id", "groups-tab");
-		expect(button).toHaveAttribute("aria-controls", "groups-panel");
+		const button = screen.getByRole("tab", { name: "Subscriptions" });
+		expect(button).toHaveAttribute("id", "subscriptions-tab");
+		expect(button).toHaveAttribute("aria-controls", "subscriptions-panel");
 		expect(button).toHaveAttribute("aria-selected", "true");
 	});
 

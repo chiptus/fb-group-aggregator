@@ -84,8 +84,8 @@ async function scrapeGroupWithScrolling(
 		let tabId: number | undefined;
 		let scrollCount = 0;
 		const targetScrolls = 2;
-		const scrollInterval = 4000; // 4 seconds between scrolls
-		const timeoutDuration = 30000; // 30 second timeout per group
+		const scrollInterval = 5000; // 5 seconds between scrolls (increased for FB to load)
+		const timeoutDuration = 45000; // 45 second timeout per group (increased)
 
 		// Create timeout to prevent hanging
 		const timeout = setTimeout(() => {
@@ -143,7 +143,7 @@ async function scrapeGroupWithScrolling(
 												}
 												clearTimeout(timeout);
 												resolve();
-											}, 3000); // Wait 3s for scraping to complete
+											}, 5000); // Wait 5s for scraping to complete (increased)
 										})
 										.catch((error) => {
 											if (tabId) {
@@ -153,7 +153,7 @@ async function scrapeGroupWithScrolling(
 											reject(error);
 										});
 								}
-							}, 2000); // Wait 2s after last scroll
+							}, 4000); // Wait 4s after last scroll for Facebook to load posts (increased)
 							return;
 						}
 
@@ -186,8 +186,8 @@ async function scrapeGroupWithScrolling(
 						}
 					};
 
-					// Start first scroll after a small delay
-					setTimeout(performScroll, 2000);
+					// Start first scroll after initial page render
+					setTimeout(performScroll, 3000);
 				}
 			};
 

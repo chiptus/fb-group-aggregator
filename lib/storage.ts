@@ -76,13 +76,23 @@ export async function deleteSubscription(id: string): Promise<void> {
 export async function createGroup(
 	groupData: Omit<Group, "addedAt" | "lastScrapedAt">,
 ): Promise<Group> {
+	const groups = (await storage.getItem<Group[]>(STORAGE_KEYS.GROUPS)) || [];
+
+	// Check for duplicates before adding
+	const existingGroup = groups.find((g) => g.id === groupData.id);
+	if (existingGroup) {
+		console.warn(
+			`[Storage] Group ${groupData.id} already exists, returning existing group`,
+		);
+		return existingGroup;
+	}
+
 	const group: Group = {
 		...groupData,
 		addedAt: Date.now(),
 		lastScrapedAt: null,
 	};
 
-	const groups = (await storage.getItem<Group[]>(STORAGE_KEYS.GROUPS)) || [];
 	groups.push(group);
 	await storage.setItem(STORAGE_KEYS.GROUPS, groups);
 

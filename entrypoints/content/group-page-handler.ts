@@ -29,6 +29,9 @@ export function initializeGroupPageScraping(
 	// Listen for messages from background script
 	chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
 		if (message.type === "TRIGGER_SCRAPE") {
+			console.log(
+				"[FB Aggregator] TRIGGER_SCRAPE received, starting scrape...",
+			);
 			scrapeAndSend(groupId).then(() => {
 				sendResponse({ success: true });
 			});

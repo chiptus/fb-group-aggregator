@@ -1,5 +1,8 @@
 import { useMemo, useState } from "react";
-import { useGroups } from "@/lib/hooks/storage/useGroups";
+import {
+	useGroups,
+	useScrapeSubscription,
+} from "@/lib/hooks/storage/useGroups";
 import { useMarkPostSeen, usePosts } from "@/lib/hooks/storage/usePosts";
 import { useSubscriptions } from "@/lib/hooks/storage/useSubscriptions";
 import { GroupsPage } from "./components/GroupsPage";
@@ -22,8 +25,9 @@ function App() {
 	const groupsQuery = useGroups();
 	const postsQuery = usePosts();
 
-	// Mutation for marking posts as seen
+	// Mutations
 	const markPostSeen = useMarkPostSeen();
+	const scrapeSubscription = useScrapeSubscription();
 
 	// Extract data with defaults
 	const subscriptions = subscriptionsQuery.data ?? [];
@@ -105,9 +109,25 @@ function App() {
 				<div className="max-w-7xl mx-auto px-4 py-4">
 					<h1 className="text-2xl font-bold mb-2">FB Group Aggregator</h1>
 					{activeTab === "posts" && (
-						<p className="text-sm text-gray-600" aria-live="polite">
-							{unseenCount} unseen post{unseenCount !== 1 ? "s" : ""}
-						</p>
+						<>
+							<p className="text-sm text-gray-600" aria-live="polite">
+								{unseenCount} unseen post{unseenCount !== 1 ? "s" : ""}
+							</p>
+							{selectedSubscriptionId && (
+								<button
+									type="button"
+									onClick={() =>
+										scrapeSubscription.mutate(selectedSubscriptionId)
+									}
+									disabled={scrapeSubscription.isPending}
+									className="mt-2 px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors"
+								>
+									{scrapeSubscription.isPending
+										? "Scraping..."
+										: `Scrape ${subscriptions.find((s) => s.id === selectedSubscriptionId)?.name || "Subscription"}`}
+								</button>
+							)}
+						</>
 					)}
 
 					{/* Tab Navigation */}

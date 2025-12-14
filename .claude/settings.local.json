@@ -4,7 +4,10 @@
 			"Bash(cat:*)",
 			"Bash(pnpm add:*)",
 			"Bash(pnpm test:run:*)",
-			"Bash(pnpm compile:*)"
+			"Bash(pnpm compile:*)",
+			"Bash(git add:*)",
+			"Bash(git commit:*)",
+			"Bash(grep:*)"
 		],
 		"deny": [],
 		"ask": []

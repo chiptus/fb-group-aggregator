@@ -1,6 +1,6 @@
 import { TabNavigationItem } from "./TabNavigationItem";
 
-export type Tab = "overview" | "subscriptions" | "groups";
+export type Tab = "overview" | "subscriptions";
 
 interface TabNavigationProps {
 	activeTab: Tab;
@@ -19,12 +19,6 @@ export function TabNavigation({ activeTab, onTabChange }: TabNavigationProps) {
 			<TabNavigationItem
 				tab="subscriptions"
 				label="Subscriptions"
-				activeTab={activeTab}
-				onTabChange={onTabChange}
-			/>
-			<TabNavigationItem
-				tab="groups"
-				label="Groups"
 				activeTab={activeTab}
 				onTabChange={onTabChange}
 			/>

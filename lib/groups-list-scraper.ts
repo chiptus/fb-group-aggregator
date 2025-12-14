@@ -9,7 +9,7 @@ export function scrapeGroupsList(): {
 	groups: GroupDiscovery[];
 	totalCount: number;
 } {
-	const groups: GroupDiscovery[] = [];
+	const groupsMap = new Map<string, GroupDiscovery>();
 	let totalCount = 0;
 
 	// Extract total count from page header
@@ -22,7 +22,10 @@ export function scrapeGroupsList(): {
 		try {
 			const group = extractGroupData(element);
 			if (group) {
-				groups.push(group);
+				// Deduplicate by group ID (Facebook might have duplicate DOM elements)
+				if (!groupsMap.has(group.id)) {
+					groupsMap.set(group.id, group);
+				}
 			}
 		} catch (error) {
 			console.error("Error extracting group:", error);
@@ -30,7 +33,7 @@ export function scrapeGroupsList(): {
 		}
 	});
 
-	return { groups, totalCount };
+	return { groups: Array.from(groupsMap.values()), totalCount };
 }
 
 /**
