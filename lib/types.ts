@@ -66,7 +66,24 @@ export type ExtensionMessage =
 			type: "SCRAPE_SUBSCRIPTION";
 			payload: { subscriptionId: string };
 	  }
-	| { type: "OPEN_GROUPS_SCANNER" };
+	| { type: "OPEN_GROUPS_SCANNER" }
+	| { type: "START_JOB" }
+	| {
+			type: "CANCEL_JOB";
+			payload: { jobId: string };
+	  }
+	| {
+			type: "RESUME_JOB";
+			payload: { jobId: string };
+	  }
+	| {
+			type: "GET_JOB";
+			payload: { jobId: string };
+	  }
+	| {
+			type: "DELETE_JOB";
+			payload: { jobId: string };
+	  };
 
 // Response types
 export type ScrapePostsResponse = {
@@ -92,6 +109,23 @@ export type ScrapeSubscriptionResponse = {
 	error?: string;
 };
 
+export type StartJobResponse = {
+	success: boolean;
+	jobId?: string;
+	error?: string;
+};
+
+export type JobActionResponse = {
+	success: boolean;
+	error?: string;
+};
+
+export type GetJobResponse = {
+	success: boolean;
+	job?: ScrapeJob;
+	error?: string;
+};
+
 // Logging types
 export type LogLevel = "debug" | "info" | "warn" | "error";
 export type LogSource = "background" | "content" | "popup" | "dashboard";
@@ -103,6 +137,60 @@ export const LogEntrySchema = z.object({
 	source: z.enum(["background", "content", "popup", "dashboard"]),
 	message: z.string(),
 	context: z.record(z.string(), z.unknown()).optional(),
+	jobId: z.string().optional(),
 });
 
 export type LogEntry = z.infer<typeof LogEntrySchema>;
+
+// Job types
+export type JobStatus =
+	| "pending"
+	| "running"
+	| "paused"
+	| "completed"
+	| "failed"
+	| "cancelled";
+
+export type JobGroupResult = {
+	groupId: string;
+	groupName: string;
+	status: "pending" | "success" | "failed" | "skipped";
+	postsScraped?: number;
+	error?: string;
+	startedAt?: number;
+	completedAt?: number;
+};
+
+export const ScrapeJobSchema = z.object({
+	id: z.string(),
+	type: z.literal("scrape_all_groups"),
+	status: z.enum([
+		"pending",
+		"running",
+		"paused",
+		"completed",
+		"failed",
+		"cancelled",
+	]),
+	createdAt: z.number(),
+	startedAt: z.number().nullable(),
+	completedAt: z.number().nullable(),
+	totalGroups: z.number(),
+	currentGroupIndex: z.number(),
+	groupResults: z.array(
+		z.object({
+			groupId: z.string(),
+			groupName: z.string(),
+			status: z.enum(["pending", "success", "failed", "skipped"]),
+			postsScraped: z.number().optional(),
+			error: z.string().optional(),
+			startedAt: z.number().optional(),
+			completedAt: z.number().optional(),
+		}),
+	),
+	successCount: z.number(),
+	failedCount: z.number(),
+	error: z.string().optional(),
+});
+
+export type ScrapeJob = z.infer<typeof ScrapeJobSchema>;

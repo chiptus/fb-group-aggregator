@@ -3,8 +3,6 @@ import { z } from "zod";
 import {
 	type Group,
 	GroupSchema,
-	type LogEntry,
-	LogEntrySchema,
 	type Post,
 	PostSchema,
 	type Subscription,
@@ -247,33 +245,43 @@ export async function deleteOldPosts(daysOld: number): Promise<void> {
 }
 
 /**
- * Logs
+ * Groups - Helper Functions
  */
 
-const MAX_LOGS = 500; // Keep last 500 log entries
+export async function getAllEnabledGroups(): Promise<
+	Array<{ id: string; name: string }>
+> {
+	const data = (await storage.getItem<Group[]>(STORAGE_KEYS.GROUPS)) || [];
+	const groups = z.array(GroupSchema).parse(data);
 
-export async function createLog(
-	logData: Omit<LogEntry, "id" | "timestamp">,
-): Promise<void> {
-	const data = (await storage.getItem<LogEntry[]>(STORAGE_KEYS.LOGS)) || [];
-	const logs = z.array(LogEntrySchema).parse(data);
+	// Get enabled groups and deduplicate by group ID
+	const enabledGroups = groups.filter((g: Group) => g.enabled);
+	const uniqueGroups = Array.from(
+		new Map(
+			enabledGroups.map((g) => [g.id, { id: g.id, name: g.name }]),
+		).values(),
+	);
 
-	const logEntry: LogEntry = {
-		id: crypto.randomUUID(),
-		timestamp: Date.now(),
-		...logData,
-	};
-
-	// Add new log and keep only last MAX_LOGS entries
-	const updatedLogs = [...logs, logEntry].slice(-MAX_LOGS);
-	await storage.setItem(STORAGE_KEYS.LOGS, updatedLogs);
+	return uniqueGroups;
 }
 
-export async function listLogs(): Promise<LogEntry[]> {
-	const data = (await storage.getItem<LogEntry[]>(STORAGE_KEYS.LOGS)) || [];
-	return z.array(LogEntrySchema).parse(data);
-}
+/**
+ * Re-exports from modular storage files
+ */
 
-export async function clearLogs(): Promise<void> {
-	await storage.setItem(STORAGE_KEYS.LOGS, []);
-}
+export {
+	cleanupOldJobs,
+	createJob,
+	deleteJob,
+	getActiveJob,
+	getJob,
+	listJobs,
+	updateJob,
+} from "./storage/jobs";
+
+export {
+	clearLogs,
+	createLog,
+	listLogs,
+	listLogsByJob,
+} from "./storage/logs";

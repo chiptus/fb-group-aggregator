@@ -7,6 +7,7 @@ import {
 	deleteOldPosts,
 	deleteSubscription,
 	findGroupByUrl,
+	getAllEnabledGroups,
 	listGroups,
 	listPosts,
 	listPostsBySubscription,
@@ -195,6 +196,60 @@ describe("Storage - Groups", () => {
 		);
 
 		expect(found).toBeUndefined();
+	});
+
+	it("should get all enabled groups and deduplicate by ID", async () => {
+		const mockGroups: Group[] = [
+			{
+				id: "group-1",
+				url: "https://facebook.com/groups/1",
+				name: "Group 1",
+				subscriptionIds: ["sub-1"],
+				addedAt: Date.now(),
+				lastScrapedAt: null,
+				enabled: true,
+			},
+			{
+				id: "group-2",
+				url: "https://facebook.com/groups/2",
+				name: "Group 2",
+				subscriptionIds: ["sub-1"],
+				addedAt: Date.now(),
+				lastScrapedAt: null,
+				enabled: false, // disabled
+			},
+			{
+				id: "group-1", // duplicate ID (should be deduplicated)
+				url: "https://facebook.com/groups/1-alt",
+				name: "Group 1 Alt",
+				subscriptionIds: ["sub-2"],
+				addedAt: Date.now(),
+				lastScrapedAt: null,
+				enabled: true,
+			},
+			{
+				id: "group-3",
+				url: "https://facebook.com/groups/3",
+				name: "Group 3",
+				subscriptionIds: ["sub-2"],
+				addedAt: Date.now(),
+				lastScrapedAt: null,
+				enabled: true,
+			},
+		];
+
+		await chrome.storage.local.set({ groups: mockGroups });
+
+		const enabledGroups = await getAllEnabledGroups();
+
+		// Should return only enabled groups, deduplicated by ID
+		expect(enabledGroups).toHaveLength(2); // group-1 and group-3
+		expect(enabledGroups).toEqual(
+			expect.arrayContaining([
+				{ id: "group-1", name: "Group 1" },
+				{ id: "group-3", name: "Group 3" },
+			]),
+		);
 	});
 });
 
