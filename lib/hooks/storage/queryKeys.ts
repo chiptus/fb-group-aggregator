@@ -3,4 +3,5 @@ export const queryKeys = {
 	groups: ["groups"] as const,
 	posts: ["posts"] as const,
 	logs: ["logs"] as const,
+	jobs: ["jobs"] as const,
 };

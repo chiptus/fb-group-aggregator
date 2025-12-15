@@ -2,10 +2,16 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import * as storage from "@/lib/storage";
 import { queryKeys } from "./queryKeys";
 
-export function useLogs() {
+interface UseLogsOptions {
+	jobId?: string;
+}
+
+export function useLogs(options?: UseLogsOptions) {
+	const { jobId } = options || {};
+
 	return useQuery({
-		queryKey: queryKeys.logs,
-		queryFn: () => storage.listLogs(),
+		queryKey: jobId ? [...queryKeys.logs, jobId] : queryKeys.logs,
+		queryFn: () => (jobId ? storage.listLogsByJob(jobId) : storage.listLogs()),
 		refetchInterval: 2000, // Refetch every 2 seconds to show new logs
 	});
 }
