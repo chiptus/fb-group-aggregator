@@ -67,6 +67,31 @@ export type ExtensionMessage =
 			payload: { subscriptionId: string };
 	  }
 	| { type: "OPEN_GROUPS_SCANNER" }
+	| {
+			type: "START_SCROLL_AND_SCRAPE";
+			payload: {
+				scrollCount: number;
+				scrollInterval: number;
+				scrapeWaitTime: number;
+			};
+	  }
+	| {
+			type: "SCROLL_AND_SCRAPE_PROGRESS";
+			payload: {
+				scrollNumber: number;
+				totalScrolls: number;
+				postsFoundThisScrape: number;
+			};
+	  }
+	| {
+			type: "SCROLL_AND_SCRAPE_COMPLETE";
+			payload: {
+				totalPostsScraped: number;
+				scrollsCompleted: number;
+				success: boolean;
+			};
+	  }
+	| { type: "TRIGGER_SCRAPE" }
 	| { type: "START_JOB" }
 	| {
 			type: "CANCEL_JOB";
