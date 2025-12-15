@@ -17,6 +17,8 @@ export function messageListener(
 	_sender: chrome.runtime.MessageSender,
 	sendResponse: (response: ScrapePostsResponse | unknown) => void,
 ): boolean {
+	console.log("[Background] Received message:", message.type);
+
 	if (message.type === "SCRAPE_POSTS") {
 		handleScrapePosts(message.payload)
 			.then(sendResponse)

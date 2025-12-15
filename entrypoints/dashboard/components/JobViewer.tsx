@@ -63,6 +63,9 @@ export function JobViewer() {
 			onSuccess: (data) => {
 				setExpandedJobId(data.jobId);
 			},
+			onError: (error) => {
+				alert(`Failed to start job: ${error.message}`);
+			},
 		});
 	}
 

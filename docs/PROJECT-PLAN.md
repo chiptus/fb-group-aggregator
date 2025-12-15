@@ -12,7 +12,7 @@ A Chrome/Firefox browser extension that aggregates posts from multiple Facebook 
 - **Validation**: Zod for runtime type safety
 - **Package Manager**: pnpm
 
-## Project Status: Phase 5 Complete ✅
+## Project Status: Job Management System Complete ✅
 
 ### ✅ Phase 0: Test Infrastructure (COMPLETED)
 - [x] Configure Vitest with WXT plugin
@@ -265,6 +265,89 @@ Build the extension popup for quick actions and management.
 
 ---
 
+## ✅ Job Management System (COMPLETED)
+
+### Objectives
+Implement background job management for scraping all enabled groups with persistence across extension restarts.
+
+### Features
+- [x] Background job engine with checkpoint-based resumption
+- [x] Job persistence across extension restarts/dashboard closure
+- [x] React Query hooks for job management
+- [x] Jobs UI with real-time progress tracking
+- [x] Auto-manage group enabled state based on subscriptions
+- [x] Global deduplication (don't scrape same group twice if in multiple subscriptions)
+
+### Files Created/Updated
+
+**Data Layer:**
+- [lib/types.ts](../lib/types.ts) - Added `ScrapeJob`, `JobStatus`, `JobGroupResult` types and schemas
+- [lib/storage/jobs.ts](../lib/storage/jobs.ts) - Job CRUD operations (createJob, listJobs, updateJob, deleteJob, cleanupOldJobs)
+- [lib/storage/logs.ts](../lib/storage/logs.ts) - Log operations (createLog, listLogs, listLogsByJob, clearLogs)
+- [lib/storage.ts](../lib/storage.ts) - Added `getAllEnabledGroups()` for global deduplication
+
+**Background Engine:**
+- [entrypoints/background/job-manager.ts](../entrypoints/background/job-manager.ts) - Job execution engine with start, cancel, resume operations
+- [entrypoints/background/scraper-orchestrator.ts](../entrypoints/background/scraper-orchestrator.ts) - Updated to accept jobId parameter
+- [entrypoints/background/background-handler.ts](../entrypoints/background/background-handler.ts) - Added job message handlers (START_JOB, CANCEL_JOB, RESUME_JOB, GET_JOB, DELETE_JOB)
+
+**React Query Hooks:**
+- [lib/hooks/storage/useJobs.ts](../lib/hooks/storage/useJobs.ts) - Job query and mutation hooks (useJobs, useStartJob, useCancelJob, useResumeJob, useDeleteJob)
+- [lib/hooks/storage/queryKeys.ts](../lib/hooks/storage/queryKeys.ts) - Added jobs query key
+- [lib/hooks/storage/useLogs.ts](../lib/hooks/storage/useLogs.ts) - Added optional jobId filter
+
+**Dashboard UI:**
+- [entrypoints/dashboard/components/JobViewer.tsx](../entrypoints/dashboard/components/JobViewer.tsx) - Jobs UI with active/historical job displays
+- [entrypoints/dashboard/App.tsx](../entrypoints/dashboard/App.tsx) - Added Jobs tab to dashboard
+
+**Group Management:**
+- [entrypoints/background/handle-scrape-groups-list.ts](../entrypoints/background/handle-scrape-groups-list.ts) - New groups default to `enabled: false`
+- [entrypoints/dashboard/components/GroupsPage.tsx](../entrypoints/dashboard/components/GroupsPage.tsx) - Auto-enable when assigned to subscription, auto-disable when removed from all subscriptions
+
+### Implementation Highlights
+
+**Job Engine:**
+- Checkpoint-based resumption: saves progress after each group
+- Graceful cancellation with resume capability
+- 3-second delay between groups for rate limiting
+- Automatic cleanup: keeps only last 3 completed jobs
+- In-memory state tracking (currentJobId, isCancelling)
+
+**Job Persistence:**
+- Jobs persist in chrome.storage.local
+- Resume interrupted jobs on extension restart (optional)
+- Full job history with group-level results
+
+**Jobs UI:**
+- Real-time progress tracking with polling (2s refetch interval)
+- Active job section showing current running/paused job
+- Progress bar with percentage and group count
+- Historical jobs section (last 3 completed jobs)
+- Expandable job details with group results
+- Per-group status indicators (✓ success, ✗ failed, ⏳ pending, ⊘ skipped)
+- Integrated log viewer filtered by jobId
+- Job controls: start, cancel, resume, delete
+
+**Group Enabled State:**
+- New groups start as `enabled: false` (won't be scraped)
+- Auto-enable when assigned to any subscription
+- Auto-disable when removed from all subscriptions
+- Manual override available via Groups page toggle
+
+**Global Deduplication:**
+- `getAllEnabledGroups()` returns unique groups across all subscriptions
+- Job scrapes each group once, even if in multiple subscriptions
+
+### Technical Details
+- **Job Status Flow**: pending → running → completed/failed/cancelled
+- **Resume Flow**: failed/paused → running
+- **Cancellation**: Sets `isCancelling` flag, waits for current group to finish, then saves as cancelled
+- **Message Protocol**: Chrome runtime messaging with success/error responses
+- **Type Safety**: Full Zod validation for job data
+- **React Query**: Automatic cache invalidation and polling
+
+---
+
 ## 📋 Phase 6: Integration & Polish (PLANNED)
 
 ### Objectives
@@ -344,4 +427,4 @@ pnpm zip              # Package for distribution
 
 ---
 
-**Last Updated**: 2025-12-08 (Phase 5 complete, 80 tests passing, Popup UI implemented with React Query and TDD)
+**Last Updated**: 2025-12-15 (Job Management System complete with background jobs, persistence, and auto-enabled state management)

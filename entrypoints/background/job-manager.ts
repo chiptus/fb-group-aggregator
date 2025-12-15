@@ -11,9 +11,10 @@ import {
 import type { ScrapeJob } from "@/lib/types";
 import { scrapeGroupWithScrolling } from "./scraper-orchestrator";
 
+// todo - need to make there's one job running at the same time
+
 const logger = createLogger("background");
 
-let currentJobId: string | null = null;
 let isCancelling = false;
 
 export async function startJob(): Promise<{ jobId: string }> {
@@ -89,8 +90,9 @@ export async function cancelJob(jobId: string): Promise<void> {
 	});
 }
 
+// TODO: break into smaller files
 async function executeJob(jobId: string): Promise<void> {
-	currentJobId = jobId;
+	// currentJobId = jobId;
 	isCancelling = false;
 
 	try {
@@ -252,7 +254,7 @@ async function executeJob(jobId: string): Promise<void> {
 			error: errorMessage,
 		});
 	} finally {
-		currentJobId = null;
+		// currentJobId = null;
 		isCancelling = false;
 	}
 }
