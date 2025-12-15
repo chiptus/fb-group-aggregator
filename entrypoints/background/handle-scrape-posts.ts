@@ -3,7 +3,6 @@ import {
 	createGroup,
 	createPosts,
 	listGroups,
-	listPosts,
 	updateGroup,
 } from "@/lib/storage";
 import type { ScrapePostsResponse } from "@/lib/types";
@@ -61,17 +60,7 @@ export async function handleScrapePosts(payload: {
 			});
 		}
 
-		// Count posts before saving
-		const postsBefore = await listPosts();
-		const existingPostIds = new Set(postsBefore.map((p) => p.id));
-
-		// Save posts (createPosts handles deduplication)
-		await createPosts(posts);
-
-		// Calculate how many NEW posts were added
-		const newPostsCount = posts.filter(
-			(p) => !existingPostIds.has(p.id),
-		).length;
+		const newPostsCount = await createPosts(posts);
 
 		logger.info("Saved posts from group", {
 			groupId,

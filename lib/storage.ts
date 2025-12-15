@@ -182,7 +182,7 @@ export async function bulkDeleteGroups(groupIds: string[]): Promise<void> {
 
 export async function createPosts(
 	newPosts: Omit<Post, "scrapedAt" | "seen">[],
-): Promise<void> {
+): Promise<number> {
 	const data = (await storage.getItem<Post[]>(STORAGE_KEYS.POSTS)) || [];
 	const posts = z.array(PostSchema).parse(data);
 
@@ -198,6 +198,8 @@ export async function createPosts(
 
 	const allPosts = [...posts, ...postsToAdd];
 	await storage.setItem(STORAGE_KEYS.POSTS, allPosts);
+
+	return postsToAdd.length;
 }
 
 export async function listPosts(): Promise<Post[]> {

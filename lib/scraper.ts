@@ -13,25 +13,93 @@ export function scrapeGroupPosts(
 	// Find the group feed container
 	const feedContainer = document.querySelector('[role="feed"]');
 	if (!feedContainer) {
+		console.warn(
+			"[Scraper] Feed container not found - Facebook may not have loaded yet",
+		);
 		return posts;
 	}
 
-	// Find all post articles
-	const postElements = feedContainer.querySelectorAll(
+	console.log("[Scraper] Feed container found, searching for posts");
+
+	// Try multiple strategies to find posts
+	let postElements: Element[] = [];
+
+	// Strategy 1: Articles within feed
+	const articlesInFeed = feedContainer.querySelectorAll(
 		".x1n2onr6.xh8yej3.x1ja2u2z.xod5an3",
 	);
+	postElements = Array.from(articlesInFeed);
 
-	postElements.forEach((postElement) => {
+	// DEBUG: Log what we're seeing in the feed
+	const allArticles = document.querySelectorAll(
+		".x1n2onr6.xh8yej3.x1ja2u2z.xod5an3",
+	);
+	console.log("[Scraper] DEBUG:", {
+		totalArticlesOnPage: allArticles.length,
+		articlesInFeed: articlesInFeed.length,
+		feedContainerTag: feedContainer.tagName,
+		feedContainerClasses: feedContainer.className,
+	});
+
+	if (postElements.length === 0) {
+		// Strategy 2: Look for direct children that might be posts
+		console.log("[Scraper] No articles in feed, trying direct children");
+		const children = feedContainer.children;
+		console.log(`[Scraper] Feed has ${children.length} direct children`);
+
+		// Convert to array and filter for likely post containers
+		postElements = Array.from(children).filter((child) => {
+			// Posts typically have links with /posts/ in them
+			const hasPostLink = child.querySelector('a[href*="/posts/"]');
+			return hasPostLink !== null;
+		});
+
+		console.log(
+			`[Scraper] Found ${postElements.length} children with post links`,
+		);
+	}
+
+	console.log(`[Scraper] Found ${postElements.length} potential post elements`);
+
+	postElements.forEach((postElement, index) => {
 		try {
-			const post = extractPostData(postElement as HTMLElement, groupId);
+			// Skip hidden or virtualized placeholder elements
+			const element = postElement as HTMLElement;
+			if (element.hasAttribute("hidden") || element.querySelector("[hidden]")) {
+				console.log(
+					`[Scraper] Skipped element ${index + 1} (hidden/placeholder)`,
+				);
+				return;
+			}
+
+			// Skip elements with no links (likely empty placeholders)
+			const linkCount = element.querySelectorAll("a[href]").length;
+			if (linkCount === 0) {
+				console.log(
+					`[Scraper] Skipped element ${index + 1} (no links - likely placeholder)`,
+				);
+				return;
+			}
+
+			const post = extractPostData(element, groupId);
 			if (post) {
 				posts.push(post);
+				console.log(
+					`[Scraper] Successfully extracted post ${index + 1}: ${post.id}`,
+				);
+			} else {
+				console.log(
+					`[Scraper] Skipped element ${index + 1} (no post ID found)`,
+					postElement,
+				);
 			}
 		} catch (error) {
-			console.error("Error extracting post:", error);
+			console.error(`[Scraper] Error extracting post ${index + 1}:`, error);
 			// Continue to next post
 		}
 	});
+
+	console.log(`[Scraper] Total posts extracted: ${posts.length}`);
 
 	return posts;
 }
@@ -46,17 +114,23 @@ function extractPostData(
 	// Extract post ID from data-ft attribute
 	const postId = extractPostId(element);
 	if (!postId) {
+		console.log("[Scraper] No post ID found, skipping element");
 		return null; // Skip posts without ID
 	}
 
+	console.log(`[Scraper] Extracting data for post ${postId}`);
+
 	// Extract author name
 	const authorName = extractAuthorName(element);
+	console.log(`[Scraper] Author: ${authorName}`);
 
 	// Extract content HTML
 	const contentHtml = extractContentHtml(element);
+	console.log(`[Scraper] Content length: ${contentHtml.length} chars`);
 
 	// Extract timestamp
 	const timestamp = extractTimestamp(element);
+	console.log(`[Scraper] Timestamp: ${new Date(timestamp).toISOString()}`);
 
 	// Construct post URL
 	const url = constructPostUrl(groupId, postId);
@@ -76,12 +150,19 @@ function extractPostData(
  * Modern Facebook may not use data-ft, so we try multiple strategies
  */
 function extractPostId(element: HTMLElement): string | null {
+	console.log("[Scraper] ===== Starting post ID extraction =====");
+
 	// Strategy 1: data-ft attribute (legacy)
 	const dataFt = element.getAttribute("data-ft");
+	console.log("[Scraper] data-ft:", dataFt ? "present" : "absent");
 	if (dataFt) {
 		try {
 			const ftData = JSON.parse(dataFt);
 			if (ftData.mf_story_key) {
+				console.log(
+					"[Scraper] ✓ Found post ID via data-ft:",
+					ftData.mf_story_key,
+				);
 				return ftData.mf_story_key;
 			}
 		} catch {
@@ -89,36 +170,78 @@ function extractPostId(element: HTMLElement): string | null {
 		}
 	}
 
-	// Strategy 2: Extract from permalink URL
-	const permalinkLink = element.querySelector('a[href*="/posts/"]');
-	if (permalinkLink) {
-		const href = permalinkLink.getAttribute("href") || "";
-		const match = href.match(/\/posts\/(\d+)/);
-		if (match?.[1]) {
-			return match[1];
+	// Get all links once for multiple strategies
+	const allLinks = element.querySelectorAll("a[href]");
+
+	// Strategy 2: Extract from any permalink URL with /posts/
+	const permalinkLinks = element.querySelectorAll('a[href*="/posts/"]');
+	console.log("[Scraper] Links with /posts/:", permalinkLinks.length);
+	if (permalinkLinks.length > 0) {
+		for (const link of Array.from(permalinkLinks)) {
+			const href = link.getAttribute("href") || "";
+			console.log("[Scraper] Checking link:", href.substring(0, 100));
+			const match = href.match(/\/posts\/(\d+)/);
+			if (match?.[1]) {
+				console.log("[Scraper] ✓ Found post ID via permalink URL:", match[1]);
+				return match[1];
+			}
+		}
+	}
+
+	// Strategy 2b: Extract from photo/video URLs with pcb (photo collection batch) parameter
+	// These contain the post ID in the pcb parameter
+	console.log(
+		"[Scraper] Checking for pcb parameter in",
+		allLinks.length,
+		"links",
+	);
+	for (const link of Array.from(allLinks)) {
+		const href = link.getAttribute("href") || "";
+		// Match pcb.XXXXXXXXX in photo URLs (set=pcb.ID) or video URLs (videos/pcb.ID/)
+		const pcbMatch = href.match(/pcb\.(\d+)/);
+		if (pcbMatch?.[1]) {
+			console.log("[Scraper] ✓ Found post ID via pcb parameter:", pcbMatch[1]);
+			return pcbMatch[1];
 		}
 	}
 
 	// Strategy 3: Look for aria-label with post/comment identifier
 	const ariaLabel = element.getAttribute("aria-label") || "";
+	console.log("[Scraper] aria-label:", ariaLabel.substring(0, 100));
 	// Skip comments - we only want main posts
 	if (ariaLabel.toLowerCase().includes("comment")) {
+		console.log("[Scraper] ✗ Skipping comment element");
 		return null;
 	}
 
-	// Strategy 4: Generate ID from timestamp link if this is a post
-	const timestampLink = element.querySelector(
-		'a[href*="/groups/"][href*="/posts/"]',
+	// Strategy 4: Look for permalink in nested elements
+	console.log("[Scraper] Total links in element:", allLinks.length);
+
+	// Sample first few links for debugging
+	const sampleLinks = Array.from(allLinks).slice(0, 5);
+	console.log(
+		"[Scraper] Sample links:",
+		sampleLinks.map((l) => (l.getAttribute("href") || "").substring(0, 80)),
 	);
-	if (timestampLink) {
-		const href = timestampLink.getAttribute("href") || "";
-		const match = href.match(/\/posts\/(\d+)/);
-		if (match?.[1]) {
-			return match[1];
+
+	for (const link of Array.from(allLinks)) {
+		const href = link.getAttribute("href") || "";
+		// Match various post URL patterns
+		if (href.includes("/posts/") || href.includes("/permalink/")) {
+			const postMatch = href.match(/\/posts\/(\d+)/);
+			const permalinkMatch = href.match(/\/permalink\/(\d+)/);
+			const storyMatch = href.match(/story_fbid=(\d+)/);
+
+			const id = postMatch?.[1] || permalinkMatch?.[1] || storyMatch?.[1];
+			if (id) {
+				console.log("[Scraper] ✓ Found post ID via nested link:", id);
+				return id;
+			}
 		}
 	}
 
 	// No ID found
+	console.log("[Scraper] ✗ Could not extract post ID after all strategies");
 	return null;
 }
 
@@ -165,19 +288,33 @@ function extractAuthorName(element: HTMLElement): string {
  * Extracts content HTML from post element
  */
 function extractContentHtml(element: HTMLElement): string {
-	// Look for the message container
+	// Strategy 1: Look for the message container with data-ad-preview
 	const messageContainer = element.querySelector('[data-ad-preview="message"]');
-	if (!messageContainer) {
-		return "";
-	}
-
-	// Get the inner content (usually in a div with dir="auto")
-	const contentElement = messageContainer.querySelector('[dir="auto"]');
-	if (!contentElement) {
+	if (messageContainer) {
+		// Get the inner content (usually in a div with dir="auto")
+		const contentElement = messageContainer.querySelector('[dir="auto"]');
+		if (contentElement) {
+			console.log("[Scraper] Found content via data-ad-preview + dir=auto");
+			return contentElement.innerHTML.trim();
+		}
+		console.log("[Scraper] Found content via data-ad-preview");
 		return messageContainer.innerHTML.trim();
 	}
 
-	return contentElement.innerHTML.trim();
+	// Strategy 2: Look for any div with dir="auto" that might contain post content
+	// This is a more generic fallback for when Facebook changes structure
+	const dirAutoElements = element.querySelectorAll('[dir="auto"]');
+	for (const elem of Array.from(dirAutoElements)) {
+		const text = elem.textContent?.trim() || "";
+		// If it has substantial text content, it's likely the post content
+		if (text.length > 10) {
+			console.log("[Scraper] Found content via dir=auto fallback");
+			return (elem as HTMLElement).innerHTML.trim();
+		}
+	}
+
+	console.log("[Scraper] No content found");
+	return "";
 }
 
 /**
