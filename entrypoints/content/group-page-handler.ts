@@ -37,6 +37,28 @@ export function initializeGroupPageScraping(
 			});
 			return true; // Keep channel open for async response
 		}
+
+		// NEW: Handle autonomous scroll-and-scrape sequence
+		if (message.type === "START_SCROLL_AND_SCRAPE") {
+			logger.info("START_SCROLL_AND_SCRAPE received", {
+				groupId,
+				config: message.payload,
+			});
+
+			performScrollAndScrapeSequence(groupId, message.payload)
+				.then(() => {
+					sendResponse({ success: true });
+				})
+				.catch((error) => {
+					logger.error("Scroll-and-scrape sequence failed", {
+						groupId,
+						error: error instanceof Error ? error.message : String(error),
+					});
+					sendResponse({ success: false, error: error.message });
+				});
+
+			return true; // Keep channel open for async response
+		}
 	});
 
 	logger.info("Group page scraping initialized", { groupId });
@@ -100,4 +122,145 @@ function isNearBottom(threshold = 3500) {
 	const clientHeight = window.innerHeight;
 
 	return scrollHeight - scrollTop - clientHeight < threshold;
+}
+
+/**
+ * Performs autonomous scroll-and-scrape sequence
+ * Called when background sends START_SCROLL_AND_SCRAPE message
+ */
+async function performScrollAndScrapeSequence(
+	groupId: string,
+	config: {
+		scrollCount: number;
+		scrollInterval: number;
+		scrapeWaitTime: number;
+	},
+): Promise<void> {
+	logger.info("Starting autonomous scroll-and-scrape sequence", {
+		groupId,
+		scrollCount: config.scrollCount,
+	});
+
+	const scrapedPostIds = new Set<string>(); // Track unique posts across all scrapes
+
+	// Initial scrape before any scrolling
+	await scrapeAndSendWithTracking(
+		groupId,
+		scrapedPostIds,
+		0,
+		config.scrollCount,
+	);
+
+	// Perform scroll-scrape cycles
+	for (let i = 1; i <= config.scrollCount; i++) {
+		logger.debug("Scroll cycle", {
+			groupId,
+			cycle: `${i}/${config.scrollCount}`,
+		});
+
+		// Scroll to bottom
+		window.scrollTo({
+			top: document.documentElement.scrollHeight,
+			behavior: "smooth",
+		});
+
+		// Wait for content to load
+		await delay(config.scrollInterval);
+
+		// Scrape again
+		await scrapeAndSendWithTracking(
+			groupId,
+			scrapedPostIds,
+			i,
+			config.scrollCount,
+		);
+
+		// Wait before next scroll
+		if (i < config.scrollCount) {
+			await delay(config.scrapeWaitTime);
+		}
+	}
+
+	// Send completion message
+	chrome.runtime.sendMessage({
+		type: "SCROLL_AND_SCRAPE_COMPLETE",
+		payload: {
+			totalPostsScraped: scrapedPostIds.size,
+			scrollsCompleted: config.scrollCount,
+			success: true,
+		},
+	});
+
+	logger.info("Scroll-and-scrape sequence complete", {
+		groupId,
+		totalPosts: scrapedPostIds.size,
+	});
+}
+
+/**
+ * Scrapes and sends posts, tracking which posts we've already seen
+ * Sends progress updates to background
+ */
+async function scrapeAndSendWithTracking(
+	groupId: string,
+	seenPostIds: Set<string>,
+	scrollNumber: number,
+	totalScrolls: number,
+): Promise<void> {
+	try {
+		// Scrape posts
+		const posts = scrapeGroupPosts(groupId);
+
+		// Filter out posts we've already scraped in this session
+		const newPosts = posts.filter((post) => !seenPostIds.has(post.id));
+
+		// Track these posts
+		for (const post of newPosts) {
+			seenPostIds.add(post.id);
+		}
+
+		if (newPosts.length > 0) {
+			logger.info("Found new posts", {
+				groupId,
+				newPosts: newPosts.length,
+				totalTracked: seenPostIds.size,
+			});
+
+			// Extract group info
+			const groupInfo = extractGroupInfo();
+
+			// Send to background for storage
+			await chrome.runtime.sendMessage({
+				type: "SCRAPE_POSTS",
+				payload: {
+					groupId,
+					groupInfo,
+					posts: newPosts,
+				},
+			});
+		}
+
+		// Send progress update
+		chrome.runtime.sendMessage({
+			type: "SCROLL_AND_SCRAPE_PROGRESS",
+			payload: {
+				scrollNumber,
+				totalScrolls,
+				postsFoundThisScrape: newPosts.length,
+			},
+		});
+	} catch (error) {
+		logger.error("Error in scrape cycle", {
+			groupId,
+			scrollNumber,
+			error: error instanceof Error ? error.message : String(error),
+		});
+	}
+}
+
+/**
+ * Simple promise-based delay
+ */
+function delay(ms: number): Promise<void> {
+	return new Promise((resolve) => setTimeout(resolve, ms));
 }
