@@ -85,17 +85,22 @@ export async function scrapeSubscription(subscriptionId: string): Promise<{
 /**
  * Opens a group page, scrolls twice to load content, then scrapes posts
  */
-async function scrapeGroupWithScrolling(
+export async function scrapeGroupWithScrolling(
 	groupId: string,
 	groupUrl: string,
 	groupName: string,
-): Promise<void> {
+	jobId?: string,
+): Promise<{ postsScraped: number }> {
 	return new Promise((resolve, reject) => {
 		let tabId: number | undefined;
 		let scrollCount = 0;
 		const targetScrolls = 2;
 		const scrollInterval = 5000; // 5 seconds between scrolls (increased for FB to load)
 		const timeoutDuration = 45000; // 45 second timeout per group (increased)
+
+		const logContext = jobId
+			? { groupId, groupName, jobId }
+			: { groupId, groupName };
 
 		// Create timeout to prevent hanging
 		const timeout = setTimeout(() => {
@@ -126,33 +131,30 @@ async function scrapeGroupWithScrolling(
 					chrome.tabs.onUpdated.removeListener(loadListener);
 
 					// Start scrolling after page loads
-					logger.debug("Page loaded, starting scroll sequence", {
-						groupName,
-						groupId,
-					});
+					logger.debug("Page loaded, starting scroll sequence", logContext);
 
 					// Function to perform scrolls
 					const performScroll = () => {
 						if (scrollCount >= targetScrolls) {
 							// Scrolling complete, wait a bit then trigger scrape
-							logger.debug("Scroll complete, waiting for content to load", {
-								groupName,
-								groupId,
-							});
+							logger.debug(
+								"Scroll complete, waiting for content to load",
+								logContext,
+							);
 							setTimeout(() => {
 								// Send message to content script to trigger scraping
 								if (tabId) {
 									chrome.tabs
 										.sendMessage(tabId, { type: "TRIGGER_SCRAPE" })
 										.then(() => {
-											logger.debug("Scrape triggered", { groupName, groupId });
+											logger.debug("Scrape triggered", logContext);
 											// Wait for scraping to complete
 											setTimeout(() => {
 												if (tabId) {
 													chrome.tabs.remove(tabId).catch(console.error);
 												}
 												clearTimeout(timeout);
-												resolve();
+												resolve({ postsScraped: 0 });
 											}, 5000); // Wait 5s for scraping to complete (increased)
 										})
 										.catch((error) => {
@@ -170,8 +172,7 @@ async function scrapeGroupWithScrolling(
 						// Perform scroll
 						scrollCount++;
 						logger.debug("Performing scroll", {
-							groupName,
-							groupId,
+							...logContext,
 							scroll: `${scrollCount}/${targetScrolls}`,
 						});
 
@@ -192,8 +193,7 @@ async function scrapeGroupWithScrolling(
 								})
 								.catch((error) => {
 									logger.warn("Error scrolling, continuing anyway", {
-										groupName,
-										groupId,
+										...logContext,
 										error:
 											error instanceof Error ? error.message : String(error),
 									});
