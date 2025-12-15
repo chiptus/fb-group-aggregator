@@ -96,7 +96,7 @@ export function GroupsPage() {
 		bulkUpdateGroups.mutate(
 			{
 				groupIds: Array.from(selectedGroupIds),
-				updates: { subscriptionIds: [bulkSubscriptionId] },
+				updates: { subscriptionIds: [bulkSubscriptionId], enabled: true },
 			},
 			{
 				onSuccess: () => {
@@ -151,7 +151,8 @@ export function GroupsPage() {
 	// Handle individual group assignment
 	function handleAssignGroup(groupId: string, subscriptionId: string) {
 		const subscriptionIds = subscriptionId ? [subscriptionId] : [];
-		updateGroup.mutate({ id: groupId, updates: { subscriptionIds } });
+		const enabled = !!subscriptionId;
+		updateGroup.mutate({ id: groupId, updates: { subscriptionIds, enabled } });
 	}
 
 	// Handle individual group delete

@@ -3,7 +3,7 @@ import type { GroupDiscovery, ScrapeGroupsListResponse } from "@/lib/types";
 
 /**
  * Handles SCRAPE_GROUPS_LIST message from content script
- * - Creates new groups with enabled: true, subscriptionIds: []
+ * - Creates new groups with enabled: false, subscriptionIds: []
  * - Updates existing groups (name, URL if changed)
  * - Returns count of new vs updated groups
  */
@@ -44,7 +44,7 @@ export async function handleScrapeGroupsList(payload: {
 					name: discoveredGroup.name,
 					url: discoveredGroup.url,
 					subscriptionIds: [],
-					enabled: true,
+					enabled: false,
 				});
 				newGroupsCount++;
 			}
