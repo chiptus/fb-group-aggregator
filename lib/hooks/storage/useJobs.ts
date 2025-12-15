@@ -14,7 +14,11 @@ export function useJobs(options?: UseJobsOptions) {
 		queryKey: jobId ? [...queryKeys.jobs, jobId] : queryKeys.jobs,
 		queryFn: async () => {
 			const jobs = await listJobs();
-			return jobId ? jobs.find((j) => j.id === jobId) : jobs;
+			if (jobId) {
+				const job = jobs.find((j) => j.id === jobId);
+				return job ? [job] : [];
+			}
+			return jobs;
 		},
 		refetchInterval,
 	});
