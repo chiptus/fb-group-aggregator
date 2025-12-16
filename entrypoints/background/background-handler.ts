@@ -153,6 +153,25 @@ export function messageListener(
 		return true;
 	}
 
+	if (message.type === "SCROLL_AND_SCRAPE_PROGRESS") {
+		logger.debug("Scroll-and-scrape progress received", {
+			scroll: `${message.payload.scrollNumber}/${message.payload.totalScrolls}`,
+			postsThisScrape: message.payload.postsFoundThisScrape,
+		});
+		// No response needed
+		return false;
+	}
+
+	if (message.type === "SCROLL_AND_SCRAPE_COMPLETE") {
+		logger.info("Scroll-and-scrape complete received", {
+			totalPosts: message.payload.totalPostsScraped,
+			scrolls: message.payload.scrollsCompleted,
+			success: message.payload.success,
+		});
+		// No response needed
+		return false;
+	}
+
 	return false;
 }
 

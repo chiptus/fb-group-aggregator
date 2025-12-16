@@ -1,5 +1,6 @@
 import { createLogger } from "@/lib/logger";
 import { getGroupsBySubscription } from "@/lib/storage";
+import type { ExtensionMessage } from "@/lib/types";
 
 const logger = createLogger("background");
 
@@ -83,7 +84,8 @@ export async function scrapeSubscription(subscriptionId: string): Promise<{
 }
 
 /**
- * Opens a group page, scrolls twice to load content, then scrapes posts
+ * Opens a group page and initiates autonomous scroll-and-scrape sequence
+ * The content script controls the scroll-scrape loop autonomously
  */
 export async function scrapeGroupWithScrolling(
 	groupId: string,
@@ -93,10 +95,7 @@ export async function scrapeGroupWithScrolling(
 ): Promise<{ postsScraped: number }> {
 	return new Promise((resolve, reject) => {
 		let tabId: number | undefined;
-		let scrollCount = 0;
-		const targetScrolls = 2;
-		const scrollInterval = 5000; // 5 seconds between scrolls (increased for FB to load)
-		const timeoutDuration = 45000; // 45 second timeout per group (increased)
+		const timeoutDuration = 120000; // 2 minute timeout
 
 		const logContext = jobId
 			? { groupId, groupName, jobId }
@@ -110,106 +109,110 @@ export async function scrapeGroupWithScrolling(
 			reject(new Error(`Timeout after ${timeoutDuration}ms`));
 		}, timeoutDuration);
 
+		// Track progress
+		let totalPostsScraped = 0;
+
+		chrome.runtime.onMessage.addListener(progressListener);
+
 		// Create tab
-		chrome.tabs.create({ url: groupUrl, active: false }, (tab) => {
-			if (!tab?.id) {
-				clearTimeout(timeout);
-				reject(new Error("Failed to create tab"));
-				return;
-			}
+		chrome.tabs.create(
+			{ url: `${groupUrl}?sorting_setting=CHRONOLOGICAL`, active: false },
+			(tab) => {
+				if (!tab?.id) {
+					clearTimeout(timeout);
+					chrome.runtime.onMessage.removeListener(progressListener);
+					reject(new Error("Failed to create tab"));
+					return;
+				}
 
-			tabId = tab.id;
+				tabId = tab.id;
 
-			// Wait for page to load
-			const loadListener = (
-				tabIdUpdated: number,
-				changeInfo: { status?: string },
-			) => {
-				if (tabIdUpdated !== tabId) return;
+				// Wait for page to load
+				const loadListener = (
+					tabIdUpdated: number,
+					changeInfo: { status?: string },
+				) => {
+					if (tabIdUpdated !== tabId) return;
 
-				if (changeInfo.status === "complete") {
-					chrome.tabs.onUpdated.removeListener(loadListener);
+					if (changeInfo.status === "complete") {
+						chrome.tabs.onUpdated.removeListener(loadListener);
 
-					// Start scrolling after page loads
-					logger.debug("Page loaded, starting scroll sequence", logContext);
+						logger.debug(
+							"Page loaded, sending START_SCROLL_AND_SCRAPE",
+							logContext,
+						);
 
-					// Function to perform scrolls
-					const performScroll = () => {
-						if (scrollCount >= targetScrolls) {
-							// Scrolling complete, wait a bit then trigger scrape
-							logger.debug(
-								"Scroll complete, waiting for content to load",
-								logContext,
-							);
-							setTimeout(() => {
-								// Send message to content script to trigger scraping
-								if (tabId) {
-									chrome.tabs
-										.sendMessage(tabId, { type: "TRIGGER_SCRAPE" })
-										.then(() => {
-											logger.debug("Scrape triggered", logContext);
-											// Wait for scraping to complete
-											setTimeout(() => {
-												if (tabId) {
-													chrome.tabs.remove(tabId).catch(console.error);
-												}
-												clearTimeout(timeout);
-												resolve({ postsScraped: 0 });
-											}, 5000); // Wait 5s for scraping to complete (increased)
-										})
-										.catch((error) => {
-											if (tabId) {
-												chrome.tabs.remove(tabId).catch(console.error);
-											}
-											clearTimeout(timeout);
-											reject(error);
-										});
-								}
-							}, 4000); // Wait 4s after last scroll for Facebook to load posts (increased)
-							return;
-						}
+						// Wait a bit for page to fully render, then send start message
+						setTimeout(() => {
+							if (!tabId) return;
 
-						// Perform scroll
-						scrollCount++;
-						logger.debug("Performing scroll", {
-							...logContext,
-							scroll: `${scrollCount}/${targetScrolls}`,
-						});
-
-						if (tabId) {
-							chrome.scripting
-								.executeScript({
-									target: { tabId },
-									func: () => {
-										window.scrollTo({
-											top: document.documentElement.scrollHeight,
-											behavior: "smooth",
-										});
+							chrome.tabs
+								.sendMessage(tabId, {
+									type: "START_SCROLL_AND_SCRAPE",
+									payload: {
+										scrollCount: 10,
+										scrollInterval: 3000, // 3s wait after scroll
+										scrapeWaitTime: 2000, // 2s wait after scrape
 									},
 								})
-								.then(() => {
-									// Schedule next scroll
-									setTimeout(performScroll, scrollInterval);
-								})
 								.catch((error) => {
-									logger.warn("Error scrolling, continuing anyway", {
+									logger.error("Failed to send START_SCROLL_AND_SCRAPE", {
 										...logContext,
 										error:
 											error instanceof Error ? error.message : String(error),
 									});
-									// Continue anyway
-									setTimeout(performScroll, scrollInterval);
+									chrome.runtime.onMessage.removeListener(progressListener);
+									clearTimeout(timeout);
+									if (tabId) {
+										chrome.tabs.remove(tabId).catch(console.error);
+									}
+									reject(error);
 								});
-						}
-					};
+						}, 3000); // 3s initial wait for page render
+					}
+				};
 
-					// Start first scroll after initial page render
-					setTimeout(performScroll, 3000);
+				chrome.tabs.onUpdated.addListener(loadListener);
+			},
+		);
+
+		// Listen for progress updates from content script
+		function progressListener(
+			message: ExtensionMessage,
+			sender: chrome.runtime.MessageSender,
+		) {
+			// Only listen to messages from our tab
+			if (sender.tab?.id !== tabId) return;
+
+			if (message.type === "SCROLL_AND_SCRAPE_PROGRESS") {
+				logger.debug("Scroll-and-scrape progress", {
+					...logContext,
+					scroll: `${message.payload.scrollNumber}/${message.payload.totalScrolls}`,
+					postsThisScrape: message.payload.postsFoundThisScrape,
+				});
+			}
+
+			if (message.type === "SCROLL_AND_SCRAPE_COMPLETE") {
+				logger.info("Scroll-and-scrape complete", {
+					...logContext,
+					totalPosts: message.payload.totalPostsScraped,
+					scrolls: message.payload.scrollsCompleted,
+				});
+
+				totalPostsScraped = message.payload.totalPostsScraped;
+
+				// Clean up
+				chrome.runtime.onMessage.removeListener(progressListener);
+				clearTimeout(timeout);
+
+				// Close tab
+				if (tabId) {
+					chrome.tabs.remove(tabId).catch(console.error);
 				}
-			};
 
-			chrome.tabs.onUpdated.addListener(loadListener);
-		});
+				resolve({ postsScraped: totalPostsScraped });
+			}
+		}
 	});
 }
 
