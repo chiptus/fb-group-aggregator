@@ -1,3 +1,5 @@
+import { Button } from "@/components/ui/button";
+
 export function BulkActionsBar({
 	selectedCount,
 	bulkSubscriptionId,
@@ -36,35 +38,28 @@ export function BulkActionsBar({
 							</option>
 						))}
 					</select>
-					<button
-						type="button"
+					<Button
 						onClick={onBulkAssign}
 						disabled={!bulkSubscriptionId}
-						className="px-3 py-1 text-sm bg-blue-600 text-white rounded hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+						variant="primary"
+						size="sm"
 					>
 						Assign
-					</button>
-					<button
-						type="button"
+					</Button>
+					<Button
 						onClick={onBulkEnable}
-						className="px-3 py-1 text-sm bg-green-600 text-white rounded hover:bg-green-700"
+						variant="default"
+						size="sm"
+						className="bg-green-600 hover:bg-green-700 active:bg-green-800"
 					>
 						Enable
-					</button>
-					<button
-						type="button"
-						onClick={onBulkDisable}
-						className="px-3 py-1 text-sm bg-gray-600 text-white rounded hover:bg-gray-700"
-					>
+					</Button>
+					<Button onClick={onBulkDisable} variant="secondary" size="sm">
 						Disable
-					</button>
-					<button
-						type="button"
-						onClick={onBulkDelete}
-						className="px-3 py-1 text-sm bg-red-600 text-white rounded hover:bg-red-700"
-					>
+					</Button>
+					<Button onClick={onBulkDelete} variant="destructive" size="sm">
 						Delete
-					</button>
+					</Button>
 				</div>
 			</div>
 		</div>

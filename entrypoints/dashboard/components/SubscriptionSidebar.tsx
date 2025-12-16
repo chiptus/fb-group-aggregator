@@ -1,3 +1,4 @@
+import { Button } from "@/components/ui/button";
 import type { Subscription } from "@/lib/types";
 
 interface SubscriptionSidebarProps {
@@ -12,38 +13,30 @@ export function SubscriptionSidebar({
 	onSelectSubscription,
 }: SubscriptionSidebarProps) {
 	return (
-		<nav className="w-64 flex-shrink-0" aria-label="Subscription filters">
+		<nav className="w-64 shrink-0" aria-label="Subscription filters">
 			<div className="bg-white rounded-lg shadow p-4">
 				<h2 className="font-semibold mb-3">Subscriptions</h2>
 				<div className="space-y-1">
-					<button
-						type="button"
+					<Button
 						onClick={() => onSelectSubscription(null)}
 						aria-pressed={selectedSubscriptionId === null}
 						aria-label="Show all posts from all subscriptions"
-						className={`w-full text-left px-3 py-2 rounded ${
-							selectedSubscriptionId === null
-								? "bg-blue-100 text-blue-900"
-								: "hover:bg-gray-100"
-						}`}
+						variant={selectedSubscriptionId === null ? "primary" : "ghost"}
+						className="w-full justify-start"
 					>
 						All Posts
-					</button>
+					</Button>
 					{subscriptions.map((sub) => (
-						<button
+						<Button
 							key={sub.id}
-							type="button"
 							onClick={() => onSelectSubscription(sub.id)}
 							aria-pressed={selectedSubscriptionId === sub.id}
 							aria-label={`Filter posts by ${sub.name} subscription`}
-							className={`w-full text-left px-3 py-2 rounded ${
-								selectedSubscriptionId === sub.id
-									? "bg-blue-100 text-blue-900"
-									: "hover:bg-gray-100"
-							}`}
+							variant={selectedSubscriptionId === sub.id ? "primary" : "ghost"}
+							className="w-full justify-start"
 						>
 							{sub.name}
-						</button>
+						</Button>
 					))}
 				</div>
 			</div>

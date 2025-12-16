@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react";
+import { Button } from "@/components/ui/button";
 import {
 	useGroups,
 	useScrapeSubscription,
@@ -94,13 +95,9 @@ function App() {
 					Failed to load posts. Please refresh the page or check your extension
 					storage.
 				</p>
-				<button
-					type="button"
-					onClick={() => window.location.reload()}
-					className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
-				>
+				<Button onClick={() => window.location.reload()} variant="primary">
 					Retry
-				</button>
+				</Button>
 			</div>
 		);
 	}
@@ -116,72 +113,76 @@ function App() {
 								{unseenCount} unseen post{unseenCount !== 1 ? "s" : ""}
 							</p>
 							{selectedSubscriptionId && (
-								<button
-									type="button"
+								<Button
 									onClick={() =>
 										scrapeSubscription.mutate(selectedSubscriptionId)
 									}
 									disabled={scrapeSubscription.isPending}
-									className="mt-2 px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors"
+									variant="default"
+									className="mt-2 bg-green-600 hover:bg-green-700 active:bg-green-800"
 								>
 									{scrapeSubscription.isPending
 										? "Scraping..."
 										: `Scrape ${subscriptions.find((s) => s.id === selectedSubscriptionId)?.name || "Subscription"}`}
-								</button>
+								</Button>
 							)}
 						</>
 					)}
 
 					{/* Tab Navigation */}
 					<div className="flex gap-4 mt-4 border-b border-gray-200">
-						<button
-							type="button"
+						<Button
 							onClick={() => setActiveTab("posts")}
-							className={`px-4 py-2 font-medium text-sm border-b-2 transition-colors ${
+							variant="ghost"
+							size="sm"
+							className={`rounded-none border-b-2 transition-colors ${
 								activeTab === "posts"
 									? "border-blue-500 text-blue-600"
-									: "border-transparent text-gray-600 hover:text-gray-800"
+									: "border-transparent text-gray-600 hover:text-gray-800 hover:bg-transparent"
 							}`}
 							aria-current={activeTab === "posts" ? "page" : undefined}
 						>
 							Posts
-						</button>
-						<button
-							type="button"
+						</Button>
+						<Button
 							onClick={() => setActiveTab("groups")}
-							className={`px-4 py-2 font-medium text-sm border-b-2 transition-colors ${
+							variant="ghost"
+							size="sm"
+							className={`rounded-none border-b-2 transition-colors ${
 								activeTab === "groups"
 									? "border-blue-500 text-blue-600"
-									: "border-transparent text-gray-600 hover:text-gray-800"
+									: "border-transparent text-gray-600 hover:text-gray-800 hover:bg-transparent"
 							}`}
 							aria-current={activeTab === "groups" ? "page" : undefined}
 						>
 							Groups
-						</button>
-						<button
-							type="button"
+						</Button>
+						<Button
 							onClick={() => setActiveTab("jobs")}
-							className={`px-4 py-2 font-medium text-sm border-b-2 transition-colors ${
+							variant="ghost"
+							size="sm"
+							className={`rounded-none border-b-2 transition-colors ${
 								activeTab === "jobs"
 									? "border-blue-500 text-blue-600"
-									: "border-transparent text-gray-600 hover:text-gray-800"
+									: "border-transparent text-gray-600 hover:text-gray-800 hover:bg-transparent"
 							}`}
 							aria-current={activeTab === "jobs" ? "page" : undefined}
 						>
 							Jobs
-						</button>
-						<button
-							type="button"
+						</Button>
+						<Button
 							onClick={() => setActiveTab("logs")}
-							className={`px-4 py-2 font-medium text-sm border-b-2 transition-colors ${
+							variant="ghost"
+							size="sm"
+							className={`rounded-none border-b-2 transition-colors ${
 								activeTab === "logs"
 									? "border-blue-500 text-blue-600"
-									: "border-transparent text-gray-600 hover:text-gray-800"
+									: "border-transparent text-gray-600 hover:text-gray-800 hover:bg-transparent"
 							}`}
 							aria-current={activeTab === "logs" ? "page" : undefined}
 						>
 							Logs
-						</button>
+						</Button>
 					</div>
 				</div>
 			</header>

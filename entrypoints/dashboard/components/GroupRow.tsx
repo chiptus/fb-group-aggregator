@@ -1,3 +1,4 @@
+import { Button } from "@/components/ui/button";
 import type { Group } from "@/lib/types";
 
 export function GroupRow({
@@ -75,13 +76,14 @@ export function GroupRow({
 				{formatDate(group.lastScrapedAt)}
 			</td>
 			<td className="px-4 py-3 text-right">
-				<button
-					type="button"
+				<Button
 					onClick={() => onDelete(group.id)}
-					className="text-sm text-red-600 hover:text-red-800"
+					variant="link"
+					size="sm"
+					className="text-red-600 hover:text-red-800"
 				>
 					Delete
-				</button>
+				</Button>
 			</td>
 		</tr>
 	);

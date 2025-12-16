@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react";
+import { Button } from "@/components/ui/button";
 import {
 	useCancelJob,
 	useDeleteJob,
@@ -125,18 +126,18 @@ export function JobViewer() {
 							Manage background scraping jobs for all enabled groups
 						</p>
 					</div>
-					<button
-						type="button"
+					<Button
 						onClick={handleStartJob}
 						disabled={
 							startJobMutation.isPending ||
 							!!activeJob ||
 							cancelJobMutation.isPending
 						}
-						className="px-6 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors font-medium"
+						variant="primary"
+						className="px-6 font-medium"
 					>
 						{startJobMutation.isPending ? "Starting..." : "Start New Job"}
-					</button>
+					</Button>
 				</div>
 			</div>
 
@@ -318,41 +319,41 @@ function JobCard(props: JobCardProps) {
 				{/* Action Buttons */}
 				<div className="flex gap-2 ml-4">
 					{job.status === "running" && (
-						<button
+						<Button
 							type="button"
 							onClick={() => onCancel(job.id)}
-							className="px-4 py-2 bg-red-600 text-white text-sm rounded hover:bg-red-700 transition-colors"
+							variant="destructive"
 						>
 							Cancel
-						</button>
+						</Button>
 					)}
 					{(job.status === "paused" || job.status === "failed") && (
-						<button
-							type="button"
+						<Button
 							onClick={() => onResume(job.id)}
-							className="px-4 py-2 bg-blue-600 text-white text-sm rounded hover:bg-blue-700 transition-colors"
+							variant="primary"
+							size="sm"
 						>
 							Resume
-						</button>
+						</Button>
 					)}
 					{(job.status === "completed" ||
 						job.status === "failed" ||
 						job.status === "cancelled") && (
-						<button
-							type="button"
+						<Button
 							onClick={() => onDelete(job.id)}
-							className="px-4 py-2 bg-gray-600 text-white text-sm rounded hover:bg-gray-700 transition-colors"
+							variant="destructive"
+							size="sm"
 						>
 							Delete
-						</button>
+						</Button>
 					)}
-					<button
-						type="button"
+					<Button
 						onClick={() => onToggleExpand(job.id)}
-						className="px-4 py-2 bg-gray-200 text-gray-700 text-sm rounded hover:bg-gray-300 transition-colors"
+						variant="secondary"
+						size="sm"
 					>
 						{isExpanded ? "Hide Details" : "Show Details"}
-					</button>
+					</Button>
 				</div>
 			</div>
 
@@ -397,13 +398,13 @@ function JobCard(props: JobCardProps) {
 
 					{/* Logs Toggle */}
 					<div>
-						<button
-							type="button"
+						<Button
 							onClick={() => onToggleLogs(job.id)}
-							className="px-4 py-2 bg-gray-200 text-gray-700 text-sm rounded hover:bg-gray-300 transition-colors"
+							variant="secondary"
+							size="sm"
 						>
 							{showLogs ? "Hide Logs" : "Show Logs"}
-						</button>
+						</Button>
 					</div>
 
 					{/* Logs Section */}

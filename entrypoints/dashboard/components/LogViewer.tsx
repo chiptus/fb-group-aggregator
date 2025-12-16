@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react";
+import { Button } from "@/components/ui/button";
 import { useClearLogs, useLogs } from "@/lib/hooks/storage/useLogs";
 import type { LogEntry, LogLevel, LogSource } from "@/lib/types";
 import { LoadingSpinner } from "./LoadingSpinner";
@@ -133,14 +134,14 @@ export function LogViewer() {
 					</div>
 
 					<div className="flex gap-2">
-						<button
+						<Button
 							type="button"
 							onClick={handleClearLogs}
 							disabled={clearLogsMutation.isPending || logs.length === 0}
-							className="px-4 py-2 bg-red-600 text-white text-sm rounded hover:bg-red-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors"
+							variant="destructive"
 						>
 							Clear Logs
-						</button>
+						</Button>
 					</div>
 				</div>
 

@@ -1,4 +1,5 @@
 import DOMPurify from "dompurify";
+import { Button } from "@/components/ui/button";
 import type { Group, Post } from "@/lib/types";
 
 interface PostCardProps {
@@ -19,18 +20,18 @@ export function PostCard({ post, group, onToggleSeen }: PostCardProps) {
 					</p>
 				</div>
 				<div className="flex gap-2">
-					<button
-						type="button"
+					<Button
 						onClick={() => onToggleSeen(post.id, post.seen)}
 						aria-label={
 							post.seen
 								? `Mark post from ${post.authorName} as unseen`
 								: `Mark post from ${post.authorName} as seen`
 						}
-						className="text-sm text-blue-600 hover:text-blue-800"
+						variant="link"
+						size="sm"
 					>
 						{post.seen ? "Mark as unseen" : "Mark as seen"}
-					</button>
+					</Button>
 				</div>
 			</div>
 			<div
