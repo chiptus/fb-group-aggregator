@@ -8,7 +8,7 @@ describe("Facebook Scraper", () => {
 	});
 
 	describe("scrapeGroupPosts", () => {
-		it("should extract posts from Facebook group page", () => {
+		it("should extract posts from Facebook group page", async () => {
 			// Mock Facebook group posts HTML structure
 			document.body.innerHTML = `
         <div role="feed">
@@ -36,7 +36,7 @@ describe("Facebook Scraper", () => {
       `;
 
 			const groupId = "testgroup";
-			const posts = scrapeGroupPosts(groupId);
+			const posts = await scrapeGroupPosts(groupId);
 
 			expect(posts).toHaveLength(2);
 
@@ -59,7 +59,7 @@ describe("Facebook Scraper", () => {
 			});
 		});
 
-		it("should handle posts with missing author gracefully", () => {
+		it("should handle posts with missing author gracefully", async () => {
 			document.body.innerHTML = `
         <div role="feed">
           <div role="article" data-ft='{"mf_story_key":"12345"}' class="x1n2onr6 xh8yej3 x1ja2u2z xod5an3">
@@ -72,13 +72,13 @@ describe("Facebook Scraper", () => {
         </div>
       `;
 
-			const posts = scrapeGroupPosts("testgroup");
+			const posts = await scrapeGroupPosts("testgroup");
 
 			expect(posts).toHaveLength(1);
 			expect(posts[0].authorName).toBe("Unknown");
 		});
 
-		it("should handle posts with missing content gracefully", () => {
+		it("should handle posts with missing content gracefully", async () => {
 			document.body.innerHTML = `
         <div role="feed">
           <div role="article" data-ft='{"mf_story_key":"12345"}' class="x1n2onr6 xh8yej3 x1ja2u2z xod5an3">
@@ -91,13 +91,13 @@ describe("Facebook Scraper", () => {
         </div>
       `;
 
-			const posts = scrapeGroupPosts("testgroup");
+			const posts = await scrapeGroupPosts("testgroup");
 
 			expect(posts).toHaveLength(1);
 			expect(posts[0].contentHtml).toBe("");
 		});
 
-		it("should handle posts with missing timestamp gracefully", () => {
+		it("should handle posts with missing timestamp gracefully", async () => {
 			document.body.innerHTML = `
         <div role="feed">
           <div role="article" data-ft='{"mf_story_key":"12345"}' class="x1n2onr6 xh8yej3 x1ja2u2z xod5an3">
@@ -113,7 +113,7 @@ describe("Facebook Scraper", () => {
       `;
 
 			const now = Date.now();
-			const posts = scrapeGroupPosts("testgroup");
+			const posts = await scrapeGroupPosts("testgroup");
 
 			expect(posts).toHaveLength(1);
 			// Allow for small timing differences (within 100ms)
@@ -121,7 +121,7 @@ describe("Facebook Scraper", () => {
 			expect(posts[0].timestamp).toBeLessThanOrEqual(now + 100);
 		});
 
-		it("should skip posts without post ID", () => {
+		it("should skip posts without post ID", async () => {
 			document.body.innerHTML = `
         <div role="feed">
           <div role="article">
@@ -135,32 +135,32 @@ describe("Facebook Scraper", () => {
         </div>
       `;
 
-			const posts = scrapeGroupPosts("testgroup");
+			const posts = await scrapeGroupPosts("testgroup");
 
 			expect(posts).toHaveLength(0);
 		});
 
-		it("should return empty array when no posts found", () => {
+		it("should return empty array when no posts found", async () => {
 			document.body.innerHTML = `
         <div role="feed">
           <div>No posts here</div>
         </div>
       `;
 
-			const posts = scrapeGroupPosts("testgroup");
+			const posts = await scrapeGroupPosts("testgroup");
 
 			expect(posts).toEqual([]);
 		});
 
-		it("should return empty array when feed container not found", () => {
+		it("should return empty array when feed container not found", async () => {
 			document.body.innerHTML = "<div>Not a Facebook page</div>";
 
-			const posts = scrapeGroupPosts("testgroup");
+			const posts = await scrapeGroupPosts("testgroup");
 
 			expect(posts).toEqual([]);
 		});
 
-		it("should extract contentHtml with formatting preserved", () => {
+		it("should extract contentHtml with formatting preserved", async () => {
 			document.body.innerHTML = `
         <div role="feed">
           <div role="article" data-ft='{"mf_story_key":"12345"}' class="x1n2onr6 xh8yej3 x1ja2u2z xod5an3">
@@ -180,7 +180,7 @@ describe("Facebook Scraper", () => {
         </div>
       `;
 
-			const posts = scrapeGroupPosts("testgroup");
+			const posts = await scrapeGroupPosts("testgroup");
 
 			expect(posts).toHaveLength(1);
 			expect(posts[0].contentHtml).toContain("<p>");
@@ -189,7 +189,7 @@ describe("Facebook Scraper", () => {
 			expect(posts[0].contentHtml).toContain("<a");
 		});
 
-		it("should construct correct post URL", () => {
+		it("should construct correct post URL", async () => {
 			document.body.innerHTML = `
         <div role="feed">
           <div role="article" data-ft='{"mf_story_key":"12345"}' class="x1n2onr6 xh8yej3 x1ja2u2z xod5an3">
@@ -204,14 +204,14 @@ describe("Facebook Scraper", () => {
         </div>
       `;
 
-			const posts = scrapeGroupPosts("testgroup");
+			const posts = await scrapeGroupPosts("testgroup");
 
 			expect(posts).toHaveLength(1);
 			expect(posts[0].url).toMatch(/facebook\.com\/groups\/testgroup/);
 			expect(posts[0].url).toContain("12345");
 		});
 
-		it("should parse Unix timestamp correctly", () => {
+		it("should parse Unix timestamp correctly", async () => {
 			const unixTimestamp = 1704067200; // Jan 1, 2024 00:00:00 GMT
 
 			document.body.innerHTML = `
@@ -228,7 +228,7 @@ describe("Facebook Scraper", () => {
         </div>
       `;
 
-			const posts = scrapeGroupPosts("testgroup");
+			const posts = await scrapeGroupPosts("testgroup");
 
 			expect(posts).toHaveLength(1);
 			expect(posts[0].timestamp).toBe(unixTimestamp * 1000); // Should convert to milliseconds

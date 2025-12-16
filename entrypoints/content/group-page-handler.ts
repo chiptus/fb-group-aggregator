@@ -72,7 +72,7 @@ async function scrapeAndSend(groupId: string) {
 		logger.debug("Scraping posts", { groupId });
 
 		// Scrape posts from page
-		const posts = scrapeGroupPosts(groupId);
+		const posts = await scrapeGroupPosts(groupId);
 
 		if (posts.length === 0) {
 			logger.debug("No posts found", { groupId });
@@ -209,7 +209,7 @@ async function scrapeAndSendWithTracking(
 ): Promise<void> {
 	try {
 		// Scrape posts
-		const posts = scrapeGroupPosts(groupId);
+		const posts = await scrapeGroupPosts(groupId);
 
 		// Filter out posts we've already scraped in this session
 		const newPosts = posts.filter((post) => !seenPostIds.has(post.id));

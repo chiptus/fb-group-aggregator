@@ -3,11 +3,11 @@ import type { Post } from "./types";
 /**
  * Scrapes posts from a Facebook group page
  * @param groupId - The Facebook group ID
- * @returns Array of scraped posts (without scrapedAt and seen fields)
+ * @returns Promise that resolves to array of scraped posts (without scrapedAt and seen fields)
  */
-export function scrapeGroupPosts(
+export async function scrapeGroupPosts(
 	groupId: string,
-): Omit<Post, "scrapedAt" | "seen">[] {
+): Promise<Omit<Post, "scrapedAt" | "seen">[]> {
 	const posts: Omit<Post, "scrapedAt" | "seen">[] = [];
 
 	// Find the group feed container
@@ -61,15 +61,15 @@ export function scrapeGroupPosts(
 
 	console.log(`[Scraper] Found ${postElements.length} potential post elements`);
 
-	postElements.forEach((postElement, index) => {
+	for (let index = 0; index < postElements.length; index++) {
 		try {
 			// Skip hidden or virtualized placeholder elements
-			const element = postElement as HTMLElement;
+			const element = postElements[index] as HTMLElement;
 			if (element.hasAttribute("hidden") || element.querySelector("[hidden]")) {
 				console.log(
 					`[Scraper] Skipped element ${index + 1} (hidden/placeholder)`,
 				);
-				return;
+				continue;
 			}
 
 			// Skip elements with no links (likely empty placeholders)
@@ -78,8 +78,11 @@ export function scrapeGroupPosts(
 				console.log(
 					`[Scraper] Skipped element ${index + 1} (no links - likely placeholder)`,
 				);
-				return;
+				continue;
 			}
+
+			// Expand "see more" links before extracting content
+			await expandSeeMore(element);
 
 			const post = extractPostData(element, groupId);
 			if (post) {
@@ -90,18 +93,104 @@ export function scrapeGroupPosts(
 			} else {
 				console.log(
 					`[Scraper] Skipped element ${index + 1} (no post ID found)`,
-					postElement,
+					postElements[index],
 				);
 			}
 		} catch (error) {
 			console.error(`[Scraper] Error extracting post ${index + 1}:`, error);
 			// Continue to next post
 		}
-	});
+	}
 
 	console.log(`[Scraper] Total posts extracted: ${posts.length}`);
 
 	return posts;
+}
+
+/**
+ * Finds and clicks "see more" links to expand truncated content
+ * @param element - The post element to search for "see more" links
+ */
+async function expandSeeMore(element: HTMLElement): Promise<void> {
+	// Common text patterns for "see more" links on Facebook
+	const seeMorePatterns = [
+		"See more",
+		"see more",
+		"See More",
+		"SEE MORE",
+		"Show more",
+		"show more",
+	];
+
+	// Strategy 1: Look for role="button" elements with "see more" text
+	const buttons = element.querySelectorAll('[role="button"]');
+	for (const button of Array.from(buttons)) {
+		const text = button.textContent?.trim() || "";
+		if (seeMorePatterns.some((pattern) => text.includes(pattern))) {
+			console.log(`[Scraper] Found "see more" button with text: "${text}"`);
+			(button as HTMLElement).click();
+			// Wait for content to expand
+			await new Promise((resolve) => setTimeout(resolve, 500));
+			console.log("[Scraper] Clicked see more button and waited for expansion");
+			return;
+		}
+	}
+
+	// Strategy 2: Look for clickable divs/spans with "see more" text
+	const clickableElements = element.querySelectorAll(
+		'div[role="button"], span[role="button"], div[tabindex="0"], span[tabindex="0"]',
+	);
+	for (const el of Array.from(clickableElements)) {
+		const text = el.textContent?.trim() || "";
+		if (seeMorePatterns.some((pattern) => text.includes(pattern))) {
+			console.log(
+				`[Scraper] Found "see more" clickable element with text: "${text}"`,
+			);
+			(el as HTMLElement).click();
+			// Wait for content to expand
+			await new Promise((resolve) => setTimeout(resolve, 500));
+			console.log(
+				"[Scraper] Clicked see more element and waited for expansion",
+			);
+			return;
+		}
+	}
+
+	// Strategy 3: Look for any element containing exactly "see more" (case insensitive)
+	const allElements = element.querySelectorAll("*");
+	for (const el of Array.from(allElements)) {
+		const text = el.textContent?.trim() || "";
+		// Check if element itself (not children) contains see more text
+		if (
+			text.length < 50 &&
+			seeMorePatterns.some(
+				(pattern) => text.toLowerCase() === pattern.toLowerCase(),
+			)
+		) {
+			const htmlEl = el as HTMLElement;
+			// Check if it's clickable (has cursor pointer or is interactive)
+			const style = window.getComputedStyle(htmlEl);
+			if (
+				style.cursor === "pointer" ||
+				htmlEl.onclick ||
+				htmlEl.getAttribute("onclick")
+			) {
+				console.log(
+					`[Scraper] Found "see more" element (strategy 3) with text: "${text}"`,
+				);
+				htmlEl.click();
+				// Wait for content to expand
+				await new Promise((resolve) => setTimeout(resolve, 500));
+				console.log(
+					"[Scraper] Clicked see more element (strategy 3) and waited for expansion",
+				);
+				return;
+			}
+		}
+	}
+
+	// No "see more" link found - content is already expanded or doesn't have one
+	console.log("[Scraper] No see more link found, content already expanded");
 }
 
 /**
