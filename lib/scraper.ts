@@ -3,12 +3,21 @@ import type { Post } from "./types";
 /**
  * Scrapes posts from a Facebook group page
  * @param groupId - The Facebook group ID
- * @returns Promise that resolves to array of scraped posts (without scrapedAt and seen fields)
+ * @param options - Optional scraping options
+ * @param options.existingPostIds - Set of post IDs that already exist (for early termination)
+ * @param options.cutoffTimestamp - Don't scrape posts older than this timestamp (for early termination)
+ * @returns Promise that resolves to array of scraped posts (without scrapedAt and seen fields), sorted by timestamp descending
  */
 export async function scrapeGroupPosts(
 	groupId: string,
+	options?: {
+		existingPostIds?: Set<string>;
+		cutoffTimestamp?: number;
+	},
 ): Promise<Omit<Post, "scrapedAt" | "seen">[]> {
 	const posts: Omit<Post, "scrapedAt" | "seen">[] = [];
+	const existingPostIds = options?.existingPostIds || new Set<string>();
+	const cutoffTimestamp = options?.cutoffTimestamp || 0;
 
 	// Find the group feed container
 	const feedContainer = document.querySelector('[role="feed"]');
@@ -86,6 +95,21 @@ export async function scrapeGroupPosts(
 
 			const post = extractPostData(element, groupId);
 			if (post) {
+				// Check for early termination conditions
+				if (existingPostIds.has(post.id)) {
+					console.log(
+						`[Scraper] Found existing post ${post.id} - stopping scrape (early termination)`,
+					);
+					break; // Stop scraping - we've reached already-scraped content
+				}
+
+				if (post.timestamp < cutoffTimestamp) {
+					console.log(
+						`[Scraper] Found post older than cutoff (${new Date(post.timestamp).toISOString()} < ${new Date(cutoffTimestamp).toISOString()}) - stopping scrape (early termination)`,
+					);
+					break; // Stop scraping - posts are too old
+				}
+
 				posts.push(post);
 				console.log(
 					`[Scraper] Successfully extracted post ${index + 1}: ${post.id}`,
@@ -103,6 +127,10 @@ export async function scrapeGroupPosts(
 	}
 
 	console.log(`[Scraper] Total posts extracted: ${posts.length}`);
+
+	// Sort posts by timestamp descending (newest first)
+	posts.sort((a, b) => b.timestamp - a.timestamp);
+	console.log(`[Scraper] Posts sorted by timestamp descending (newest first)`);
 
 	return posts;
 }
@@ -219,7 +247,9 @@ function extractPostData(
 
 	// Extract timestamp
 	const timestamp = extractTimestamp(element);
-	console.log(`[Scraper] Timestamp: ${new Date(timestamp).toISOString()}`);
+	console.log(
+		`[Scraper] Timestamp: ${timestamp ? new Date(timestamp).toISOString() : ""}`,
+	);
 
 	// Construct post URL
 	const url = constructPostUrl(groupId, postId);

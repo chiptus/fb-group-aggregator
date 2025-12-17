@@ -2,6 +2,10 @@ import type { ContentScriptContext } from "wxt/utils/content-script-context";
 import { debounce } from "@/lib/debounce";
 import { createLogger } from "@/lib/logger";
 import { extractGroupInfo, scrapeGroupPosts } from "@/lib/scraper";
+import {
+	getExistingPostIdsForGroup,
+	getLatestPostTimestampForGroup,
+} from "@/lib/storage/posts";
 
 const logger = createLogger("content");
 const debouncedScrape = debounce(scrapeAndSend, 2000);
@@ -71,15 +75,36 @@ async function scrapeAndSend(groupId: string) {
 	try {
 		logger.debug("Scraping posts", { groupId });
 
-		// Scrape posts from page
-		const posts = await scrapeGroupPosts(groupId);
+		// Fetch existing post IDs and latest timestamp for early termination
+		const existingPostIds = await getExistingPostIdsForGroup(groupId);
+		const latestTimestamp = await getLatestPostTimestampForGroup(groupId);
+
+		// Calculate cutoff timestamp (30 days ago if no posts exist, otherwise no cutoff for incremental scraping)
+		// When we have existing posts, we rely on finding duplicate IDs to stop
+		const cutoffTimestamp = latestTimestamp
+			? 0 // No time-based cutoff if we have existing posts - rely on ID matching
+			: Date.now() - 30 * 24 * 60 * 60 * 1000; // 30 days ago for first scrape
+
+		logger.debug("Scraping with early termination", {
+			groupId,
+			existingPostCount: existingPostIds.size,
+			cutoffDate: cutoffTimestamp
+				? new Date(cutoffTimestamp).toISOString()
+				: "none",
+		});
+
+		// Scrape posts from page with early termination options
+		const posts = await scrapeGroupPosts(groupId, {
+			existingPostIds,
+			cutoffTimestamp,
+		});
 
 		if (posts.length === 0) {
-			logger.debug("No posts found", { groupId });
+			logger.debug("No new posts found", { groupId });
 			return;
 		}
 
-		logger.info("Found posts", { groupId, postCount: posts.length });
+		logger.info("Found new posts", { groupId, postCount: posts.length });
 
 		// Extract group info
 		const groupInfo = extractGroupInfo();
@@ -144,14 +169,35 @@ async function performScrollAndScrapeSequence(
 	const scrapedPostIds = new Set<string>(); // Track unique posts across all scrapes
 
 	// Initial scrape before any scrolling
-	await scrapeAndSendWithTracking(
+	const shouldContinue = await scrapeAndSendWithTracking(
 		groupId,
 		scrapedPostIds,
 		0,
 		config.scrollCount,
 	);
 
+	if (!shouldContinue) {
+		logger.info(
+			"Early termination on initial scrape - all posts already scraped",
+			{
+				groupId,
+			},
+		);
+
+		chrome.runtime.sendMessage({
+			type: "SCROLL_AND_SCRAPE_COMPLETE",
+			payload: {
+				totalPostsScraped: scrapedPostIds.size,
+				scrollsCompleted: 0,
+				success: true,
+			},
+		});
+
+		return;
+	}
+
 	// Perform scroll-scrape cycles
+	let completedScrolls = 0;
 	for (let i = 1; i <= config.scrollCount; i++) {
 		logger.debug("Scroll cycle", {
 			groupId,
@@ -168,12 +214,24 @@ async function performScrollAndScrapeSequence(
 		await delay(config.scrollInterval);
 
 		// Scrape again
-		await scrapeAndSendWithTracking(
+		const continueScrolling = await scrapeAndSendWithTracking(
 			groupId,
 			scrapedPostIds,
 			i,
 			config.scrollCount,
 		);
+
+		completedScrolls = i;
+
+		// Check if we should stop early
+		if (!continueScrolling) {
+			logger.info("Early termination triggered - stopping scroll sequence", {
+				groupId,
+				completedScrolls,
+				totalPosts: scrapedPostIds.size,
+			});
+			break;
+		}
 
 		// Wait before next scroll
 		if (i < config.scrollCount) {
@@ -186,7 +244,7 @@ async function performScrollAndScrapeSequence(
 		type: "SCROLL_AND_SCRAPE_COMPLETE",
 		payload: {
 			totalPostsScraped: scrapedPostIds.size,
-			scrollsCompleted: config.scrollCount,
+			scrollsCompleted: completedScrolls,
 			success: true,
 		},
 	});
@@ -194,6 +252,7 @@ async function performScrollAndScrapeSequence(
 	logger.info("Scroll-and-scrape sequence complete", {
 		groupId,
 		totalPosts: scrapedPostIds.size,
+		scrollsCompleted: completedScrolls,
 	});
 }
 
@@ -206,10 +265,45 @@ async function scrapeAndSendWithTracking(
 	seenPostIds: Set<string>,
 	scrollNumber: number,
 	totalScrolls: number,
-): Promise<void> {
+): Promise<boolean> {
 	try {
-		// Scrape posts
-		const posts = await scrapeGroupPosts(groupId);
+		// Fetch existing post IDs from storage for early termination
+		const existingPostIds = await getExistingPostIdsForGroup(groupId);
+		const latestTimestamp = await getLatestPostTimestampForGroup(groupId);
+
+		// Calculate cutoff timestamp
+		const cutoffTimestamp = latestTimestamp
+			? 0 // No time-based cutoff if we have existing posts
+			: Date.now() - 30 * 24 * 60 * 60 * 1000; // 30 days ago for first scrape
+
+		// Merge existing post IDs with session-seen IDs
+		const allKnownPostIds = new Set([...existingPostIds, ...seenPostIds]);
+
+		// Scrape posts with early termination
+		const posts = await scrapeGroupPosts(groupId, {
+			existingPostIds: allKnownPostIds,
+			cutoffTimestamp,
+		});
+
+		// If scraper returned 0 posts, we hit the early termination condition
+		if (posts.length === 0) {
+			logger.info("Early termination triggered - no new posts found", {
+				groupId,
+				scrollNumber,
+			});
+
+			// Send progress update
+			chrome.runtime.sendMessage({
+				type: "SCROLL_AND_SCRAPE_PROGRESS",
+				payload: {
+					scrollNumber,
+					totalScrolls,
+					postsFoundThisScrape: 0,
+				},
+			});
+
+			return false; // Signal to stop scrolling
+		}
 
 		// Filter out posts we've already scraped in this session
 		const newPosts = posts.filter((post) => !seenPostIds.has(post.id));
@@ -249,12 +343,15 @@ async function scrapeAndSendWithTracking(
 				postsFoundThisScrape: newPosts.length,
 			},
 		});
+
+		return true;
 	} catch (error) {
 		logger.error("Error in scrape cycle", {
 			groupId,
 			scrollNumber,
 			error: error instanceof Error ? error.message : String(error),
 		});
+		return true;
 	}
 }
 
