@@ -8,7 +8,7 @@ const MAX_LOGS = 500;
 export async function createLog(
 	logData: Omit<LogEntry, "id" | "timestamp">,
 ): Promise<void> {
-	const data = (await storage.getItem<LogEntry[]>(STORAGE_KEY)) || [];
+	const data = await storage.getItem<LogEntry[]>(STORAGE_KEY, { fallback: [] });
 	const logs = z.array(LogEntrySchema).parse(data);
 
 	const logEntry: LogEntry = {
@@ -22,12 +22,12 @@ export async function createLog(
 }
 
 export async function listLogs(): Promise<LogEntry[]> {
-	const data = (await storage.getItem<LogEntry[]>(STORAGE_KEY)) || [];
+	const data = await storage.getItem<LogEntry[]>(STORAGE_KEY, { fallback: [] });
 	return z.array(LogEntrySchema).parse(data);
 }
 
 export async function listLogsByJob(jobId: string): Promise<LogEntry[]> {
-	const data = (await storage.getItem<LogEntry[]>(STORAGE_KEY)) || [];
+	const data = await storage.getItem<LogEntry[]>(STORAGE_KEY, { fallback: [] });
 	const logs = z.array(LogEntrySchema).parse(data);
 	return logs.filter((log) => log.jobId === jobId);
 }

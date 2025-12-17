@@ -1,5 +1,5 @@
 import { createLogger } from "@/lib/logger";
-import { deleteJob, getJob } from "@/lib/storage";
+import { deleteJob, getJob } from "@/lib/storage/jobs";
 import type { ExtensionMessage, ScrapePostsResponse } from "@/lib/types";
 import { handleScrapeGroupsList } from "./handle-scrape-groups-list";
 import { handleScrapePosts } from "./handle-scrape-posts";

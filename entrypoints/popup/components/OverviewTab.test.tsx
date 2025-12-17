@@ -1,22 +1,30 @@
 import { screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import * as storage from "@/lib/storage";
+import * as groupsStorage from "@/lib/storage/groups";
+import * as postsStorage from "@/lib/storage/posts";
+import * as subscriptionsStorage from "@/lib/storage/subscriptions";
 import { renderWithQuery } from "@/test/test-utils";
 import { OverviewTab } from "./OverviewTab";
 
-vi.mock("@/lib/storage", () => ({
+vi.mock("@/lib/storage/subscriptions", () => ({
 	listSubscriptions: vi.fn(),
+}));
+
+vi.mock("@/lib/storage/groups", () => ({
 	listGroups: vi.fn(),
+}));
+
+vi.mock("@/lib/storage/posts", () => ({
 	listPosts: vi.fn(),
 }));
 
 describe("OverviewTab", () => {
 	beforeEach(() => {
 		vi.clearAllMocks();
-		vi.mocked(storage.listSubscriptions).mockResolvedValue([]);
-		vi.mocked(storage.listGroups).mockResolvedValue([]);
-		vi.mocked(storage.listPosts).mockResolvedValue([]);
+		vi.mocked(subscriptionsStorage.listSubscriptions).mockResolvedValue([]);
+		vi.mocked(groupsStorage.listGroups).mockResolvedValue([]);
+		vi.mocked(postsStorage.listPosts).mockResolvedValue([]);
 	});
 
 	it('should display "Open Dashboard" button', async () => {
@@ -82,9 +90,11 @@ describe("OverviewTab", () => {
 			},
 		];
 
-		vi.mocked(storage.listSubscriptions).mockResolvedValue(mockSubscriptions);
-		vi.mocked(storage.listGroups).mockResolvedValue(mockGroups);
-		vi.mocked(storage.listPosts).mockResolvedValue(mockPosts);
+		vi.mocked(subscriptionsStorage.listSubscriptions).mockResolvedValue(
+			mockSubscriptions,
+		);
+		vi.mocked(groupsStorage.listGroups).mockResolvedValue(mockGroups);
+		vi.mocked(postsStorage.listPosts).mockResolvedValue(mockPosts);
 
 		renderWithQuery(<OverviewTab />);
 

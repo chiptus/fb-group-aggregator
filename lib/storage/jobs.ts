@@ -1,8 +1,8 @@
 import { storage } from "wxt/utils/storage";
 import { z } from "zod";
 import { type ScrapeJob, ScrapeJobSchema } from "../types";
+import { JOBS_STORAGE_KEY } from "./keys";
 
-const STORAGE_KEY = "local:jobs" as const;
 const MAX_COMPLETED_JOBS = 3;
 
 export async function createJob(
@@ -26,20 +26,26 @@ export async function createJob(
 		failedCount: 0,
 	};
 
-	const jobs = (await storage.getItem<ScrapeJob[]>(STORAGE_KEY)) || [];
+	const jobs = await storage.getItem<ScrapeJob[]>(JOBS_STORAGE_KEY, {
+		fallback: [],
+	});
 	jobs.push(job);
-	await storage.setItem(STORAGE_KEY, jobs);
+	await storage.setItem(JOBS_STORAGE_KEY, jobs);
 
 	return job;
 }
 
 export async function listJobs(): Promise<ScrapeJob[]> {
-	const data = (await storage.getItem<ScrapeJob[]>(STORAGE_KEY)) || [];
+	const data = await storage.getItem<ScrapeJob[]>(JOBS_STORAGE_KEY, {
+		fallback: [],
+	});
 	return z.array(ScrapeJobSchema).parse(data);
 }
 
 export async function getJob(id: string): Promise<ScrapeJob | undefined> {
-	const data = (await storage.getItem<ScrapeJob[]>(STORAGE_KEY)) || [];
+	const data = await storage.getItem<ScrapeJob[]>(JOBS_STORAGE_KEY, {
+		fallback: [],
+	});
 	const jobs = z.array(ScrapeJobSchema).parse(data);
 	return jobs.find((j) => j.id === id);
 }
@@ -48,7 +54,9 @@ export async function updateJob(
 	id: string,
 	updates: Partial<Omit<ScrapeJob, "id" | "createdAt">>,
 ): Promise<ScrapeJob> {
-	const data = (await storage.getItem<ScrapeJob[]>(STORAGE_KEY)) || [];
+	const data = await storage.getItem<ScrapeJob[]>(JOBS_STORAGE_KEY, {
+		fallback: [],
+	});
 	const jobs = z.array(ScrapeJobSchema).parse(data);
 	const index = jobs.findIndex((j) => j.id === id);
 
@@ -58,20 +66,24 @@ export async function updateJob(
 
 	const updated = { ...jobs[index], ...updates };
 	jobs[index] = updated;
-	await storage.setItem(STORAGE_KEY, jobs);
+	await storage.setItem(JOBS_STORAGE_KEY, jobs);
 
 	return updated;
 }
 
 export async function deleteJob(id: string): Promise<void> {
-	const data = (await storage.getItem<ScrapeJob[]>(STORAGE_KEY)) || [];
+	const data = await storage.getItem<ScrapeJob[]>(JOBS_STORAGE_KEY, {
+		fallback: [],
+	});
 	const jobs = z.array(ScrapeJobSchema).parse(data);
 	const filtered = jobs.filter((j) => j.id !== id);
-	await storage.setItem(STORAGE_KEY, filtered);
+	await storage.setItem(JOBS_STORAGE_KEY, filtered);
 }
 
 export async function cleanupOldJobs(): Promise<void> {
-	const data = (await storage.getItem<ScrapeJob[]>(STORAGE_KEY)) || [];
+	const data = await storage.getItem<ScrapeJob[]>(JOBS_STORAGE_KEY, {
+		fallback: [],
+	});
 	const jobs = z.array(ScrapeJobSchema).parse(data);
 
 	const completedJobs = jobs
@@ -82,11 +94,13 @@ export async function cleanupOldJobs(): Promise<void> {
 	const nonCompletedJobs = jobs.filter((j) => j.status !== "completed");
 	const kept = [...nonCompletedJobs, ...completedJobs];
 
-	await storage.setItem(STORAGE_KEY, kept);
+	await storage.setItem(JOBS_STORAGE_KEY, kept);
 }
 
 export async function getActiveJob(): Promise<ScrapeJob | undefined> {
-	const data = (await storage.getItem<ScrapeJob[]>(STORAGE_KEY)) || [];
+	const data = await storage.getItem<ScrapeJob[]>(JOBS_STORAGE_KEY, {
+		fallback: [],
+	});
 	const jobs = z.array(ScrapeJobSchema).parse(data);
 	return jobs.find((j) => j.status === "running" || j.status === "paused");
 }

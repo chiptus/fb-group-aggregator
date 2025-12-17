@@ -1,21 +1,23 @@
 import { screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import * as storage from "@/lib/storage";
+import * as subscriptionStorage from "@/lib/storage/subscriptions";
 import { renderWithQuery } from "@/test/test-utils";
 import { SubscriptionsTab } from "./SubscriptionsTab";
 
-vi.mock("@/lib/storage", () => ({
+vi.mock("@/lib/storage/subscriptions", () => ({
 	listSubscriptions: vi.fn(),
+	deleteSubscription: vi.fn(),
 	createSubscription: vi.fn(),
 	updateSubscription: vi.fn(),
-	deleteSubscription: vi.fn(),
 }));
+
+import * as subscriptionsStorage from "@/lib/storage/subscriptions";
 
 describe("SubscriptionsTab", () => {
 	beforeEach(() => {
 		vi.clearAllMocks();
-		vi.mocked(storage.listSubscriptions).mockResolvedValue([]);
+		vi.mocked(subscriptionsStorage.listSubscriptions).mockResolvedValue([]);
 	});
 
 	it("should display list of subscriptions", async () => {
@@ -24,7 +26,9 @@ describe("SubscriptionsTab", () => {
 			{ id: "sub2", name: "Apartments", createdAt: Date.now() },
 		];
 
-		vi.mocked(storage.listSubscriptions).mockResolvedValue(mockSubscriptions);
+		vi.mocked(subscriptionsStorage.listSubscriptions).mockResolvedValue(
+			mockSubscriptions,
+		);
 
 		renderWithQuery(<SubscriptionsTab />);
 
@@ -35,7 +39,7 @@ describe("SubscriptionsTab", () => {
 	});
 
 	it('should show "Add Subscription" button', async () => {
-		vi.mocked(storage.listSubscriptions).mockResolvedValue([]);
+		vi.mocked(subscriptionsStorage.listSubscriptions).mockResolvedValue([]);
 
 		renderWithQuery(<SubscriptionsTab />);
 
@@ -54,8 +58,12 @@ describe("SubscriptionsTab", () => {
 			createdAt: Date.now(),
 		};
 
-		vi.mocked(storage.createSubscription).mockResolvedValue(newSubscription);
-		vi.mocked(storage.listSubscriptions).mockResolvedValue([newSubscription]);
+		vi.mocked(subscriptionStorage.createSubscription).mockResolvedValue(
+			newSubscription,
+		);
+		vi.mocked(subscriptionsStorage.listSubscriptions).mockResolvedValue([
+			newSubscription,
+		]);
 
 		renderWithQuery(<SubscriptionsTab />);
 
@@ -74,7 +82,9 @@ describe("SubscriptionsTab", () => {
 		await user.click(screen.getByRole("button", { name: /create/i }));
 
 		await waitFor(() => {
-			expect(storage.createSubscription).toHaveBeenCalledWith("New Sub");
+			expect(subscriptionStorage.createSubscription).toHaveBeenCalledWith(
+				"New Sub",
+			);
 		});
 	});
 
@@ -86,8 +96,10 @@ describe("SubscriptionsTab", () => {
 			createdAt: Date.now(),
 		};
 
-		vi.mocked(storage.listSubscriptions).mockResolvedValue([mockSubscription]);
-		vi.mocked(storage.updateSubscription).mockResolvedValue({
+		vi.mocked(subscriptionsStorage.listSubscriptions).mockResolvedValue([
+			mockSubscription,
+		]);
+		vi.mocked(subscriptionStorage.updateSubscription).mockResolvedValue({
 			...mockSubscription,
 			name: "New Name",
 		});
@@ -110,9 +122,12 @@ describe("SubscriptionsTab", () => {
 		await user.click(screen.getByRole("button", { name: /save/i }));
 
 		await waitFor(() => {
-			expect(storage.updateSubscription).toHaveBeenCalledWith("sub1", {
-				name: "New Name",
-			});
+			expect(subscriptionStorage.updateSubscription).toHaveBeenCalledWith(
+				"sub1",
+				{
+					name: "New Name",
+				},
+			);
 		});
 	});
 
@@ -124,8 +139,12 @@ describe("SubscriptionsTab", () => {
 			createdAt: Date.now(),
 		};
 
-		vi.mocked(storage.listSubscriptions).mockResolvedValue([mockSubscription]);
-		vi.mocked(storage.deleteSubscription).mockResolvedValue(undefined);
+		vi.mocked(subscriptionsStorage.listSubscriptions).mockResolvedValue([
+			mockSubscription,
+		]);
+		vi.mocked(subscriptionsStorage.deleteSubscription).mockResolvedValue(
+			undefined,
+		);
 
 		renderWithQuery(<SubscriptionsTab />);
 
@@ -146,12 +165,14 @@ describe("SubscriptionsTab", () => {
 		await user.click(screen.getByRole("button", { name: /confirm/i }));
 
 		await waitFor(() => {
-			expect(storage.deleteSubscription).toHaveBeenCalledWith("sub1");
+			expect(subscriptionsStorage.deleteSubscription).toHaveBeenCalledWith(
+				"sub1",
+			);
 		});
 	});
 
 	it("should show empty state when no subscriptions", async () => {
-		vi.mocked(storage.listSubscriptions).mockResolvedValue([]);
+		vi.mocked(subscriptionsStorage.listSubscriptions).mockResolvedValue([]);
 
 		renderWithQuery(<SubscriptionsTab />);
 

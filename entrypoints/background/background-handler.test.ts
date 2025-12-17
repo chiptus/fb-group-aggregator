@@ -1,5 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { createGroup, listGroups, listPosts } from "@/lib/storage";
+import { createGroup, listGroups } from "@/lib/storage/groups";
+import { listPosts } from "@/lib/storage/posts";
 import type { ExtensionMessage, Post } from "@/lib/types";
 import { handleScrapePosts, messageListener } from "./background-handler";
 
@@ -200,9 +201,10 @@ describe.sequential("Background Script - Message Handling", () => {
 	describe("Error handling", () => {
 		it("should return error response when storage fails", async () => {
 			// Mock listGroups to throw error
-			vi.spyOn(await import("@/lib/storage"), "listGroups").mockRejectedValue(
-				new Error("Storage error"),
-			);
+			vi.spyOn(
+				await import("@/lib/storage/groups"),
+				"listGroups",
+			).mockRejectedValue(new Error("Storage error"));
 
 			await expect(
 				handleScrapePosts({

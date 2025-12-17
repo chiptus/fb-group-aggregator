@@ -1,12 +1,18 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import * as storage from "@/lib/storage";
+import {
+	createPosts,
+	deleteOldPosts,
+	listPosts,
+	listPostsBySubscription,
+	markPostAsSeen,
+} from "@/lib/storage/posts";
 import type { Post } from "@/lib/types";
 import { queryKeys } from "./queryKeys";
 
 export function usePosts() {
 	return useQuery({
 		queryKey: queryKeys.posts,
-		queryFn: () => storage.listPosts(),
+		queryFn: () => listPosts(),
 	});
 }
 
@@ -15,7 +21,7 @@ export function useMarkPostSeen() {
 
 	return useMutation({
 		mutationFn: ({ postId, seen }: { postId: string; seen: boolean }) =>
-			storage.markPostAsSeen(postId, seen),
+			markPostAsSeen(postId, seen),
 		onMutate: async ({ postId, seen }) => {
 			// Cancel outgoing refetches
 			await queryClient.cancelQueries({ queryKey: queryKeys.posts });

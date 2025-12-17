@@ -1,10 +1,6 @@
 import { createLogger } from "@/lib/logger";
-import {
-	createGroup,
-	createPosts,
-	listGroups,
-	updateGroup,
-} from "@/lib/storage";
+import { createGroup, listGroups, updateGroup } from "@/lib/storage/groups";
+import { createPosts } from "@/lib/storage/posts";
 import type { ScrapePostsResponse } from "@/lib/types";
 
 const logger = createLogger("background");

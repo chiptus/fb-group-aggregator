@@ -1,12 +1,17 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import * as storage from "@/lib/storage";
+import {
+	createSubscription,
+	deleteSubscription,
+	listSubscriptions,
+	updateSubscription,
+} from "@/lib/storage/subscriptions";
 import type { Subscription } from "@/lib/types";
 import { queryKeys } from "./queryKeys";
 
 export function useSubscriptions() {
 	return useQuery({
 		queryKey: queryKeys.subscriptions,
-		queryFn: () => storage.listSubscriptions(),
+		queryFn: () => listSubscriptions(),
 	});
 }
 
@@ -14,7 +19,7 @@ export function useCreateSubscription() {
 	const queryClient = useQueryClient();
 
 	return useMutation({
-		mutationFn: (name: string) => storage.createSubscription(name),
+		mutationFn: (name: string) => createSubscription(name),
 		onSuccess: () => {
 			queryClient.invalidateQueries({ queryKey: queryKeys.subscriptions });
 		},
@@ -31,7 +36,7 @@ export function useUpdateSubscription() {
 		}: {
 			id: string;
 			updates: Partial<Subscription>;
-		}) => storage.updateSubscription(id, updates),
+		}) => updateSubscription(id, updates),
 		onSuccess: () => {
 			queryClient.invalidateQueries({ queryKey: queryKeys.subscriptions });
 		},
@@ -42,7 +47,7 @@ export function useDeleteSubscription() {
 	const queryClient = useQueryClient();
 
 	return useMutation({
-		mutationFn: (id: string) => storage.deleteSubscription(id),
+		mutationFn: (id: string) => deleteSubscription(id),
 		onSuccess: () => {
 			queryClient.invalidateQueries({ queryKey: queryKeys.subscriptions });
 		},

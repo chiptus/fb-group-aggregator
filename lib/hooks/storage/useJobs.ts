@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { listJobs } from "@/lib/storage";
+import { listJobs } from "@/lib/storage/jobs";
 import { queryKeys } from "./queryKeys";
 
 interface UseJobsOptions {

@@ -1,19 +1,24 @@
 import { screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import * as groupsStorage from "@/lib/storage/groups";
+import * as postsStorage from "@/lib/storage/posts";
+import * as subscriptionsStorage from "@/lib/storage/subscriptions";
 import type { Group, Post, Subscription } from "@/lib/types";
 import { renderWithQuery } from "@/test/test-utils";
 import App from "./App";
 
-// Mock the storage module
-vi.mock("@/lib/storage", () => ({
+// Mock the storage modules
+vi.mock("@/lib/storage/subscriptions", () => ({
 	listSubscriptions: vi.fn(),
+}));
+vi.mock("@/lib/storage/groups", () => ({
 	listGroups: vi.fn(),
+}));
+vi.mock("@/lib/storage/posts", () => ({
 	listPosts: vi.fn(),
 	markPostAsSeen: vi.fn(),
 }));
-
-import * as storage from "@/lib/storage";
 
 describe("Dashboard App", () => {
 	const mockSubscriptions: Subscription[] = [
@@ -77,9 +82,11 @@ describe("Dashboard App", () => {
 
 	beforeEach(() => {
 		vi.clearAllMocks();
-		vi.mocked(storage.listSubscriptions).mockResolvedValue(mockSubscriptions);
-		vi.mocked(storage.listGroups).mockResolvedValue(mockGroups);
-		vi.mocked(storage.listPosts).mockResolvedValue(mockPosts);
+		vi.mocked(subscriptionsStorage.listSubscriptions).mockResolvedValue(
+			mockSubscriptions,
+		);
+		vi.mocked(groupsStorage.listGroups).mockResolvedValue(mockGroups);
+		vi.mocked(postsStorage.listPosts).mockResolvedValue(mockPosts);
 	});
 
 	it("should render loading state initially", () => {
@@ -133,7 +140,7 @@ describe("Dashboard App", () => {
 	});
 
 	it("should allow marking posts as seen", async () => {
-		vi.mocked(storage.markPostAsSeen).mockResolvedValue();
+		vi.mocked(postsStorage.markPostAsSeen).mockResolvedValue();
 		const user = userEvent.setup();
 		renderWithQuery(<App />);
 
@@ -149,14 +156,14 @@ describe("Dashboard App", () => {
 		});
 		await user.click(markSeenButton);
 
-		// Should call storage.markPostAsSeen with seen: true
+		// Should call postsStorage.markPostAsSeen with seen: true
 		await waitFor(() => {
-			expect(storage.markPostAsSeen).toHaveBeenCalledWith("post1", true);
+			expect(postsStorage.markPostAsSeen).toHaveBeenCalledWith("post1", true);
 		});
 	});
 
 	it("should allow marking posts as unseen", async () => {
-		vi.mocked(storage.markPostAsSeen).mockResolvedValue();
+		vi.mocked(postsStorage.markPostAsSeen).mockResolvedValue();
 		const user = userEvent.setup();
 		renderWithQuery(<App />);
 
@@ -170,9 +177,9 @@ describe("Dashboard App", () => {
 		});
 		await user.click(markUnseenButton);
 
-		// Should call storage.markPostAsSeen with seen: false
+		// Should call postsStorage.markPostAsSeen with seen: false
 		await waitFor(() => {
-			expect(storage.markPostAsSeen).toHaveBeenCalledWith("post3", false);
+			expect(postsStorage.markPostAsSeen).toHaveBeenCalledWith("post3", false);
 		});
 	});
 
@@ -232,7 +239,7 @@ describe("Dashboard App", () => {
 	});
 
 	it("should handle empty state when no posts exist", async () => {
-		vi.mocked(storage.listPosts).mockResolvedValue([]);
+		vi.mocked(postsStorage.listPosts).mockResolvedValue([]);
 		renderWithQuery(<App />);
 
 		await waitFor(() => {
@@ -253,7 +260,7 @@ describe("Dashboard App", () => {
 
 	describe("Error Handling", () => {
 		it("should display error message when loading posts fails", async () => {
-			vi.mocked(storage.listPosts).mockRejectedValue(
+			vi.mocked(postsStorage.listPosts).mockRejectedValue(
 				new Error("Failed to load posts"),
 			);
 
@@ -269,7 +276,7 @@ describe("Dashboard App", () => {
 		});
 
 		it("should display error message when loading subscriptions fails", async () => {
-			vi.mocked(storage.listSubscriptions).mockRejectedValue(
+			vi.mocked(subscriptionsStorage.listSubscriptions).mockRejectedValue(
 				new Error("Failed to load subscriptions"),
 			);
 
@@ -281,7 +288,7 @@ describe("Dashboard App", () => {
 		});
 
 		it("should display error message when loading groups fails", async () => {
-			vi.mocked(storage.listGroups).mockRejectedValue(
+			vi.mocked(groupsStorage.listGroups).mockRejectedValue(
 				new Error("Failed to load groups"),
 			);
 
@@ -293,7 +300,7 @@ describe("Dashboard App", () => {
 		});
 
 		it("should show reload button when error occurs", async () => {
-			vi.mocked(storage.listPosts).mockRejectedValue(
+			vi.mocked(postsStorage.listPosts).mockRejectedValue(
 				new Error("Failed to load posts"),
 			);
 
@@ -314,7 +321,7 @@ describe("Dashboard App", () => {
 				writable: true,
 			});
 
-			vi.mocked(storage.listPosts).mockRejectedValue(
+			vi.mocked(postsStorage.listPosts).mockRejectedValue(
 				new Error("Failed to load posts"),
 			);
 

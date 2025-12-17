@@ -1,22 +1,29 @@
 import { screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import * as storage from "@/lib/storage";
+import * as groupsStorage from "@/lib/storage/groups";
+import * as postsStorage from "@/lib/storage/posts";
+
+import * as subscriptionsStorage from "@/lib/storage/subscriptions";
 import { renderWithQuery } from "@/test/test-utils";
 import App from "./App";
 
-vi.mock("@/lib/storage", () => ({
+vi.mock("@/lib/storage/subscriptions", () => ({
 	listSubscriptions: vi.fn(),
+}));
+vi.mock("@/lib/storage/groups", () => ({
 	listGroups: vi.fn(),
+}));
+vi.mock("@/lib/storage/posts", () => ({
 	listPosts: vi.fn(),
 }));
 
 describe("Popup - App", () => {
 	beforeEach(() => {
 		vi.clearAllMocks();
-		vi.mocked(storage.listSubscriptions).mockResolvedValue([]);
-		vi.mocked(storage.listGroups).mockResolvedValue([]);
-		vi.mocked(storage.listPosts).mockResolvedValue([]);
+		vi.mocked(subscriptionsStorage.listSubscriptions).mockResolvedValue([]);
+		vi.mocked(groupsStorage.listGroups).mockResolvedValue([]);
+		vi.mocked(postsStorage.listPosts).mockResolvedValue([]);
 	});
 
 	it("should render app title", async () => {
@@ -37,7 +44,6 @@ describe("Popup - App", () => {
 			expect(
 				screen.getByRole("tab", { name: /subscriptions/i }),
 			).toBeInTheDocument();
-			expect(screen.getByRole("tab", { name: /groups/i })).toBeInTheDocument();
 		});
 	});
 
@@ -56,11 +62,5 @@ describe("Popup - App", () => {
 
 		// Should show subscriptions content
 		expect(screen.getByText(/manage subscriptions/i)).toBeInTheDocument();
-
-		// Click on Groups tab
-		await user.click(screen.getByRole("tab", { name: /groups/i }));
-
-		// Should show groups content
-		expect(screen.getByText(/manage groups/i)).toBeInTheDocument();
 	});
 });

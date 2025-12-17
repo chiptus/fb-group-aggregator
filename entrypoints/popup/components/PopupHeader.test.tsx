@@ -1,17 +1,18 @@
 import { screen, waitFor } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import * as storage from "@/lib/storage";
 import { renderWithQuery } from "@/test/test-utils";
 import { PopupHeader } from "./PopupHeader";
 
-vi.mock("@/lib/storage", () => ({
+vi.mock("@/lib/storage/posts", () => ({
 	listPosts: vi.fn(),
 }));
+
+import * as postsStorage from "@/lib/storage/posts";
 
 describe("PopupHeader", () => {
 	beforeEach(() => {
 		vi.clearAllMocks();
-		vi.mocked(storage.listPosts).mockResolvedValue([]);
+		vi.mocked(postsStorage.listPosts).mockResolvedValue([]);
 	});
 
 	it("should render title", async () => {
@@ -46,7 +47,7 @@ describe("PopupHeader", () => {
 			},
 		];
 
-		vi.mocked(storage.listPosts).mockResolvedValue(mockPosts);
+		vi.mocked(postsStorage.listPosts).mockResolvedValue(mockPosts);
 
 		renderWithQuery(<PopupHeader />);
 
@@ -70,7 +71,7 @@ describe("PopupHeader", () => {
 			},
 		];
 
-		vi.mocked(storage.listPosts).mockResolvedValue(mockPosts);
+		vi.mocked(postsStorage.listPosts).mockResolvedValue(mockPosts);
 
 		renderWithQuery(<PopupHeader />);
 
@@ -80,7 +81,7 @@ describe("PopupHeader", () => {
 	});
 
 	it("should display loading state", () => {
-		vi.mocked(storage.listPosts).mockImplementation(
+		vi.mocked(postsStorage.listPosts).mockImplementation(
 			() => new Promise(() => {}),
 		);
 
@@ -90,7 +91,7 @@ describe("PopupHeader", () => {
 	});
 
 	it("should display error state", async () => {
-		vi.mocked(storage.listPosts).mockRejectedValue(
+		vi.mocked(postsStorage.listPosts).mockRejectedValue(
 			new Error("Failed to fetch posts"),
 		);
 
@@ -105,7 +106,7 @@ describe("PopupHeader", () => {
 	});
 
 	it("should display generic error when error is not an Error instance", async () => {
-		vi.mocked(storage.listPosts).mockRejectedValue("Unknown error");
+		vi.mocked(postsStorage.listPosts).mockRejectedValue("Unknown error");
 
 		renderWithQuery(<PopupHeader />);
 

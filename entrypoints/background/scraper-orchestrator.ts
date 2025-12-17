@@ -1,5 +1,5 @@
 import { createLogger } from "@/lib/logger";
-import { getGroupsBySubscription } from "@/lib/storage";
+import { getGroupsBySubscription } from "@/lib/storage/groups";
 import type { ExtensionMessage } from "@/lib/types";
 
 const logger = createLogger("background");

@@ -1,4 +1,4 @@
-import { createLog } from "./storage";
+import { createLog } from "./storage/logs";
 import type { LogLevel, LogSource } from "./types";
 
 /**

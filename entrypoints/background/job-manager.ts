@@ -1,13 +1,12 @@
 import { createLogger } from "@/lib/logger";
+import { getAllEnabledGroups, listGroups } from "@/lib/storage/groups";
 import {
 	cleanupOldJobs,
 	createJob,
 	getActiveJob,
-	getAllEnabledGroups,
 	getJob,
-	listGroups,
 	updateJob,
-} from "@/lib/storage";
+} from "@/lib/storage/jobs";
 import type { ScrapeJob } from "@/lib/types";
 import { scrapeGroupWithScrolling } from "./scraper-orchestrator";
 

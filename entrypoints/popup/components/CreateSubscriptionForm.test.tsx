@@ -1,12 +1,12 @@
 import { screen, waitFor } from "@testing-library/react";
 import { userEvent } from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
-import * as storage from "@/lib/storage";
+import * as subscriptionsStorage from "@/lib/storage/subscriptions";
 import { renderWithQuery } from "@/test/test-utils";
 import { CreateSubscriptionForm } from "./CreateSubscriptionForm";
 
 // Mock the storage module
-vi.mock("@/lib/storage", () => ({
+vi.mock("@/lib/storage/subscriptions", () => ({
 	createSubscription: vi.fn(),
 }));
 
@@ -60,11 +60,13 @@ describe("CreateSubscriptionForm", () => {
 
 	it("calls mutation on valid submission", async () => {
 		const user = userEvent.setup();
-		const mockCreate = vi.mocked(storage.createSubscription).mockResolvedValue({
-			id: "new-sub",
-			name: "Test Sub",
-			createdAt: Date.now(),
-		});
+		const mockCreate = vi
+			.mocked(subscriptionsStorage.createSubscription)
+			.mockResolvedValue({
+				id: "new-sub",
+				name: "Test Sub",
+				createdAt: Date.now(),
+			});
 
 		renderWithQuery(
 			<CreateSubscriptionForm onSuccess={() => {}} onCancel={() => {}} />,
@@ -84,7 +86,7 @@ describe("CreateSubscriptionForm", () => {
 	it("calls onSuccess after successful mutation", async () => {
 		const user = userEvent.setup();
 		const onSuccess = vi.fn();
-		vi.mocked(storage.createSubscription).mockResolvedValue({
+		vi.mocked(subscriptionsStorage.createSubscription).mockResolvedValue({
 			id: "new-sub",
 			name: "Test Sub",
 			createdAt: Date.now(),
@@ -121,7 +123,7 @@ describe("CreateSubscriptionForm", () => {
 
 	it("disables buttons while mutation is pending", async () => {
 		const user = userEvent.setup();
-		vi.mocked(storage.createSubscription).mockImplementation(
+		vi.mocked(subscriptionsStorage.createSubscription).mockImplementation(
 			() => new Promise((resolve) => setTimeout(resolve, 1000)),
 		);
 
@@ -144,7 +146,7 @@ describe("CreateSubscriptionForm", () => {
 
 	it("shows Creating... text while mutation is pending", async () => {
 		const user = userEvent.setup();
-		vi.mocked(storage.createSubscription).mockImplementation(
+		vi.mocked(subscriptionsStorage.createSubscription).mockImplementation(
 			() => new Promise((resolve) => setTimeout(resolve, 1000)),
 		);
 
@@ -165,7 +167,7 @@ describe("CreateSubscriptionForm", () => {
 
 	it("shows mutation error when mutation fails", async () => {
 		const user = userEvent.setup();
-		vi.mocked(storage.createSubscription).mockRejectedValue(
+		vi.mocked(subscriptionsStorage.createSubscription).mockRejectedValue(
 			new Error("Network error"),
 		);
 
@@ -186,11 +188,13 @@ describe("CreateSubscriptionForm", () => {
 
 	it("trims whitespace from input", async () => {
 		const user = userEvent.setup();
-		const mockCreate = vi.mocked(storage.createSubscription).mockResolvedValue({
-			id: "new-sub",
-			name: "Test Sub",
-			createdAt: Date.now(),
-		});
+		const mockCreate = vi
+			.mocked(subscriptionsStorage.createSubscription)
+			.mockResolvedValue({
+				id: "new-sub",
+				name: "Test Sub",
+				createdAt: Date.now(),
+			});
 
 		renderWithQuery(
 			<CreateSubscriptionForm onSuccess={() => {}} onCancel={() => {}} />,

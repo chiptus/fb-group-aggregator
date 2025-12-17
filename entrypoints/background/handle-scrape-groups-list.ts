@@ -1,4 +1,4 @@
-import { createGroup, listGroups, updateGroup } from "@/lib/storage";
+import { createGroup, listGroups, updateGroup } from "@/lib/storage/groups";
 import type { GroupDiscovery, ScrapeGroupsListResponse } from "@/lib/types";
 
 /**
