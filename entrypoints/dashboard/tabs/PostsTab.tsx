@@ -1,3 +1,4 @@
+import { useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { useGroups } from "@/lib/hooks/storage/useGroups";
 import { useMarkPostSeen, usePosts } from "@/lib/hooks/storage/usePosts";
@@ -12,6 +13,7 @@ export function PostsTab() {
 		string | null
 	>(null);
 	const [searchQuery, setSearchQuery] = useState("");
+	const [showOnlyUnseen, setShowOnlyUnseen] = useState(true);
 	const markPostSeen = useMarkPostSeen();
 
 	// Fetch data using react-query
@@ -58,6 +60,11 @@ export function PostsTab() {
 			);
 		}
 
+		// Filter by seen status
+		if (showOnlyUnseen) {
+			result = result.filter((p) => !p.seen);
+		}
+
 		// Sort by post ID (newest first) - create new array to avoid mutation
 		// Using BigInt because Facebook post IDs exceed JavaScript's safe integer range
 		return [...result].sort((a, b) => {
@@ -70,7 +77,7 @@ export function PostsTab() {
 				return b.id.localeCompare(a.id);
 			}
 		});
-	}, [posts, groups, selectedSubscriptionId, searchQuery]);
+	}, [posts, groups, selectedSubscriptionId, searchQuery, showOnlyUnseen]);
 
 	// Calculate unseen post count
 	const unseenCount = useMemo(
@@ -107,9 +114,20 @@ export function PostsTab() {
 			<main className="flex-1">
 				<SearchBar value={searchQuery} onChange={setSearchQuery} />
 
-				<p className="text-sm text-gray-600" aria-live="polite">
-					{unseenCount} unseen post{unseenCount !== 1 ? "s" : ""}
-				</p>
+				<div className="flex items-center justify-between mb-4">
+					<p className="text-sm text-gray-600" aria-live="polite">
+						{unseenCount} unseen post{unseenCount !== 1 ? "s" : ""}
+					</p>
+					<label className="flex items-center gap-2 text-sm cursor-pointer">
+						<input
+							type="checkbox"
+							checked={showOnlyUnseen}
+							onChange={(e) => setShowOnlyUnseen(e.target.checked)}
+							className="w-4 h-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+						/>
+						<span>Show only unseen</span>
+					</label>
+				</div>
 
 				{filteredPosts.length === 0 ? (
 					<div className="block bg-white rounded-lg shadow p-8 text-center">
