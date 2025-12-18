@@ -14,12 +14,12 @@ describe.sequential("Background Script - Message Handling", () => {
 		it("should save new posts to storage", async () => {
 			const mockPosts: Omit<Post, "scrapedAt" | "seen">[] = [
 				{
-					id: "post1",
+					id: "123456789012345",
 					groupId: "group1",
 					authorName: "John Doe",
 					contentHtml: "<p>Test post</p>",
 					timestamp: Date.now(),
-					url: "https://facebook.com/groups/group1/posts/post1",
+					url: "https://facebook.com/groups/group1/posts/123456789012345",
 				},
 			];
 
@@ -41,7 +41,7 @@ describe.sequential("Background Script - Message Handling", () => {
 			const savedPosts = await listPosts();
 			expect(savedPosts).toHaveLength(1);
 			expect(savedPosts[0]).toMatchObject({
-				id: "post1",
+				id: "123456789012345",
 				groupId: "group1",
 				authorName: "John Doe",
 				seen: false,
@@ -51,12 +51,12 @@ describe.sequential("Background Script - Message Handling", () => {
 
 		it("should deduplicate posts (not save duplicates)", async () => {
 			const mockPost: Omit<Post, "scrapedAt" | "seen"> = {
-				id: "post1",
+				id: "123456789012345",
 				groupId: "group1",
 				authorName: "John Doe",
 				contentHtml: "<p>Test post</p>",
 				timestamp: Date.now(),
-				url: "https://facebook.com/groups/group1/posts/post1",
+				url: "https://facebook.com/groups/group1/posts/123456789012345",
 			};
 
 			const payload = {
@@ -162,20 +162,20 @@ describe.sequential("Background Script - Message Handling", () => {
 		it("should handle multiple posts from same message", async () => {
 			const mockPosts: Omit<Post, "scrapedAt" | "seen">[] = [
 				{
-					id: "post1",
+					id: "123456789012345",
 					groupId: "group1",
 					authorName: "John",
 					contentHtml: "<p>Post 1</p>",
 					timestamp: Date.now(),
-					url: "https://facebook.com/groups/group1/posts/post1",
+					url: "https://facebook.com/groups/group1/posts/123456789012345",
 				},
 				{
-					id: "post2",
+					id: "234567890123456",
 					groupId: "group1",
 					authorName: "Jane",
 					contentHtml: "<p>Post 2</p>",
 					timestamp: Date.now(),
-					url: "https://facebook.com/groups/group1/posts/post2",
+					url: "https://facebook.com/groups/group1/posts/234567890123456",
 				},
 			];
 

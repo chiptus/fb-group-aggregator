@@ -2,10 +2,7 @@ import type { ContentScriptContext } from "wxt/utils/content-script-context";
 import { debounce } from "@/lib/debounce";
 import { createLogger } from "@/lib/logger";
 import { extractGroupInfo, scrapeGroupPosts } from "@/lib/scraper";
-import {
-	getExistingPostIdsForGroup,
-	getLatestPostTimestampForGroup,
-} from "@/lib/storage/posts";
+import { getExistingPostIdsForGroup } from "@/lib/storage/posts";
 
 const logger = createLogger("content");
 const debouncedScrape = debounce(scrapeAndSend, 2000);
@@ -75,28 +72,17 @@ async function scrapeAndSend(groupId: string) {
 	try {
 		logger.debug("Scraping posts", { groupId });
 
-		// Fetch existing post IDs and latest timestamp for early termination
+		// Fetch existing post IDs for early termination
 		const existingPostIds = await getExistingPostIdsForGroup(groupId);
-		const latestTimestamp = await getLatestPostTimestampForGroup(groupId);
-
-		// Calculate cutoff timestamp (30 days ago if no posts exist, otherwise no cutoff for incremental scraping)
-		// When we have existing posts, we rely on finding duplicate IDs to stop
-		const cutoffTimestamp = latestTimestamp
-			? 0 // No time-based cutoff if we have existing posts - rely on ID matching
-			: Date.now() - 30 * 24 * 60 * 60 * 1000; // 30 days ago for first scrape
 
 		logger.debug("Scraping with early termination", {
 			groupId,
 			existingPostCount: existingPostIds.size,
-			cutoffDate: cutoffTimestamp
-				? new Date(cutoffTimestamp).toISOString()
-				: "none",
 		});
 
-		// Scrape posts from page with early termination options
+		// Scrape posts from page with early termination based on existing post IDs
 		const posts = await scrapeGroupPosts(groupId, {
 			existingPostIds,
-			cutoffTimestamp,
 		});
 
 		if (posts.length === 0) {
@@ -269,20 +255,13 @@ async function scrapeAndSendWithTracking(
 	try {
 		// Fetch existing post IDs from storage for early termination
 		const existingPostIds = await getExistingPostIdsForGroup(groupId);
-		const latestTimestamp = await getLatestPostTimestampForGroup(groupId);
-
-		// Calculate cutoff timestamp
-		const cutoffTimestamp = latestTimestamp
-			? 0 // No time-based cutoff if we have existing posts
-			: Date.now() - 30 * 24 * 60 * 60 * 1000; // 30 days ago for first scrape
 
 		// Merge existing post IDs with session-seen IDs
 		const allKnownPostIds = new Set([...existingPostIds, ...seenPostIds]);
 
-		// Scrape posts with early termination
+		// Scrape posts with early termination based on existing post IDs
 		const posts = await scrapeGroupPosts(groupId, {
 			existingPostIds: allKnownPostIds,
-			cutoffTimestamp,
 		});
 
 		// If scraper returned 0 posts, we hit the early termination condition

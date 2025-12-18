@@ -49,34 +49,34 @@ describe("Dashboard App", () => {
 
 	const mockPosts: Post[] = [
 		{
-			id: "post1",
+			id: "345678901234567", // Newest (highest ID)
 			groupId: "group1",
 			authorName: "John Doe",
 			contentHtml: "Senior React Developer needed",
 			timestamp: Date.now() - 1000,
 			scrapedAt: Date.now(),
 			seen: false,
-			url: "https://facebook.com/groups/react-jobs/posts/1",
+			url: "https://facebook.com/groups/react-jobs/posts/345678901234567",
 		},
 		{
-			id: "post2",
+			id: "234567890123456", // Middle
 			groupId: "group2",
 			authorName: "Jane Smith",
 			contentHtml: "3BR apartment in TLV",
 			timestamp: Date.now() - 2000,
 			scrapedAt: Date.now(),
 			seen: false,
-			url: "https://facebook.com/groups/tlv-apartments/posts/2",
+			url: "https://facebook.com/groups/tlv-apartments/posts/234567890123456",
 		},
 		{
-			id: "post3",
+			id: "123456789012345", // Oldest (lowest ID)
 			groupId: "group1",
 			authorName: "Bob Wilson",
 			contentHtml: "Junior Frontend opening",
 			timestamp: Date.now() - 3000,
 			scrapedAt: Date.now(),
 			seen: true,
-			url: "https://facebook.com/groups/react-jobs/posts/3",
+			url: "https://facebook.com/groups/react-jobs/posts/123456789012345",
 		},
 	];
 
@@ -158,7 +158,10 @@ describe("Dashboard App", () => {
 
 		// Should call postsStorage.markPostAsSeen with seen: true
 		await waitFor(() => {
-			expect(postsStorage.markPostAsSeen).toHaveBeenCalledWith("post1", true);
+			expect(postsStorage.markPostAsSeen).toHaveBeenCalledWith(
+				"345678901234567",
+				true,
+			);
 		});
 	});
 
@@ -179,7 +182,10 @@ describe("Dashboard App", () => {
 
 		// Should call postsStorage.markPostAsSeen with seen: false
 		await waitFor(() => {
-			expect(postsStorage.markPostAsSeen).toHaveBeenCalledWith("post3", false);
+			expect(postsStorage.markPostAsSeen).toHaveBeenCalledWith(
+				"123456789012345",
+				false,
+			);
 		});
 	});
 
@@ -232,7 +238,7 @@ describe("Dashboard App", () => {
 		expect(openLinks[0]).toBeInTheDocument();
 		expect(openLinks[0]).toHaveAttribute(
 			"href",
-			"https://facebook.com/groups/react-jobs/posts/1",
+			"https://facebook.com/groups/react-jobs/posts/345678901234567",
 		);
 		expect(openLinks[0]).toHaveAttribute("target", "_blank");
 		expect(openLinks[0]).toHaveAttribute("rel", "noopener noreferrer");
@@ -247,12 +253,12 @@ describe("Dashboard App", () => {
 		});
 	});
 
-	it("should sort posts by timestamp (newest first)", async () => {
+	it("should sort posts by ID (newest first)", async () => {
 		renderWithQuery(<App />);
 
 		await waitFor(() => {
 			const posts = screen.getAllByRole("article");
-			// post1 (newest) should be first, post3 (oldest) should be last
+			// ID 345678901234567 (highest/newest) should be first, ID 123456789012345 (lowest/oldest) should be last
 			expect(posts[0]).toHaveTextContent(/Senior React Developer needed/);
 			expect(posts[2]).toHaveTextContent(/Junior Frontend opening/);
 		});

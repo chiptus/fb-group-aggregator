@@ -69,8 +69,18 @@ function App() {
 			);
 		}
 
-		// Sort by timestamp (newest first) - create new array to avoid mutation
-		return [...result].sort((a, b) => b.timestamp - a.timestamp);
+		// Sort by post ID (newest first) - create new array to avoid mutation
+		// Using BigInt because Facebook post IDs exceed JavaScript's safe integer range
+		return [...result].sort((a, b) => {
+			try {
+				const idA = BigInt(a.id);
+				const idB = BigInt(b.id);
+				return idB > idA ? 1 : idB < idA ? -1 : 0;
+			} catch {
+				// Fallback for non-numeric IDs (e.g., in tests)
+				return b.id.localeCompare(a.id);
+			}
+		});
 	}, [posts, groups, selectedSubscriptionId, searchQuery]);
 
 	// Calculate unseen post count

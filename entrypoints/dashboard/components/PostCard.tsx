@@ -16,7 +16,7 @@ export function PostCard({ post, group, onToggleSeen }: PostCardProps) {
 					<h3 className="font-semibold text-gray-900">{post.authorName}</h3>
 					<p className="text-sm text-gray-500">
 						{group && <span className="text-blue-600">{group.name} • </span>}
-						{new Date(post.timestamp).toLocaleString()}
+						Scraped: {new Date(post.scrapedAt).toLocaleString()}
 					</p>
 				</div>
 				<div className="flex gap-2">

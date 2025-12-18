@@ -5,19 +5,16 @@ import type { Post } from "./types";
  * @param groupId - The Facebook group ID
  * @param options - Optional scraping options
  * @param options.existingPostIds - Set of post IDs that already exist (for early termination)
- * @param options.cutoffTimestamp - Don't scrape posts older than this timestamp (for early termination)
- * @returns Promise that resolves to array of scraped posts (without scrapedAt and seen fields), sorted by timestamp descending
+ * @returns Promise that resolves to array of scraped posts (without scrapedAt and seen fields), sorted by ID descending
  */
 export async function scrapeGroupPosts(
 	groupId: string,
 	options?: {
 		existingPostIds?: Set<string>;
-		cutoffTimestamp?: number;
 	},
 ): Promise<Omit<Post, "scrapedAt" | "seen">[]> {
 	const posts: Omit<Post, "scrapedAt" | "seen">[] = [];
 	const existingPostIds = options?.existingPostIds || new Set<string>();
-	const cutoffTimestamp = options?.cutoffTimestamp || 0;
 
 	// Find the group feed container
 	const feedContainer = document.querySelector('[role="feed"]');
@@ -95,20 +92,13 @@ export async function scrapeGroupPosts(
 
 			const post = extractPostData(element, groupId);
 			if (post) {
-				// Check for early termination conditions
-				if (existingPostIds.has(post.id)) {
-					console.log(
-						`[Scraper] Found existing post ${post.id} - stopping scrape (early termination)`,
-					);
-					break; // Stop scraping - we've reached already-scraped content
-				}
-
-				if (post.timestamp < cutoffTimestamp) {
-					console.log(
-						`[Scraper] Found post older than cutoff (${new Date(post.timestamp).toISOString()} < ${new Date(cutoffTimestamp).toISOString()}) - stopping scrape (early termination)`,
-					);
-					break; // Stop scraping - posts are too old
-				}
+				// Check for early termination condition
+				// if (existingPostIds.has(post.id)) {
+				// 	console.log(
+				// 		`[Scraper] Found existing post ${post.id} - stopping scrape (early termination)`,
+				// 	);
+				// 	break; // Stop scraping - we've reached already-scraped content
+				// }
 
 				posts.push(post);
 				console.log(
@@ -128,9 +118,19 @@ export async function scrapeGroupPosts(
 
 	console.log(`[Scraper] Total posts extracted: ${posts.length}`);
 
-	// Sort posts by timestamp descending (newest first)
-	posts.sort((a, b) => b.timestamp - a.timestamp);
-	console.log(`[Scraper] Posts sorted by timestamp descending (newest first)`);
+	// Sort posts by ID descending (newest first)
+	// Using BigInt because Facebook post IDs exceed JavaScript's safe integer range
+	posts.sort((a, b) => {
+		try {
+			const idA = BigInt(a.id);
+			const idB = BigInt(b.id);
+			return idB > idA ? 1 : idB < idA ? -1 : 0;
+		} catch {
+			// Fallback for non-numeric IDs (e.g., in tests)
+			return b.id.localeCompare(a.id);
+		}
+	});
+	console.log(`[Scraper] Posts sorted by ID descending (newest first)`);
 
 	return posts;
 }
@@ -245,10 +245,10 @@ function extractPostData(
 	const contentHtml = extractContentHtml(element);
 	console.log(`[Scraper] Content length: ${contentHtml.length} chars`);
 
-	// Extract timestamp
+	// Extract timestamp (always undefined - Facebook obfuscates timestamps)
 	const timestamp = extractTimestamp(element);
 	console.log(
-		`[Scraper] Timestamp: ${timestamp ? new Date(timestamp).toISOString() : ""}`,
+		`[Scraper] Timestamp: ${timestamp ? new Date(timestamp).toISOString() : "undefined (using post ID for ordering)"}`,
 	);
 
 	// Construct post URL
@@ -438,66 +438,14 @@ function extractContentHtml(element: HTMLElement): string {
 
 /**
  * Extracts timestamp from post element
+ * NOTE: Facebook obfuscates timestamp text in the DOM, making reliable extraction impossible.
+ * We now use post ID for ordering and scrapedAt for age-based operations.
+ * @returns undefined - timestamp extraction is no longer supported
  */
-function extractTimestamp(element: HTMLElement): number {
-	// Strategy 1: abbr element with data-utime attribute (most accurate)
-	const timeElement = element.querySelector("abbr[data-utime]");
-	if (timeElement) {
-		const utime = timeElement.getAttribute("data-utime");
-		if (utime) {
-			// Facebook stores Unix timestamp in seconds, convert to milliseconds
-			return parseInt(utime, 10) * 1000;
-		}
-	}
-
-	// Strategy 2: Look for aria-label timestamp pattern
-	const ariaLabel = element.getAttribute("aria-label") || "";
-	// Match patterns like "4 days ago", "2 hours ago", etc.
-	const timeMatch = ariaLabel.match(
-		/(\d+)\s*(second|minute|hour|day|week|month|year)s?\s*ago/i,
-	);
-	if (timeMatch) {
-		const value = parseInt(timeMatch[1], 10);
-		const unit = timeMatch[2].toLowerCase();
-		const now = Date.now();
-
-		const unitMs: Record<string, number> = {
-			second: 1000,
-			minute: 60 * 1000,
-			hour: 60 * 60 * 1000,
-			day: 24 * 60 * 60 * 1000,
-			week: 7 * 24 * 60 * 60 * 1000,
-			month: 30 * 24 * 60 * 60 * 1000,
-			year: 365 * 24 * 60 * 60 * 1000,
-		};
-
-		return now - value * (unitMs[unit] || 0);
-	}
-
-	// Strategy 3: Look for relative time in links (like "4d")
-	const links = element.querySelectorAll("a");
-	for (const link of Array.from(links)) {
-		const text = link.textContent?.trim() || "";
-		const relativeMatch = text.match(/^(\d+)([smhdw])$/);
-		if (relativeMatch) {
-			const value = parseInt(relativeMatch[1], 10);
-			const unit = relativeMatch[2];
-			const now = Date.now();
-
-			const unitMs: Record<string, number> = {
-				s: 1000,
-				m: 60 * 1000,
-				h: 60 * 60 * 1000,
-				d: 24 * 60 * 60 * 1000,
-				w: 7 * 24 * 60 * 60 * 1000,
-			};
-
-			return now - value * (unitMs[unit] || 0);
-		}
-	}
-
-	// Fallback to current time if timestamp not found
-	return Date.now();
+function extractTimestamp(_element: HTMLElement): number | undefined {
+	// Facebook obfuscates timestamp text using CSS tricks - cannot reliably extract
+	// Will use post ID for ordering and scrapedAt for age-based operations
+	return undefined;
 }
 
 /**

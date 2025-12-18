@@ -19,7 +19,7 @@ export async function handleScrapePosts(payload: {
 		groupId: string;
 		authorName: string;
 		contentHtml: string;
-		timestamp: number;
+		timestamp?: number;
 		url: string;
 	}>;
 }): Promise<ScrapePostsResponse> {

@@ -18,11 +18,21 @@ export const GroupSchema = z.object({
 });
 
 export const PostSchema = z.object({
-	id: z.string(),
+	id: z.string().refine(
+		(val) => {
+			try {
+				BigInt(val);
+				return true;
+			} catch {
+				return false;
+			}
+		},
+		{ message: "Post ID must be a valid BigInt string" },
+	),
 	groupId: z.string(),
 	authorName: z.string(),
 	contentHtml: z.string(),
-	timestamp: z.number(),
+	timestamp: z.number().optional(),
 	scrapedAt: z.number(),
 	seen: z.boolean(),
 	url: z.string(),

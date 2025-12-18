@@ -167,12 +167,12 @@ Core TypeScript interfaces defined in [lib/types.ts](lib/types.ts):
 - `enabled`: boolean - Whether scraping is enabled
 
 **Post**:
-- `id`: string - Facebook post ID
+- `id`: string - Facebook post ID (used for chronological ordering - higher ID = newer)
 - `groupId`: string - Reference to Group
 - `authorName`: string - Post author
 - `contentHtml`: string - HTML content (preserves formatting/links)
-- `timestamp`: number - Post creation time
-- `scrapedAt`: number - When post was scraped
+- `timestamp`: number | undefined - Post creation time (currently always undefined - Facebook obfuscates timestamps)
+- `scrapedAt`: number - When post was scraped (used for age-based operations and display)
 - `seen`: boolean - User has marked as seen
 - `url`: string - Direct link to Facebook post
 
@@ -212,14 +212,22 @@ Content Script → Background:
 **Extraction Strategy**:
 - Identify post containers via DOM selectors
 - Extract post ID from data attributes
-- Extract author name, timestamp, content HTML
+- Extract author name and content HTML
+- **Timestamp extraction**: NOT SUPPORTED - Facebook obfuscates timestamp text using CSS tricks
 - Construct post URL from group + post ID
 - Handle Facebook's dynamic content loading
 - Graceful error handling if selectors change
 
+**Post Ordering**:
+- Posts are sorted by Facebook post ID (higher ID = newer post)
+- Post IDs are chronologically sequential, making them suitable for ordering
+- Use `scrapedAt` field for age-based operations (deleting old posts, displaying scrape time)
+
 **Scraping Trigger**:
 - **Current**: Automatic when visiting Facebook group page
-- **Future**: Background periodic scraping via chrome.alarms API
+- **Future Enhancement**: OCR-based timestamp extraction (screenshot + image-to-text service)
+
+**Note**: Facebook obfuscates timestamp text in the DOM to prevent scraping. The `extractTimestamp` function always returns `undefined`. Posts are ordered by ID and use `scrapedAt` for age-based operations.
 
 ### UI Framework
 

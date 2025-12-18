@@ -26,24 +26,24 @@ describe("PopupHeader", () => {
 	it("should display unseen posts count", async () => {
 		const mockPosts = [
 			{
-				id: "post1",
+				id: "123456789012345",
 				groupId: "group1",
 				authorName: "John",
 				contentHtml: "<p>Test</p>",
 				timestamp: Date.now(),
 				scrapedAt: Date.now(),
 				seen: false,
-				url: "https://facebook.com/post1",
+				url: "https://facebook.com/123456789012345",
 			},
 			{
-				id: "post2",
+				id: "234567890123456",
 				groupId: "group1",
 				authorName: "Jane",
 				contentHtml: "<p>Test 2</p>",
 				timestamp: Date.now(),
 				scrapedAt: Date.now(),
 				seen: true,
-				url: "https://facebook.com/post2",
+				url: "https://facebook.com/234567890123456",
 			},
 		];
 
@@ -60,14 +60,14 @@ describe("PopupHeader", () => {
 	it("should display zero when no unseen posts", async () => {
 		const mockPosts = [
 			{
-				id: "post1",
+				id: "123456789012345",
 				groupId: "group1",
 				authorName: "John",
 				contentHtml: "<p>Test</p>",
 				timestamp: Date.now(),
 				scrapedAt: Date.now(),
 				seen: true,
-				url: "https://facebook.com/post1",
+				url: "https://facebook.com/123456789012345",
 			},
 		];
 

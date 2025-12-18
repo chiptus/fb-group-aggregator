@@ -79,14 +79,14 @@ describe("OverviewTab", () => {
 		];
 		const mockPosts = [
 			{
-				id: "post1",
+				id: "123456789012345",
 				groupId: "group1",
 				authorName: "John",
 				contentHtml: "<p>Test</p>",
 				timestamp: Date.now(),
 				scrapedAt: Date.now(),
 				seen: false,
-				url: "https://facebook.com/post1",
+				url: "https://facebook.com/123456789012345",
 			},
 		];
 

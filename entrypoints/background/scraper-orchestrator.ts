@@ -116,7 +116,7 @@ export async function scrapeGroupWithScrolling(
 
 		// Create tab
 		chrome.tabs.create(
-			{ url: `${groupUrl}?sorting_setting=CHRONOLOGICAL`, active: false },
+			{ url: `${groupUrl}?sorting_setting=CHRONOLOGICAL`, active: true },
 			(tab) => {
 				if (!tab?.id) {
 					clearTimeout(timeout);

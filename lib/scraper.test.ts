@@ -45,7 +45,7 @@ describe("Facebook Scraper", () => {
 				groupId: "testgroup",
 				authorName: "John Doe",
 				contentHtml: expect.stringContaining("test post"),
-				timestamp: expect.any(Number),
+				timestamp: undefined,
 				url: expect.stringContaining("12345"),
 			});
 
@@ -54,7 +54,7 @@ describe("Facebook Scraper", () => {
 				groupId: "testgroup",
 				authorName: "Jane Doe",
 				contentHtml: expect.stringContaining("Another post"),
-				timestamp: expect.any(Number),
+				timestamp: undefined,
 				url: expect.stringContaining("67890"),
 			});
 		});
@@ -97,7 +97,7 @@ describe("Facebook Scraper", () => {
 			expect(posts[0].contentHtml).toBe("");
 		});
 
-		it("should handle posts with missing timestamp gracefully", async () => {
+		it("should handle posts with missing timestamp (always returns undefined)", async () => {
 			document.body.innerHTML = `
         <div role="feed">
           <div role="article" data-ft='{"mf_story_key":"12345"}' class="x1n2onr6 xh8yej3 x1ja2u2z xod5an3">
@@ -112,13 +112,11 @@ describe("Facebook Scraper", () => {
         </div>
       `;
 
-			const now = Date.now();
 			const posts = await scrapeGroupPosts("testgroup");
 
 			expect(posts).toHaveLength(1);
-			// Allow for small timing differences (within 100ms)
-			expect(posts[0].timestamp).toBeGreaterThanOrEqual(now);
-			expect(posts[0].timestamp).toBeLessThanOrEqual(now + 100);
+			// Timestamp extraction is no longer supported (Facebook obfuscates timestamps)
+			expect(posts[0].timestamp).toBeUndefined();
 		});
 
 		it("should skip posts without post ID", async () => {
@@ -211,7 +209,7 @@ describe("Facebook Scraper", () => {
 			expect(posts[0].url).toContain("12345");
 		});
 
-		it("should parse Unix timestamp correctly", async () => {
+		it("should return undefined timestamp even when data-utime is present", async () => {
 			const unixTimestamp = 1704067200; // Jan 1, 2024 00:00:00 GMT
 
 			document.body.innerHTML = `
@@ -231,7 +229,8 @@ describe("Facebook Scraper", () => {
 			const posts = await scrapeGroupPosts("testgroup");
 
 			expect(posts).toHaveLength(1);
-			expect(posts[0].timestamp).toBe(unixTimestamp * 1000); // Should convert to milliseconds
+			// Timestamp extraction is disabled - always returns undefined
+			expect(posts[0].timestamp).toBeUndefined();
 		});
 	});
 
