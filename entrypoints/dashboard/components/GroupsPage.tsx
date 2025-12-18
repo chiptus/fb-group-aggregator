@@ -44,7 +44,9 @@ export function GroupsPage() {
 		// Filter by subscription
 		if (filterSubscriptionId) {
 			result = result.filter((g) =>
-				g.subscriptionIds.includes(filterSubscriptionId),
+				filterSubscriptionId === "unassigned"
+					? g.subscriptionIds.length === 0
+					: g.subscriptionIds.includes(filterSubscriptionId),
 			);
 		}
 
