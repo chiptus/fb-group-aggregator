@@ -53,7 +53,7 @@ export function PostCard({
 				</div>
 			</div>
 			<div
-				className="prose max-w-none mb-3"
+				className="prose max-w-full mb-3 break-all overflow-hidden"
 				// biome-ignore lint/security/noDangerouslySetInnerHtml: Content is sanitized with DOMPurify
 				dangerouslySetInnerHTML={{
 					__html: DOMPurify.sanitize(post.contentHtml),
