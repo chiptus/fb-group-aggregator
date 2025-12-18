@@ -33,6 +33,7 @@ describe("PopupHeader", () => {
 				timestamp: Date.now(),
 				scrapedAt: Date.now(),
 				seen: false,
+				starred: false,
 				url: "https://facebook.com/123456789012345",
 			},
 			{
@@ -43,6 +44,7 @@ describe("PopupHeader", () => {
 				timestamp: Date.now(),
 				scrapedAt: Date.now(),
 				seen: true,
+				starred: false,
 				url: "https://facebook.com/234567890123456",
 			},
 		];
@@ -67,6 +69,7 @@ describe("PopupHeader", () => {
 				timestamp: Date.now(),
 				scrapedAt: Date.now(),
 				seen: true,
+				starred: false,
 				url: "https://facebook.com/123456789012345",
 			},
 		];

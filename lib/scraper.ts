@@ -12,8 +12,8 @@ export async function scrapeGroupPosts(
 	options?: {
 		existingPostIds?: Set<string>;
 	},
-): Promise<Omit<Post, "scrapedAt" | "seen">[]> {
-	const posts: Omit<Post, "scrapedAt" | "seen">[] = [];
+): Promise<Omit<Post, "scrapedAt" | "seen" | "starred">[]> {
+	const posts: Omit<Post, "scrapedAt" | "seen" | "starred">[] = [];
 	const existingPostIds = options?.existingPostIds || new Set<string>();
 
 	// Find the group feed container
@@ -227,7 +227,7 @@ async function expandSeeMore(element: HTMLElement): Promise<void> {
 function extractPostData(
 	element: HTMLElement,
 	groupId: string,
-): Omit<Post, "scrapedAt" | "seen"> | null {
+): Omit<Post, "scrapedAt" | "seen" | "starred"> | null {
 	// Extract post ID from data-ft attribute
 	const postId = extractPostId(element);
 	if (!postId) {

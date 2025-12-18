@@ -6,6 +6,7 @@ import {
 	listPosts,
 	listPostsBySubscription,
 	markPostAsSeen,
+	togglePostStarred,
 } from "./posts";
 
 describe("Storage - Posts", () => {
@@ -16,7 +17,7 @@ describe("Storage - Posts", () => {
 	it("should create new posts", async () => {
 		const newPosts = [
 			{
-				id: "post-1",
+				id: "1",
 				groupId: "group-1",
 				authorName: "John Doe",
 				contentHtml: "<p>Test post</p>",
@@ -24,7 +25,7 @@ describe("Storage - Posts", () => {
 				url: "https://facebook.com/posts/1",
 			},
 			{
-				id: "post-2",
+				id: "2",
 				groupId: "group-1",
 				authorName: "Jane Doe",
 				contentHtml: "<p>Another post</p>",
@@ -43,11 +44,13 @@ describe("Storage - Posts", () => {
 					...newPosts[0],
 					scrapedAt: expect.any(Number),
 					seen: false,
+					starred: false,
 				}),
 				expect.objectContaining({
 					...newPosts[1],
 					scrapedAt: expect.any(Number),
 					seen: false,
+					starred: false,
 				}),
 			]),
 		);
@@ -55,13 +58,14 @@ describe("Storage - Posts", () => {
 
 	it("should deduplicate posts by ID", async () => {
 		const existingPost: Post = {
-			id: "post-1",
+			id: "1",
 			groupId: "group-1",
 			authorName: "John Doe",
 			contentHtml: "<p>Test post</p>",
 			timestamp: Date.now(),
 			scrapedAt: Date.now(),
 			seen: false,
+			starred: false,
 			url: "https://facebook.com/posts/1",
 		};
 
@@ -69,7 +73,7 @@ describe("Storage - Posts", () => {
 
 		const newPosts = [
 			{
-				id: "post-1", // Duplicate
+				id: "1", // Duplicate
 				groupId: "group-1",
 				authorName: "John Doe Updated",
 				contentHtml: "<p>Updated content</p>",
@@ -77,7 +81,7 @@ describe("Storage - Posts", () => {
 				url: "https://facebook.com/posts/1",
 			},
 			{
-				id: "post-2", // New
+				id: "2", // New
 				groupId: "group-1",
 				authorName: "Jane Doe",
 				contentHtml: "<p>Another post</p>",
@@ -90,20 +94,21 @@ describe("Storage - Posts", () => {
 
 		const posts = await listPosts();
 		expect(posts).toHaveLength(2); // Should have 2 posts total (1 existing, 1 new)
-		expect(posts.find((p: Post) => p.id === "post-1")).toEqual(existingPost); // Existing should remain unchanged
-		expect(posts.find((p: Post) => p.id === "post-2")).toBeDefined(); // New post should be added
+		expect(posts.find((p: Post) => p.id === "1")).toEqual(existingPost); // Existing should remain unchanged
+		expect(posts.find((p: Post) => p.id === "2")).toBeDefined(); // New post should be added
 	});
 
 	it("should list all posts", async () => {
 		const mockPosts: Post[] = [
 			{
-				id: "post-1",
+				id: "1",
 				groupId: "group-1",
 				authorName: "John Doe",
 				contentHtml: "<p>Test</p>",
 				timestamp: Date.now(),
 				scrapedAt: Date.now(),
 				seen: false,
+				starred: false,
 				url: "https://facebook.com/posts/1",
 			},
 		];
@@ -139,23 +144,25 @@ describe("Storage - Posts", () => {
 
 		const mockPosts: Post[] = [
 			{
-				id: "post-1",
+				id: "1",
 				groupId: "group-1",
 				authorName: "John",
 				contentHtml: "<p>Test</p>",
 				timestamp: Date.now(),
 				scrapedAt: Date.now(),
 				seen: false,
+				starred: false,
 				url: "https://facebook.com/posts/1",
 			},
 			{
-				id: "post-2",
+				id: "2",
 				groupId: "group-2",
 				authorName: "Jane",
 				contentHtml: "<p>Test 2</p>",
 				timestamp: Date.now(),
 				scrapedAt: Date.now(),
 				seen: false,
+				starred: false,
 				url: "https://facebook.com/posts/2",
 			},
 		];
@@ -174,20 +181,21 @@ describe("Storage - Posts", () => {
 	it("should mark post as seen", async () => {
 		const mockPosts: Post[] = [
 			{
-				id: "post-1",
+				id: "1",
 				groupId: "group-1",
 				authorName: "John",
 				contentHtml: "<p>Test</p>",
 				timestamp: Date.now(),
 				scrapedAt: Date.now(),
 				seen: false,
+				starred: false,
 				url: "https://facebook.com/posts/1",
 			},
 		];
 
 		await chrome.storage.local.set({ posts: mockPosts });
 
-		await markPostAsSeen("post-1", true);
+		await markPostAsSeen("1", true);
 
 		const posts = await listPosts();
 		expect(posts).toEqual([
@@ -198,27 +206,57 @@ describe("Storage - Posts", () => {
 		]);
 	});
 
+	it("should toggle post starred status", async () => {
+		const mockPosts: Post[] = [
+			{
+				id: "1",
+				groupId: "group-1",
+				authorName: "John",
+				contentHtml: "<p>Test</p>",
+				timestamp: Date.now(),
+				scrapedAt: Date.now(),
+				seen: false,
+				starred: false,
+				url: "https://facebook.com/posts/1",
+			},
+		];
+
+		await chrome.storage.local.set({ posts: mockPosts });
+
+		await togglePostStarred("1", true);
+
+		const posts = await listPosts();
+		expect(posts).toEqual([
+			{
+				...mockPosts[0],
+				starred: true,
+			},
+		]);
+	});
+
 	it("should delete old posts", async () => {
 		const now = Date.now();
 		const oldPost: Post = {
-			id: "post-old",
+			id: "100",
 			groupId: "group-1",
 			authorName: "John",
 			contentHtml: "<p>Old</p>",
 			timestamp: now - 40 * 24 * 60 * 60 * 1000, // 40 days ago
 			scrapedAt: now - 40 * 24 * 60 * 60 * 1000,
 			seen: true,
+			starred: false,
 			url: "https://facebook.com/posts/old",
 		};
 
 		const recentPost: Post = {
-			id: "post-recent",
+			id: "200",
 			groupId: "group-1",
 			authorName: "Jane",
 			contentHtml: "<p>Recent</p>",
 			timestamp: now - 10 * 24 * 60 * 60 * 1000, // 10 days ago
 			scrapedAt: now - 10 * 24 * 60 * 60 * 1000,
 			seen: false,
+			starred: false,
 			url: "https://facebook.com/posts/recent",
 		};
 

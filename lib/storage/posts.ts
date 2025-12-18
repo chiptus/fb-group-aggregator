@@ -5,7 +5,7 @@ import { listGroups } from "./groups";
 import { POSTS_STORAGE_KEY } from "./keys";
 
 export async function createPosts(
-	newPosts: Omit<Post, "scrapedAt" | "seen">[],
+	newPosts: Omit<Post, "scrapedAt" | "seen" | "starred">[],
 ): Promise<number> {
 	const posts = await listPosts();
 
@@ -17,6 +17,7 @@ export async function createPosts(
 			...p,
 			scrapedAt: Date.now(),
 			seen: false,
+			starred: false,
 		}));
 
 	const allPosts = [...posts, ...postsToAdd];
@@ -54,6 +55,17 @@ export async function markPostAsSeen(
 	const posts = await listPosts();
 	const updatedPosts = posts.map((p: Post) =>
 		p.id === postId ? { ...p, seen } : p,
+	);
+	await storage.setItem(POSTS_STORAGE_KEY, updatedPosts);
+}
+
+export async function togglePostStarred(
+	postId: string,
+	starred: boolean,
+): Promise<void> {
+	const posts = await listPosts();
+	const updatedPosts = posts.map((p: Post) =>
+		p.id === postId ? { ...p, starred } : p,
 	);
 	await storage.setItem(POSTS_STORAGE_KEY, updatedPosts);
 }

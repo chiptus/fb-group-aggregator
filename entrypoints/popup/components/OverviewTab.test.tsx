@@ -86,6 +86,7 @@ describe("OverviewTab", () => {
 				timestamp: Date.now(),
 				scrapedAt: Date.now(),
 				seen: false,
+				starred: false,
 				url: "https://facebook.com/123456789012345",
 			},
 		];

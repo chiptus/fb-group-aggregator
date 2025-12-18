@@ -6,9 +6,15 @@ interface PostCardProps {
 	post: Post;
 	group?: Group;
 	onToggleSeen: (postId: string, currentSeen: boolean) => void;
+	onToggleStarred: (postId: string, currentStarred: boolean) => void;
 }
 
-export function PostCard({ post, group, onToggleSeen }: PostCardProps) {
+export function PostCard({
+	post,
+	group,
+	onToggleSeen,
+	onToggleStarred,
+}: PostCardProps) {
 	return (
 		<article className="bg-white rounded-lg shadow p-6">
 			<div className="flex justify-between items-start mb-3">
@@ -31,6 +37,18 @@ export function PostCard({ post, group, onToggleSeen }: PostCardProps) {
 						size="sm"
 					>
 						{post.seen ? "Mark as unseen" : "Mark as seen"}
+					</Button>
+					<Button
+						onClick={() => onToggleStarred(post.id, post.starred)}
+						aria-label={
+							post.starred
+								? `Unstar post from ${post.authorName}`
+								: `Star post from ${post.authorName}`
+						}
+						variant="link"
+						size="sm"
+					>
+						{post.starred ? "★" : "☆"}
 					</Button>
 				</div>
 			</div>

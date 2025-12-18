@@ -5,6 +5,7 @@ import {
 	listPosts,
 	listPostsBySubscription,
 	markPostAsSeen,
+	togglePostStarred,
 } from "@/lib/storage/posts";
 import type { Post } from "@/lib/types";
 import { queryKeys } from "./queryKeys";
@@ -32,6 +33,40 @@ export function useMarkPostSeen() {
 			// Optimistically update to the new value
 			queryClient.setQueryData<Post[]>(queryKeys.posts, (old) =>
 				old?.map((p) => (p.id === postId ? { ...p, seen } : p)),
+			);
+
+			// Return context with the snapshot
+			return { previousPosts };
+		},
+		onError: (_err, _variables, context) => {
+			// Rollback on error
+			if (context?.previousPosts) {
+				queryClient.setQueryData(queryKeys.posts, context.previousPosts);
+			}
+		},
+		onSettled: () => {
+			// Refetch after mutation
+			queryClient.invalidateQueries({ queryKey: queryKeys.posts });
+		},
+	});
+}
+
+export function useTogglePostStarred() {
+	const queryClient = useQueryClient();
+
+	return useMutation({
+		mutationFn: ({ postId, starred }: { postId: string; starred: boolean }) =>
+			togglePostStarred(postId, starred),
+		onMutate: async ({ postId, starred }) => {
+			// Cancel outgoing refetches
+			await queryClient.cancelQueries({ queryKey: queryKeys.posts });
+
+			// Snapshot the previous value
+			const previousPosts = queryClient.getQueryData<Post[]>(queryKeys.posts);
+
+			// Optimistically update to the new value
+			queryClient.setQueryData<Post[]>(queryKeys.posts, (old) =>
+				old?.map((p) => (p.id === postId ? { ...p, starred } : p)),
 			);
 
 			// Return context with the snapshot

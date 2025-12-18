@@ -1,7 +1,11 @@
 import { useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { useGroups } from "@/lib/hooks/storage/useGroups";
-import { useMarkPostSeen, usePosts } from "@/lib/hooks/storage/usePosts";
+import {
+	useMarkPostSeen,
+	usePosts,
+	useTogglePostStarred,
+} from "@/lib/hooks/storage/usePosts";
 import { useSubscriptions } from "@/lib/hooks/storage/useSubscriptions";
 import { LoadingSpinner } from "../components/LoadingSpinner";
 import { PostCard } from "../components/PostCard";
@@ -14,7 +18,9 @@ export function PostsTab() {
 	>(null);
 	const [searchQuery, setSearchQuery] = useState("");
 	const [showOnlyUnseen, setShowOnlyUnseen] = useState(true);
+	const [showOnlyStarred, setShowOnlyStarred] = useState(false);
 	const markPostSeen = useMarkPostSeen();
+	const togglePostStarred = useTogglePostStarred();
 
 	// Fetch data using react-query
 	const subscriptionsQuery = useSubscriptions();
@@ -65,6 +71,11 @@ export function PostsTab() {
 			result = result.filter((p) => !p.seen);
 		}
 
+		// Filter by starred status
+		if (showOnlyStarred) {
+			result = result.filter((p) => p.starred);
+		}
+
 		// Sort by post ID (newest first) - create new array to avoid mutation
 		// Using BigInt because Facebook post IDs exceed JavaScript's safe integer range
 		return [...result].sort((a, b) => {
@@ -77,11 +88,24 @@ export function PostsTab() {
 				return b.id.localeCompare(a.id);
 			}
 		});
-	}, [posts, groups, selectedSubscriptionId, searchQuery, showOnlyUnseen]);
+	}, [
+		posts,
+		groups,
+		selectedSubscriptionId,
+		searchQuery,
+		showOnlyUnseen,
+		showOnlyStarred,
+	]);
 
 	// Calculate unseen post count
 	const unseenCount = useMemo(
 		() => filteredPosts.filter((p) => !p.seen).length,
+		[filteredPosts],
+	);
+
+	// Calculate starred post count
+	const starredCount = useMemo(
+		() => filteredPosts.filter((p) => p.starred).length,
 		[filteredPosts],
 	);
 
@@ -116,17 +140,29 @@ export function PostsTab() {
 
 				<div className="flex items-center justify-between mb-4">
 					<p className="text-sm text-gray-600" aria-live="polite">
-						{unseenCount} unseen post{unseenCount !== 1 ? "s" : ""}
+						{unseenCount} unseen post{unseenCount !== 1 ? "s" : ""} •{" "}
+						{starredCount} starred post{starredCount !== 1 ? "s" : ""}
 					</p>
-					<label className="flex items-center gap-2 text-sm cursor-pointer">
-						<input
-							type="checkbox"
-							checked={showOnlyUnseen}
-							onChange={(e) => setShowOnlyUnseen(e.target.checked)}
-							className="w-4 h-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-						/>
-						<span>Show only unseen</span>
-					</label>
+					<div className="flex gap-4">
+						<label className="flex items-center gap-2 text-sm cursor-pointer">
+							<input
+								type="checkbox"
+								checked={showOnlyUnseen}
+								onChange={(e) => setShowOnlyUnseen(e.target.checked)}
+								className="w-4 h-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+							/>
+							<span>Show only unseen</span>
+						</label>
+						<label className="flex items-center gap-2 text-sm cursor-pointer">
+							<input
+								type="checkbox"
+								checked={showOnlyStarred}
+								onChange={(e) => setShowOnlyStarred(e.target.checked)}
+								className="w-4 h-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+							/>
+							<span>Show only starred</span>
+						</label>
+					</div>
 				</div>
 
 				{filteredPosts.length === 0 ? (
@@ -147,6 +183,7 @@ export function PostsTab() {
 									post={post}
 									group={group}
 									onToggleSeen={handleToggleSeen}
+									onToggleStarred={handleToggleStarred}
 								/>
 							);
 						})}
@@ -158,5 +195,9 @@ export function PostsTab() {
 
 	function handleToggleSeen(postId: string, currentSeen: boolean) {
 		markPostSeen.mutate({ postId, seen: !currentSeen });
+	}
+
+	function handleToggleStarred(postId: string, currentStarred: boolean) {
+		togglePostStarred.mutate({ postId, starred: !currentStarred });
 	}
 }

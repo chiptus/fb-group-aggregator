@@ -12,7 +12,7 @@ describe.sequential("Background Script - Message Handling", () => {
 
 	describe("handleScrapePosts function", () => {
 		it("should save new posts to storage", async () => {
-			const mockPosts: Omit<Post, "scrapedAt" | "seen">[] = [
+			const mockPosts: Omit<Post, "scrapedAt" | "seen" | "starred">[] = [
 				{
 					id: "123456789012345",
 					groupId: "group1",
@@ -50,7 +50,7 @@ describe.sequential("Background Script - Message Handling", () => {
 		});
 
 		it("should deduplicate posts (not save duplicates)", async () => {
-			const mockPost: Omit<Post, "scrapedAt" | "seen"> = {
+			const mockPost: Omit<Post, "scrapedAt" | "seen" | "starred"> = {
 				id: "123456789012345",
 				groupId: "group1",
 				authorName: "John Doe",
@@ -160,7 +160,7 @@ describe.sequential("Background Script - Message Handling", () => {
 		});
 
 		it("should handle multiple posts from same message", async () => {
-			const mockPosts: Omit<Post, "scrapedAt" | "seen">[] = [
+			const mockPosts: Omit<Post, "scrapedAt" | "seen" | "starred">[] = [
 				{
 					id: "123456789012345",
 					groupId: "group1",

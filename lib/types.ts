@@ -35,6 +35,7 @@ export const PostSchema = z.object({
 	timestamp: z.number().optional(),
 	scrapedAt: z.number(),
 	seen: z.boolean(),
+	starred: z.boolean().optional().default(false),
 	url: z.string(),
 });
 
@@ -57,7 +58,7 @@ export type ExtensionMessage =
 			payload: {
 				groupId: string;
 				groupInfo: { name: string; url: string };
-				posts: Omit<Post, "scrapedAt" | "seen">[];
+				posts: Omit<Post, "scrapedAt" | "seen" | "starred">[];
 			};
 	  }
 	| { type: "GET_CURRENT_GROUP" }

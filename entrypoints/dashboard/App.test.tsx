@@ -56,6 +56,7 @@ describe("Dashboard App", () => {
 			timestamp: Date.now() - 1000,
 			scrapedAt: Date.now(),
 			seen: false,
+			starred: false,
 			url: "https://facebook.com/groups/react-jobs/posts/345678901234567",
 		},
 		{
@@ -66,6 +67,7 @@ describe("Dashboard App", () => {
 			timestamp: Date.now() - 2000,
 			scrapedAt: Date.now(),
 			seen: false,
+			starred: false,
 			url: "https://facebook.com/groups/tlv-apartments/posts/234567890123456",
 		},
 		{
@@ -76,6 +78,7 @@ describe("Dashboard App", () => {
 			timestamp: Date.now() - 3000,
 			scrapedAt: Date.now(),
 			seen: true,
+			starred: false,
 			url: "https://facebook.com/groups/react-jobs/posts/123456789012345",
 		},
 	];
