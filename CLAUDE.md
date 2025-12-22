@@ -482,3 +482,10 @@ feat(dashboard): add spinner, fix XSS  # Multiple changes in one commit
 - Reuse same scraper module
 - Trigger scraping via programmatic content script injection
 - **Migration Effort**: Low - scraper stays the same, just change trigger
+
+## Active Technologies
+- TypeScript 5.x (extension + web app consistency), Node.js 20.x LTS (backend) + Fastify (backend framework), Drizzle ORM (database client), React + Vite (frontend), React Query (state), Tailwind CSS (UI) (001-remote-sync-webapp)
+- PostgreSQL with JSONB for HTML conten (001-remote-sync-webapp)
+
+## Recent Changes
+- 001-remote-sync-webapp: Added TypeScript 5.x (extension + web app consistency), Node.js 20.x LTS (backend) + Fastify (backend framework), Drizzle ORM (database client), React + Vite (frontend), React Query (state), Tailwind CSS (UI)
