@@ -17,6 +17,8 @@
     "lint-staged": "^16.2.7"
   },
   "lint-staged": {
-    "extension/**/*": "pnpm --filter extension lint-staged"
+    "extension/**/*": "pnpm --filter extension lint-staged",
+    "server/**/*": "pnpm --filter server lint-staged",
+    "webapp/**/*": "pnpm --filter webapp lint-staged"
   }
 }
