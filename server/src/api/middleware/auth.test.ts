@@ -1,7 +1,7 @@
-import { describe, it, expect, beforeEach } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { createServer } from '../server.js';
 import type { FastifyInstance } from 'fastify';
-import { createTestUser } from '../../../tests/helpers.js';
+import { createTestUser, cleanDatabase } from '../../../tests/helpers.js';
 import { authenticateRequest } from './auth.js';
 
 describe('Authentication Middleware', () => {
@@ -9,9 +9,14 @@ describe('Authentication Middleware', () => {
   let testApiKey: string;
 
   beforeEach(async () => {
+    await cleanDatabase();
     server = await createServer();
     const user = await createTestUser();
     testApiKey = user.apiKey;
+  });
+
+  afterEach(async () => {
+    await server.close();
   });
 
   describe('authenticateRequest', () => {

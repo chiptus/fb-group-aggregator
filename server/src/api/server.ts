@@ -1,5 +1,9 @@
 import Fastify from 'fastify';
 import cors from '@fastify/cors';
+import { registerAuthRoutes } from './routes/auth.js';
+import { registerPostRoutes } from './routes/posts.js';
+import { registerSubscriptionRoutes } from './routes/subscriptions.js';
+import { registerGroupRoutes } from './routes/groups.js';
 
 export async function createServer() {
   const server = Fastify({
@@ -60,6 +64,12 @@ export async function createServer() {
       },
     });
   });
+
+  // Register API routes
+  registerAuthRoutes(server);
+  registerPostRoutes(server);
+  registerSubscriptionRoutes(server);
+  registerGroupRoutes(server);
 
   return server;
 }
