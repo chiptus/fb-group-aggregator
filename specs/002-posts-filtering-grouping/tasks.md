@@ -56,14 +56,14 @@ This is a browser extension using WXT framework in a monorepo structure. All pat
 
 > **NOTE: Write these tests FIRST, ensure they FAIL before implementation**
 
-- [ ] T005 [P] [US1] Write test for FilterSettings Zod schema validation in extension/lib/filters/types.test.ts
-- [ ] T006 [P] [US1] Write test for filterPosts function with positive keywords in extension/lib/filters/filterPosts.test.ts
-- [ ] T007 [P] [US1] Write test for filterPosts function with negative keywords in extension/lib/filters/filterPosts.test.ts
-- [ ] T008 [P] [US1] Write test for filterPosts function with both positive and negative keywords (negative precedence) in extension/lib/filters/filterPosts.test.ts
-- [ ] T009 [P] [US1] Write test for case-insensitive keyword matching in extension/lib/filters/filterPosts.test.ts
-- [ ] T010 [P] [US1] Write test for empty filters (show all posts) in extension/lib/filters/filterPosts.test.ts
-- [ ] T011 [P] [US1] Write test for useFilters hook (load/save to chrome.storage.local) in extension/lib/hooks/filters/useFilters.test.ts
-- [ ] T012 [P] [US1] Write test for useFilteredPosts hook (integration with usePosts) in extension/lib/hooks/filters/useFilteredPosts.test.ts
+- [x] T005 [P] [US1] Write test for FilterSettings Zod schema validation in extension/lib/filters/types.test.ts
+- [x] T006 [P] [US1] Write test for filterPosts function with positive keywords in extension/lib/filters/filterPosts.test.ts
+- [x] T007 [P] [US1] Write test for filterPosts function with negative keywords in extension/lib/filters/filterPosts.test.ts
+- [x] T008 [P] [US1] Write test for filterPosts function with both positive and negative keywords (negative precedence) in extension/lib/filters/filterPosts.test.ts
+- [x] T009 [P] [US1] Write test for case-insensitive keyword matching in extension/lib/filters/filterPosts.test.ts
+- [x] T010 [P] [US1] Write test for empty filters (show all posts) in extension/lib/filters/filterPosts.test.ts
+- [x] T011 [P] [US1] Write test for useFilters hook (load/save to chrome.storage.local) in extension/lib/hooks/filters/useFilters.test.ts
+- [x] T012 [P] [US1] Write test for useFilteredPosts hook (integration with usePosts) in extension/lib/hooks/filters/useFilteredPosts.test.ts
 - [ ] T013 [P] [US1] Write test for FilterControls component (add/remove keywords) in extension/entrypoints/dashboard/components/FilterControls.test.tsx
 - [ ] T014 [P] [US1] Write test for FilterChips component (display/remove chips) in extension/entrypoints/dashboard/components/FilterChips.test.tsx
 
