@@ -67,9 +67,7 @@ describe("useFilters", () => {
 		await waitFor(() => expect(result.current.isSuccess).toBe(true));
 
 		expect(result.current.data).toEqual(storedFilters);
-		expect(storage.getItem).toHaveBeenCalledWith("filterSettings", {
-			fallback: DEFAULT_FILTERS,
-		});
+		expect(storage.getItem).toHaveBeenCalledWith("local:filterSettings");
 	});
 
 	it("should handle loading state", () => {
@@ -130,7 +128,10 @@ describe("useSaveFilters", () => {
 
 		await waitFor(() => expect(result.current.update.isSuccess).toBe(true));
 
-		expect(storage.setItem).toHaveBeenCalledWith("filterSettings", newFilters);
+		expect(storage.setItem).toHaveBeenCalledWith(
+			"local:filterSettings",
+			newFilters,
+		);
 	});
 
 	it("should update query cache on successful mutation", async () => {
@@ -156,12 +157,17 @@ describe("useSaveFilters", () => {
 			searchFields: ["contentHtml", "authorName"],
 		};
 
+		// Update mock to return new filters after mutation
+		vi.mocked(storage.getItem).mockResolvedValue(newFilters);
+
 		result.current.update.mutate(newFilters);
 
 		await waitFor(() => expect(result.current.update.isSuccess).toBe(true));
 
-		// Query cache should be updated
-		expect(result.current.filters.data).toEqual(newFilters);
+		// Query cache should be updated (after invalidation refetch)
+		await waitFor(() =>
+			expect(result.current.filters.data).toEqual(newFilters),
+		);
 	});
 
 	it("should handle mutation errors", async () => {
