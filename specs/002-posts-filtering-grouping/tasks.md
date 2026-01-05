@@ -27,10 +27,10 @@ This is a browser extension using WXT framework in a monorepo structure. All pat
 
 **Purpose**: Install dependencies and create directory structure
 
-- [ ] T001 Install @tanstack/react-virtual dependency using pnpm in extension/ workspace
-- [ ] T002 [P] Create extension/lib/filters/ directory structure
-- [ ] T003 [P] Create extension/lib/grouping/ directory structure
-- [ ] T004 [P] Create extension/lib/hooks/filters/ directory structure
+- [x] T001 Install @tanstack/react-virtual dependency using pnpm in extension/ workspace
+- [x] T002 [P] Create extension/lib/filters/ directory structure
+- [x] T003 [P] Create extension/lib/grouping/ directory structure
+- [x] T004 [P] Create extension/lib/hooks/filters/ directory structure
 
 ---
 
