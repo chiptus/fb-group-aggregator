@@ -73,7 +73,8 @@ describe("Integration: Complete Sync Flow", () => {
 
 		expect(createSubResponse.statusCode).toBe(200);
 		const createSubBody = createSubResponse.json();
-		expect(createSubBody.created).toBe(2);
+		expect(createSubBody.synced).toBe(2);
+		expect(createSubBody.conflicts).toBe(0);
 
 		// Step 2: Create groups
 		const groupsData = [
@@ -110,7 +111,8 @@ describe("Integration: Complete Sync Flow", () => {
 
 		expect(createGroupsResponse.statusCode).toBe(200);
 		const createGroupsBody = createGroupsResponse.json();
-		expect(createGroupsBody.created).toBe(2);
+		expect(createGroupsBody.synced).toBe(2);
+		expect(createGroupsBody.conflicts).toBe(0);
 
 		// Step 3: Upload posts
 		const postsData = [
@@ -149,8 +151,8 @@ describe("Integration: Complete Sync Flow", () => {
 
 		expect(uploadPostsResponse.statusCode).toBe(200);
 		const uploadPostsBody = uploadPostsResponse.json();
-		expect(uploadPostsBody.created).toBe(2);
-		expect(uploadPostsBody.updated).toBe(0);
+		expect(uploadPostsBody.synced).toBe(2);
+		expect(uploadPostsBody.conflicts).toBe(0);
 
 		// Step 4: Retrieve subscriptions
 		const getSubsResponse = await server.inject({
@@ -220,21 +222,7 @@ describe("Integration: Complete Sync Flow", () => {
 		expect(retrievedPost1.starred).toBe(false);
 	});
 
-	it("should handle duplicate posts correctly", async () => {
-		// Upload posts first time
-		const postsData = [
-			{
-				id: "post-dup-1",
-				groupId: "group-1",
-				authorName: "John Doe",
-				contentHtml: "<p>First version</p>",
-				scrapedAt: Date.now(),
-				seen: false,
-				starred: false,
-				url: "https://facebook.com/groups/react-jobs/posts/post-dup-1",
-			},
-		];
-
+	it("should merge seen status correctly for duplicate posts", async () => {
 		// Create subscription and group first
 		await server.inject({
 			method: "POST",
@@ -268,6 +256,20 @@ describe("Integration: Complete Sync Flow", () => {
 			},
 		});
 
+		// Upload post first time (seen: false, starred: false)
+		const postsData = [
+			{
+				id: "post-dup-1",
+				groupId: "group-1",
+				authorName: "John Doe",
+				contentHtml: "<p>Test post</p>",
+				scrapedAt: Date.now(),
+				seen: false,
+				starred: false,
+				url: "https://facebook.com/groups/react-jobs/posts/post-dup-1",
+			},
+		];
+
 		const firstUpload = await server.inject({
 			method: "POST",
 			url: "/api/sync/posts",
@@ -281,11 +283,11 @@ describe("Integration: Complete Sync Flow", () => {
 
 		expect(firstUpload.statusCode).toBe(200);
 		const firstBody = firstUpload.json();
-		expect(firstBody.created).toBe(1);
-		expect(firstBody.updated).toBe(0);
+		expect(firstBody.synced).toBe(1);
+		expect(firstBody.conflicts).toBe(0);
 
-		// Upload same post again with updated content
-		postsData[0].contentHtml = "<p>Updated version</p>";
+		// Upload same post again with seen: true
+		postsData[0].seen = true;
 		postsData[0].scrapedAt = Date.now();
 
 		const secondUpload = await server.inject({
@@ -301,10 +303,10 @@ describe("Integration: Complete Sync Flow", () => {
 
 		expect(secondUpload.statusCode).toBe(200);
 		const secondBody = secondUpload.json();
-		expect(secondBody.created).toBe(0);
-		expect(secondBody.updated).toBe(1);
+		expect(secondBody.synced).toBe(0);
+		expect(secondBody.conflicts).toBe(1);
 
-		// Verify only one post exists with updated content
+		// Verify post has seen: true (union of false || true = true)
 		const getPosts = await server.inject({
 			method: "GET",
 			url: "/api/sync/posts",
@@ -315,7 +317,35 @@ describe("Integration: Complete Sync Flow", () => {
 
 		const getPostsBody = getPosts.json();
 		expect(getPostsBody.total).toBe(1);
-		expect(getPostsBody.posts[0].contentHtml).toBe("<p>Updated version</p>");
+		expect(getPostsBody.posts[0].seen).toBe(true);
+
+		// Upload same post again with seen: false
+		postsData[0].seen = false;
+
+		const thirdUpload = await server.inject({
+			method: "POST",
+			url: "/api/sync/posts",
+			headers: {
+				authorization: `Bearer ${apiKey}`,
+			},
+			payload: {
+				posts: postsData,
+			},
+		});
+
+		expect(thirdUpload.statusCode).toBe(200);
+
+		// Verify post still has seen: true (union of true || false = true)
+		const getPostsAgain = await server.inject({
+			method: "GET",
+			url: "/api/sync/posts",
+			headers: {
+				authorization: `Bearer ${apiKey}`,
+			},
+		});
+
+		const getPostsAgainBody = getPostsAgain.json();
+		expect(getPostsAgainBody.posts[0].seen).toBe(true);
 	});
 
 	it("should isolate data between different users", async () => {
