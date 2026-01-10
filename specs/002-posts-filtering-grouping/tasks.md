@@ -69,10 +69,10 @@ This is a browser extension using WXT framework in a monorepo structure. All pat
 
 ### Implementation for User Story 1
 
-- [ ] T015 [P] [US1] Create FilterSettings Zod schema and type in extension/lib/filters/types.ts
-- [ ] T016 [US1] Implement filterPosts function with positive/negative keyword logic in extension/lib/filters/filterPosts.ts
-- [ ] T017 [US1] Implement useFilters hook with chrome.storage.local persistence (use wxt/storage instead of chrome.storage.local per data-model.md note) in extension/lib/hooks/filters/useFilters.ts
-- [ ] T018 [US1] Implement useFilteredPosts hook combining usePosts with filter logic in extension/lib/hooks/filters/useFilteredPosts.ts
+- [x] T015 [P] [US1] Create FilterSettings Zod schema and type in extension/lib/filters/types.ts
+- [x] T016 [US1] Implement filterPosts function with positive/negative keyword logic in extension/lib/filters/filterPosts.ts
+- [x] T017 [US1] Implement useFilters hook with chrome.storage.local persistence (use wxt/storage instead of chrome.storage.local per data-model.md note) in extension/lib/hooks/filters/useFilters.ts
+- [x] T018 [US1] Implement useFilteredPosts hook combining usePosts with filter logic in extension/lib/hooks/filters/useFilteredPosts.ts
 - [ ] T019 [US1] Implement FilterControls component with keyword input and add/remove functionality in extension/entrypoints/dashboard/components/FilterControls.tsx
 - [ ] T020 [US1] Implement FilterChips component with active filter display and removal in extension/entrypoints/dashboard/components/FilterChips.tsx
 - [ ] T021 [US1] Add 300ms debounce to search input in FilterControls component in extension/entrypoints/dashboard/components/FilterControls.tsx
