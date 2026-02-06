@@ -98,19 +98,19 @@ This is a browser extension using WXT framework in a monorepo structure. All pat
 
 > **NOTE: Write these tests FIRST, ensure they FAIL before implementation**
 
-- [ ] T025 [P] [US2] Write test for VirtualPostList component rendering only visible items in extension/entrypoints/dashboard/components/VirtualPostList.test.tsx
-- [ ] T026 [P] [US2] Write test for VirtualPostList scroll position preservation in extension/entrypoints/dashboard/components/VirtualPostList.test.tsx
-- [ ] T027 [P] [US2] Write test for VirtualPostList with empty posts array in extension/entrypoints/dashboard/components/VirtualPostList.test.tsx
-- [ ] T028 [P] [US2] Write test for VirtualPostList estimateSize calculation in extension/entrypoints/dashboard/components/VirtualPostList.test.tsx
+- [x] T025 [P] [US2] Write test for VirtualPostList component rendering only visible items in extension/entrypoints/dashboard/components/VirtualPostList.test.tsx
+- [x] T026 [P] [US2] Write test for VirtualPostList scroll position preservation in extension/entrypoints/dashboard/components/VirtualPostList.test.tsx
+- [x] T027 [P] [US2] Write test for VirtualPostList with empty posts array in extension/entrypoints/dashboard/components/VirtualPostList.test.tsx
+- [x] T028 [P] [US2] Write test for VirtualPostList estimateSize calculation in extension/entrypoints/dashboard/components/VirtualPostList.test.tsx
 
 ### Implementation for User Story 2
 
-- [ ] T029 [US2] Implement VirtualPostList component using @tanstack/react-virtual with useVirtualizer hook in extension/entrypoints/dashboard/components/VirtualPostList.tsx
-- [ ] T030 [US2] Configure virtualizer with estimateSize (200px), overscan (5 items), and proper scroll container ref in extension/entrypoints/dashboard/components/VirtualPostList.tsx
-- [ ] T031 [US2] Apply React 19 workaround for TanStack Virtual (wrap virtualizer in useRef per research.md) in extension/entrypoints/dashboard/components/VirtualPostList.tsx
-- [ ] T032 [US2] Implement absolute positioning with transform for virtual items in extension/entrypoints/dashboard/components/VirtualPostList.tsx
-- [ ] T033 [US2] Replace existing post list rendering with VirtualPostList in PostFeed/PostsTab component in extension/entrypoints/dashboard/components/PostFeed.tsx (or tabs/PostsTab.tsx)
-- [ ] T034 [US2] Ensure scroll position is preserved when filters change (FR-016) in VirtualPostList implementation
+- [x] T029 [US2] Implement VirtualPostList component using @tanstack/react-virtual with useVirtualizer hook in extension/entrypoints/dashboard/components/VirtualPostList.tsx
+- [x] T030 [US2] Configure virtualizer with estimateSize (200px), overscan (5 items), and proper scroll container ref in extension/entrypoints/dashboard/components/VirtualPostList.tsx
+- [x] T031 [US2] Apply React 19 workaround for TanStack Virtual (wrap virtualizer in useRef per research.md) in extension/entrypoints/dashboard/components/VirtualPostList.tsx
+- [x] T032 [US2] Implement absolute positioning with transform for virtual items in extension/entrypoints/dashboard/components/VirtualPostList.tsx
+- [x] T033 [US2] Replace existing post list rendering with VirtualPostList in PostsTab component in extension/entrypoints/dashboard/tabs/PostsTab.tsx
+- [x] T034 [US2] Ensure scroll position is preserved when filters change (FR-016) in VirtualPostList implementation
 - [ ] T035 [US2] Test performance with 1000+ posts and verify <100ms scroll latency
 
 **Checkpoint**: At this point, User Stories 1 AND 2 should both work independently

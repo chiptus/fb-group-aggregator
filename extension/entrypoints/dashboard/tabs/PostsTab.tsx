@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { filterPosts } from "@/lib/filters/filterPosts";
 import type { FilterSettings } from "@/lib/filters/types";
@@ -10,6 +10,7 @@ import {
 	useTogglePostStarred,
 } from "@/lib/hooks/storage/usePosts";
 import { useSubscriptions } from "@/lib/hooks/storage/useSubscriptions";
+import type { Post } from "@/lib/types";
 import { FilterChips } from "../components/FilterChips";
 import { FilterControls } from "../components/FilterControls";
 import { FilterStatsBanner } from "../components/FilterStatsBanner";
@@ -17,6 +18,7 @@ import { LoadingSpinner } from "../components/LoadingSpinner";
 import { PostCard } from "../components/PostCard";
 import { SearchBar } from "../components/SearchBar";
 import { SubscriptionSidebar } from "../components/SubscriptionSidebar";
+import { VirtualPostList } from "../components/VirtualPostList";
 
 const DEFAULT_FILTERS: FilterSettings = {
 	positiveKeywords: [],
@@ -139,6 +141,62 @@ export function PostsTab() {
 		[filteredPosts],
 	);
 
+	// Create groups Map for O(1) lookups in renderPost
+	const groupsMap = useMemo(() => {
+		return new Map(groups.map((g) => [g.id, g]));
+	}, [groups]);
+
+	// Memoized handlers for virtualized list
+	const handleToggleSeen = useCallback(
+		(postId: string, currentSeen: boolean) => {
+			markPostSeen.mutate({ postId, seen: !currentSeen });
+		},
+		[markPostSeen],
+	);
+
+	const handleToggleStarred = useCallback(
+		(postId: string, currentStarred: boolean) => {
+			togglePostStarred.mutate({ postId, starred: !currentStarred });
+		},
+		[togglePostStarred],
+	);
+
+	const handleRemoveKeyword = useCallback(
+		(keyword: string, type: "positive" | "negative") => {
+			const updatedFilters: FilterSettings = {
+				...filters,
+				positiveKeywords:
+					type === "positive"
+						? filters.positiveKeywords.filter((k) => k !== keyword)
+						: filters.positiveKeywords,
+				negativeKeywords:
+					type === "negative"
+						? filters.negativeKeywords.filter((k) => k !== keyword)
+						: filters.negativeKeywords,
+			};
+			saveFiltersMutation.mutate(updatedFilters);
+		},
+		[filters, saveFiltersMutation],
+	);
+
+	// Render function for virtualized list
+	const renderPost = useCallback(
+		(post: Post) => {
+			const group = groupsMap.get(post.groupId);
+			return (
+				<div className="pb-4">
+					<PostCard
+						post={post}
+						group={group}
+						onToggleSeen={handleToggleSeen}
+						onToggleStarred={handleToggleStarred}
+					/>
+				</div>
+			);
+		},
+		[groupsMap, handleToggleSeen, handleToggleStarred],
+	);
+
 	if (isLoading) {
 		return <LoadingSpinner />;
 	}
@@ -248,49 +306,15 @@ export function PostsTab() {
 						<p className="text-gray-600">No posts found</p>
 					</div>
 				) : (
-					<div
-						className="space-y-4"
-						role="feed"
-						aria-label="Facebook group posts"
-					>
-						{filteredPosts.map((post) => {
-							const group = groups.find((g) => g.id === post.groupId);
-							return (
-								<PostCard
-									key={post.id}
-									post={post}
-									group={group}
-									onToggleSeen={handleToggleSeen}
-									onToggleStarred={handleToggleStarred}
-								/>
-							);
-						})}
-					</div>
+					<VirtualPostList
+						posts={filteredPosts}
+						height={600}
+						estimateSize={200}
+						overscan={5}
+						renderPost={renderPost}
+					/>
 				)}
 			</main>
 		</div>
 	);
-
-	function handleToggleSeen(postId: string, currentSeen: boolean) {
-		markPostSeen.mutate({ postId, seen: !currentSeen });
-	}
-
-	function handleToggleStarred(postId: string, currentStarred: boolean) {
-		togglePostStarred.mutate({ postId, starred: !currentStarred });
-	}
-
-	function handleRemoveKeyword(keyword: string, type: "positive" | "negative") {
-		const updatedFilters: FilterSettings = {
-			...filters,
-			positiveKeywords:
-				type === "positive"
-					? filters.positiveKeywords.filter((k) => k !== keyword)
-					: filters.positiveKeywords,
-			negativeKeywords:
-				type === "negative"
-					? filters.negativeKeywords.filter((k) => k !== keyword)
-					: filters.negativeKeywords,
-		};
-		saveFiltersMutation.mutate(updatedFilters);
-	}
 }
