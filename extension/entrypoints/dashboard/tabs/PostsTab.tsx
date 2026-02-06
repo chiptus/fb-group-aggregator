@@ -1,5 +1,8 @@
 import { useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
+import { filterPosts } from "@/lib/filters/filterPosts";
+import type { FilterSettings } from "@/lib/filters/types";
+import { useFilters, useSaveFilters } from "@/lib/hooks/filters/useFilters";
 import { useGroups } from "@/lib/hooks/storage/useGroups";
 import {
 	useMarkPostSeen,
@@ -7,10 +10,20 @@ import {
 	useTogglePostStarred,
 } from "@/lib/hooks/storage/usePosts";
 import { useSubscriptions } from "@/lib/hooks/storage/useSubscriptions";
+import { FilterChips } from "../components/FilterChips";
+import { FilterControls } from "../components/FilterControls";
+import { FilterStatsBanner } from "../components/FilterStatsBanner";
 import { LoadingSpinner } from "../components/LoadingSpinner";
 import { PostCard } from "../components/PostCard";
 import { SearchBar } from "../components/SearchBar";
 import { SubscriptionSidebar } from "../components/SubscriptionSidebar";
+
+const DEFAULT_FILTERS: FilterSettings = {
+	positiveKeywords: [],
+	negativeKeywords: [],
+	caseSensitive: false,
+	searchFields: ["contentHtml", "authorName"],
+};
 
 export function PostsTab() {
 	const [selectedSubscriptionId, setSelectedSubscriptionId] = useState<
@@ -19,6 +32,7 @@ export function PostsTab() {
 	const [searchQuery, setSearchQuery] = useState("");
 	const [showOnlyUnseen, setShowOnlyUnseen] = useState(true);
 	const [showOnlyStarred, setShowOnlyStarred] = useState(false);
+	const [showFilterPanel, setShowFilterPanel] = useState(false);
 	const markPostSeen = useMarkPostSeen();
 	const togglePostStarred = useTogglePostStarred();
 
@@ -27,7 +41,10 @@ export function PostsTab() {
 	const groupsQuery = useGroups();
 	const postsQuery = usePosts();
 
-	// Mutations
+	// Keyword filters
+	const filtersQuery = useFilters();
+	const saveFiltersMutation = useSaveFilters();
+	const filters = filtersQuery.data ?? DEFAULT_FILTERS;
 
 	// Combined loading state
 	const isLoading =
@@ -39,24 +56,29 @@ export function PostsTab() {
 	const error =
 		subscriptionsQuery.error || groupsQuery.error || postsQuery.error;
 
-	// Filter posts by subscription and search query
-
 	const subscriptions = subscriptionsQuery.data ?? [];
 	const groups = groupsQuery.data ?? [];
 	const posts = postsQuery.data ?? [];
 
+	// Memoize Set of group IDs for subscription (T023: Set-based lookups for O(1) performance)
+	const subscriptionGroupIds = useMemo(() => {
+		if (!selectedSubscriptionId) return null;
+		return new Set(
+			groups
+				.filter((g) => g.subscriptionIds.includes(selectedSubscriptionId))
+				.map((g) => g.id),
+		);
+	}, [groups, selectedSubscriptionId]);
+
 	const filteredPosts = useMemo(() => {
 		let result = posts;
 
-		// Filter by subscription
-		if (selectedSubscriptionId) {
-			const groupsInSubscription = groups
-				.filter((g) => g.subscriptionIds.includes(selectedSubscriptionId))
-				.map((g) => g.id);
-			result = result.filter((p) => groupsInSubscription.includes(p.groupId));
+		// Filter by subscription using Set for O(1) lookup
+		if (subscriptionGroupIds) {
+			result = result.filter((p) => subscriptionGroupIds.has(p.groupId));
 		}
 
-		// Filter by search query
+		// Filter by search query (text search)
 		if (searchQuery) {
 			const query = searchQuery.toLowerCase();
 			result = result.filter(
@@ -64,6 +86,14 @@ export function PostsTab() {
 					p.contentHtml.toLowerCase().includes(query) ||
 					p.authorName.toLowerCase().includes(query),
 			);
+		}
+
+		// Apply keyword filters (positive/negative keywords)
+		const hasKeywordFilters =
+			filters.positiveKeywords.length > 0 ||
+			filters.negativeKeywords.length > 0;
+		if (hasKeywordFilters) {
+			result = filterPosts(result, filters);
 		}
 
 		// Filter by seen status
@@ -90,9 +120,9 @@ export function PostsTab() {
 		});
 	}, [
 		posts,
-		groups,
-		selectedSubscriptionId,
+		subscriptionGroupIds,
 		searchQuery,
+		filters,
 		showOnlyUnseen,
 		showOnlyStarred,
 	]);
@@ -127,6 +157,9 @@ export function PostsTab() {
 		);
 	}
 
+	const hasActiveFilters =
+		filters.positiveKeywords.length > 0 || filters.negativeKeywords.length > 0;
+
 	return (
 		<div className="max-w-7xl mx-auto px-4 py-6 flex gap-6">
 			<SubscriptionSidebar
@@ -137,6 +170,51 @@ export function PostsTab() {
 
 			<main className="flex-1">
 				<SearchBar value={searchQuery} onChange={setSearchQuery} />
+
+				{/* Filter toggle button */}
+				<div className="mb-4">
+					<button
+						type="button"
+						onClick={() => setShowFilterPanel(!showFilterPanel)}
+						className="text-sm text-blue-600 hover:text-blue-800 flex items-center gap-1"
+					>
+						{showFilterPanel ? "Hide" : "Show"} keyword filters
+						{hasActiveFilters && (
+							<span className="bg-blue-100 text-blue-800 text-xs px-2 py-0.5 rounded-full">
+								{filters.positiveKeywords.length +
+									filters.negativeKeywords.length}
+							</span>
+						)}
+					</button>
+				</div>
+
+				{/* Filter controls panel */}
+				{showFilterPanel && (
+					<div className="mb-4">
+						<FilterControls />
+					</div>
+				)}
+
+				{/* Active filter chips */}
+				{hasActiveFilters && (
+					<div className="mb-4">
+						<FilterChips
+							filters={filters}
+							onRemoveKeyword={handleRemoveKeyword}
+						/>
+					</div>
+				)}
+
+				{/* Filter stats banner */}
+				{hasActiveFilters && (
+					<FilterStatsBanner
+						totalPosts={posts.length}
+						filteredPosts={filteredPosts.length}
+						positiveKeywordCount={filters.positiveKeywords.length}
+						negativeKeywordCount={filters.negativeKeywords.length}
+						className="mb-4"
+					/>
+				)}
 
 				<div className="flex items-center justify-between mb-4">
 					<p className="text-sm text-gray-600" aria-live="polite">
@@ -199,5 +277,20 @@ export function PostsTab() {
 
 	function handleToggleStarred(postId: string, currentStarred: boolean) {
 		togglePostStarred.mutate({ postId, starred: !currentStarred });
+	}
+
+	function handleRemoveKeyword(keyword: string, type: "positive" | "negative") {
+		const updatedFilters: FilterSettings = {
+			...filters,
+			positiveKeywords:
+				type === "positive"
+					? filters.positiveKeywords.filter((k) => k !== keyword)
+					: filters.positiveKeywords,
+			negativeKeywords:
+				type === "negative"
+					? filters.negativeKeywords.filter((k) => k !== keyword)
+					: filters.negativeKeywords,
+		};
+		saveFiltersMutation.mutate(updatedFilters);
 	}
 }

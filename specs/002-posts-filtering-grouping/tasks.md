@@ -64,8 +64,8 @@ This is a browser extension using WXT framework in a monorepo structure. All pat
 - [x] T010 [P] [US1] Write test for empty filters (show all posts) in extension/lib/filters/filterPosts.test.ts
 - [x] T011 [P] [US1] Write test for useFilters hook (load/save to chrome.storage.local) in extension/lib/hooks/filters/useFilters.test.ts
 - [x] T012 [P] [US1] Write test for useFilteredPosts hook (integration with usePosts) in extension/lib/hooks/filters/useFilteredPosts.test.ts
-- [ ] T013 [P] [US1] Write test for FilterControls component (add/remove keywords) in extension/entrypoints/dashboard/components/FilterControls.test.tsx
-- [ ] T014 [P] [US1] Write test for FilterChips component (display/remove chips) in extension/entrypoints/dashboard/components/FilterChips.test.tsx
+- [x] T013 [P] [US1] Write test for FilterControls component (add/remove keywords) in extension/entrypoints/dashboard/components/FilterControls.test.tsx
+- [x] T014 [P] [US1] Write test for FilterChips component (display/remove chips) in extension/entrypoints/dashboard/components/FilterChips.test.tsx
 
 ### Implementation for User Story 1
 
@@ -73,12 +73,12 @@ This is a browser extension using WXT framework in a monorepo structure. All pat
 - [x] T016 [US1] Implement filterPosts function with positive/negative keyword logic in extension/lib/filters/filterPosts.ts
 - [x] T017 [US1] Implement useFilters hook with chrome.storage.local persistence (use wxt/storage instead of chrome.storage.local per data-model.md note) in extension/lib/hooks/filters/useFilters.ts
 - [x] T018 [US1] Implement useFilteredPosts hook combining usePosts with filter logic in extension/lib/hooks/filters/useFilteredPosts.ts
-- [ ] T019 [US1] Implement FilterControls component with keyword input and add/remove functionality in extension/entrypoints/dashboard/components/FilterControls.tsx
-- [ ] T020 [US1] Implement FilterChips component with active filter display and removal in extension/entrypoints/dashboard/components/FilterChips.tsx
-- [ ] T021 [US1] Add 300ms debounce to search input in FilterControls component in extension/entrypoints/dashboard/components/FilterControls.tsx
-- [ ] T022 [US1] Integrate FilterControls and FilterChips into PostFeed component in extension/entrypoints/dashboard/components/PostFeed.tsx (or tabs/PostsTab.tsx if that's the actual location)
-- [ ] T023 [US1] Optimize filtering with Set-based lookups for subscription filtering (replace Array.includes with Set.has) in filter logic
-- [ ] T024 [US1] Add FilterStatsBanner component showing "X of Y posts" with filter counts in extension/entrypoints/dashboard/components/FilterStatsBanner.tsx
+- [x] T019 [US1] Implement FilterControls component with keyword input and add/remove functionality in extension/entrypoints/dashboard/components/FilterControls.tsx
+- [x] T020 [US1] Implement FilterChips component with active filter display and removal in extension/entrypoints/dashboard/components/FilterChips.tsx
+- [x] T021 [US1] Add 300ms debounce to search input in SearchBar component in extension/entrypoints/dashboard/components/SearchBar.tsx
+- [x] T022 [US1] Integrate FilterControls and FilterChips into PostsTab component in extension/entrypoints/dashboard/tabs/PostsTab.tsx
+- [x] T023 [US1] Optimize filtering with Set-based lookups for subscription filtering (replace Array.includes with Set.has) in PostsTab filter logic
+- [x] T024 [US1] Add FilterStatsBanner component showing "X of Y posts" with filter counts in extension/entrypoints/dashboard/components/FilterStatsBanner.tsx
 
 **Checkpoint**: At this point, User Story 1 should be fully functional and testable independently
 - Users can add/remove positive/negative keywords
