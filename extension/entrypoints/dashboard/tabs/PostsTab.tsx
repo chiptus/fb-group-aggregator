@@ -2,7 +2,10 @@ import { useCallback, useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { filterPosts } from "@/lib/filters/filterPosts";
 import type { FilterSettings } from "@/lib/filters/types";
+import type { PostGroupingService } from "@/lib/grouping/service";
+import type { GroupingResult } from "@/lib/grouping/types";
 import { useFilters, useSaveFilters } from "@/lib/hooks/filters/useFilters";
+import { useGroupedPosts } from "@/lib/hooks/grouping/useGroupedPosts";
 import { useGroups } from "@/lib/hooks/storage/useGroups";
 import {
 	useMarkPostSeen,
@@ -10,12 +13,14 @@ import {
 	useTogglePostStarred,
 } from "@/lib/hooks/storage/usePosts";
 import { useSubscriptions } from "@/lib/hooks/storage/useSubscriptions";
-import type { Post } from "@/lib/types";
+import type { Group, Post } from "@/lib/types";
 import { FilterChips } from "../components/FilterChips";
 import { FilterControls } from "../components/FilterControls";
 import { FilterStatsBanner } from "../components/FilterStatsBanner";
+import { GroupingStatsBanner } from "../components/GroupingStatsBanner";
 import { LoadingSpinner } from "../components/LoadingSpinner";
 import { PostCard } from "../components/PostCard";
+import { PostGroup } from "../components/PostGroup";
 import { SearchBar } from "../components/SearchBar";
 import { SubscriptionSidebar } from "../components/SubscriptionSidebar";
 import { VirtualPostList } from "../components/VirtualPostList";
@@ -27,6 +32,87 @@ const DEFAULT_FILTERS: FilterSettings = {
 	searchFields: ["contentHtml", "authorName"],
 };
 
+interface GroupedPostsViewProps {
+	groupingData: GroupingResult;
+	filteredPosts: Post[];
+	service: PostGroupingService;
+	expansionState: Map<string, boolean>;
+	onToggleExpanded: (groupId: string) => void;
+	onMarkGroupSeen: (postIds: string[]) => void;
+	groupsMap: Map<string, Group>;
+	onToggleSeen: (postId: string, currentSeen: boolean) => void;
+	onToggleStarred: (postId: string, currentStarred: boolean) => void;
+}
+
+function GroupedPostsView({
+	groupingData,
+	filteredPosts,
+	service,
+	expansionState,
+	onToggleExpanded,
+	onMarkGroupSeen,
+	groupsMap,
+	onToggleSeen,
+	onToggleStarred,
+}: GroupedPostsViewProps) {
+	return (
+		<div className="space-y-4">
+			{groupingData.groups.map((group) => {
+				const groupPosts = service.getPostsByGroup(
+					group.id,
+					filteredPosts,
+					groupingData,
+				);
+				return (
+					<PostGroup
+						key={group.id}
+						group={group}
+						posts={groupPosts}
+						isExpanded={expansionState.get(group.id) ?? false}
+						onToggle={() => onToggleExpanded(group.id)}
+						onMarkSeen={() => onMarkGroupSeen(group.postIds)}
+						renderPost={(post) => {
+							const fbGroup = groupsMap.get(post.groupId);
+							return (
+								<PostCard
+									post={post}
+									group={fbGroup}
+									onToggleSeen={onToggleSeen}
+									onToggleStarred={onToggleStarred}
+								/>
+							);
+						}}
+					/>
+				);
+			})}
+			{/* Render ungrouped posts individually */}
+			{groupingData.ungroupedPostIds.length > 0 && (
+				<div className="mt-6">
+					<h3 className="text-sm font-medium text-gray-700 mb-3">
+						Ungrouped Posts ({groupingData.ungroupedPostIds.length})
+					</h3>
+					<div className="space-y-4">
+						{filteredPosts
+							.filter((p) => groupingData.ungroupedPostIds.includes(p.id))
+							.map((post) => {
+								const fbGroup = groupsMap.get(post.groupId);
+								return (
+									<PostCard
+										key={post.id}
+										post={post}
+										group={fbGroup}
+										onToggleSeen={onToggleSeen}
+										onToggleStarred={onToggleStarred}
+									/>
+								);
+							})}
+					</div>
+				</div>
+			)}
+		</div>
+	);
+}
+
 export function PostsTab() {
 	const [selectedSubscriptionId, setSelectedSubscriptionId] = useState<
 		string | null
@@ -35,6 +121,7 @@ export function PostsTab() {
 	const [showOnlyUnseen, setShowOnlyUnseen] = useState(true);
 	const [showOnlyStarred, setShowOnlyStarred] = useState(false);
 	const [showFilterPanel, setShowFilterPanel] = useState(false);
+	const [enableGrouping, setEnableGrouping] = useState(false);
 	const markPostSeen = useMarkPostSeen();
 	const togglePostStarred = useTogglePostStarred();
 
@@ -129,6 +216,9 @@ export function PostsTab() {
 		showOnlyStarred,
 	]);
 
+	// Grouping hook - only group when enabled
+	const groupingResult = useGroupedPosts(enableGrouping ? filteredPosts : []);
+
 	// Calculate unseen post count
 	const unseenCount = useMemo(
 		() => filteredPosts.filter((p) => !p.seen).length,
@@ -177,6 +267,16 @@ export function PostsTab() {
 			saveFiltersMutation.mutate(updatedFilters);
 		},
 		[filters, saveFiltersMutation],
+	);
+
+	// Handler for marking all posts in a group as seen
+	const handleMarkGroupSeen = useCallback(
+		(postIds: string[]) => {
+			for (const postId of postIds) {
+				markPostSeen.mutate({ postId, seen: true });
+			}
+		},
+		[markPostSeen],
 	);
 
 	// Render function for virtualized list
@@ -298,13 +398,47 @@ export function PostsTab() {
 							/>
 							<span>Show only starred</span>
 						</label>
+						<label className="flex items-center gap-2 text-sm cursor-pointer">
+							<input
+								type="checkbox"
+								checked={enableGrouping}
+								onChange={(e) => setEnableGrouping(e.target.checked)}
+								className="w-4 h-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+							/>
+							<span>Group similar posts</span>
+						</label>
 					</div>
 				</div>
+
+				{/* Grouping stats banner */}
+				{enableGrouping && groupingResult.data && (
+					<GroupingStatsBanner
+						totalGroups={groupingResult.data.totalGroups}
+						totalPostsGrouped={groupingResult.data.totalPostsGrouped}
+						reductionPercentage={
+							groupingResult.service.getGroupingStats(groupingResult.data)
+								.reductionPercentage
+						}
+						className="mb-4"
+					/>
+				)}
 
 				{filteredPosts.length === 0 ? (
 					<div className="block bg-white rounded-lg shadow p-8 text-center">
 						<p className="text-gray-600">No posts found</p>
 					</div>
+				) : enableGrouping && groupingResult.data ? (
+					<GroupedPostsView
+						groupingData={groupingResult.data}
+						filteredPosts={filteredPosts}
+						service={groupingResult.service}
+						expansionState={groupingResult.expansionState}
+						onToggleExpanded={groupingResult.toggleExpanded}
+						onMarkGroupSeen={handleMarkGroupSeen}
+						groupsMap={groupsMap}
+						onToggleSeen={handleToggleSeen}
+						onToggleStarred={handleToggleStarred}
+					/>
 				) : (
 					<VirtualPostList
 						posts={filteredPosts}
