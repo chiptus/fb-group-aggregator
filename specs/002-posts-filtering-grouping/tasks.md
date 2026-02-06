@@ -131,30 +131,30 @@ This is a browser extension using WXT framework in a monorepo structure. All pat
 
 > **NOTE: Write these tests FIRST, ensure they FAIL before implementation**
 
-- [ ] T036 [P] [US3] Write test for normalizeContent function (HTML stripping, whitespace, lowercase) in extension/lib/grouping/normalizer.test.ts
-- [ ] T037 [P] [US3] Write test for PostGroup Zod schema validation in extension/lib/grouping/types.test.ts
-- [ ] T038 [P] [US3] Write test for GroupingResult Zod schema validation in extension/lib/grouping/types.test.ts
-- [ ] T039 [P] [US3] Write test for ExactMatchStrategy grouping with identical posts in extension/lib/grouping/strategies/exact-match.test.ts
-- [ ] T040 [P] [US3] Write test for ExactMatchStrategy with posts below min length (10 chars) in extension/lib/grouping/strategies/exact-match.test.ts
-- [ ] T041 [P] [US3] Write test for PostGroupingService with strategy switching in extension/lib/grouping/service.test.ts
-- [ ] T042 [P] [US3] Write test for getPostsByGroup helper method in extension/lib/grouping/service.test.ts
-- [ ] T043 [P] [US3] Write test for getGroupsSorted helper method (largest first) in extension/lib/grouping/service.test.ts
-- [ ] T044 [P] [US3] Write test for useGroupedPosts hook with expansion state in extension/lib/hooks/grouping/useGroupedPosts.test.ts
-- [ ] T045 [P] [US3] Write test for PostGroup component (expand/collapse, mark as seen) in extension/entrypoints/dashboard/components/PostGroup.test.tsx
+- [x] T036 [P] [US3] Write test for normalizeContent function (HTML stripping, whitespace, lowercase) in extension/lib/grouping/normalizer.test.ts
+- [x] T037 [P] [US3] Write test for PostGroup Zod schema validation in extension/lib/grouping/types.test.ts
+- [x] T038 [P] [US3] Write test for GroupingResult Zod schema validation in extension/lib/grouping/types.test.ts
+- [x] T039 [P] [US3] Write test for ExactMatchStrategy grouping with identical posts in extension/lib/grouping/strategies/exact-match.test.ts
+- [x] T040 [P] [US3] Write test for ExactMatchStrategy with posts below min length (10 chars) in extension/lib/grouping/strategies/exact-match.test.ts
+- [x] T041 [P] [US3] Write test for PostGroupingService with strategy switching in extension/lib/grouping/service.test.ts
+- [x] T042 [P] [US3] Write test for getPostsByGroup helper method in extension/lib/grouping/service.test.ts
+- [x] T043 [P] [US3] Write test for getGroupsSorted helper method (largest first) in extension/lib/grouping/service.test.ts
+- [x] T044 [P] [US3] Write test for useGroupedPosts hook with expansion state in extension/lib/hooks/grouping/useGroupedPosts.test.ts
+- [x] T045 [P] [US3] Write test for PostGroup component (expand/collapse, mark as seen) in extension/entrypoints/dashboard/components/PostGroup.test.tsx
 
 ### Implementation for User Story 3
 
-- [ ] T046 [P] [US3] Create PostGroup and GroupingResult Zod schemas and types in extension/lib/grouping/types.ts
-- [ ] T047 [P] [US3] Implement normalizeContent function (strip HTML, collapse whitespace, lowercase) in extension/lib/grouping/normalizer.ts
-- [ ] T048 [US3] Create GroupingStrategy interface in extension/lib/grouping/strategies/base.ts
-- [ ] T049 [US3] Implement ExactMatchStrategy class with Map-based grouping in extension/lib/grouping/strategies/exact-match.ts
-- [ ] T050 [US3] Implement PostGroupingService with strategy pattern and helper methods in extension/lib/grouping/service.ts
-- [ ] T051 [US3] Create useGroupedPosts hook with grouping logic and expansion state management in extension/lib/hooks/grouping/useGroupedPosts.ts
-- [ ] T052 [US3] Implement PostGroup component with expand/collapse and mark-as-seen functionality in extension/entrypoints/dashboard/components/PostGroup.tsx
-- [ ] T053 [US3] Implement GroupingStatsBanner component showing group count and reduction percentage in extension/entrypoints/dashboard/components/GroupingStatsBanner.tsx
-- [ ] T054 [US3] Integrate grouping UI into PostFeed with toggle for grouped/ungrouped view in extension/entrypoints/dashboard/components/PostFeed.tsx (or tabs/PostsTab.tsx)
-- [ ] T055 [US3] Ensure grouped posts work with filters (FR-015) - hide groups that don't match filters
-- [ ] T056 [US3] Verify 30% list reduction with 10+ similar posts (SC-007)
+- [x] T046 [P] [US3] Create PostGroup and GroupingResult Zod schemas and types in extension/lib/grouping/types.ts
+- [x] T047 [P] [US3] Implement normalizeContent function (strip HTML, collapse whitespace, lowercase) in extension/lib/grouping/normalizer.ts
+- [x] T048 [US3] Create GroupingStrategy interface in extension/lib/grouping/strategies/base.ts
+- [x] T049 [US3] Implement ExactMatchStrategy class with Map-based grouping in extension/lib/grouping/strategies/exact-match.ts
+- [x] T050 [US3] Implement PostGroupingService with strategy pattern and helper methods in extension/lib/grouping/service.ts
+- [x] T051 [US3] Create useGroupedPosts hook with grouping logic and expansion state management in extension/lib/hooks/grouping/useGroupedPosts.ts
+- [x] T052 [US3] Implement PostGroup component with expand/collapse and mark-as-seen functionality in extension/entrypoints/dashboard/components/PostGroup.tsx
+- [x] T053 [US3] Implement GroupingStatsBanner component showing group count and reduction percentage in extension/entrypoints/dashboard/components/GroupingStatsBanner.tsx
+- [x] T054 [US3] Integrate grouping UI into PostFeed with toggle for grouped/ungrouped view in extension/entrypoints/dashboard/components/PostFeed.tsx (or tabs/PostsTab.tsx)
+- [x] T055 [US3] Ensure grouped posts work with filters (FR-015) - hide groups that don't match filters
+- [x] T056 [US3] Verify 30% list reduction with 10+ similar posts (SC-007)
 
 **Checkpoint**: All user stories should now be independently functional
 - Grouping works with exact text matching
