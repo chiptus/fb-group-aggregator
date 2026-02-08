@@ -1,4 +1,4 @@
-import { useQuery } from "@tanstack/react-query";
+import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import { useMemo, useState } from "react";
 import { PostGroupingService } from "@/lib/grouping/service";
 import { ExactMatchStrategy } from "@/lib/grouping/strategies/exact-match";
@@ -19,6 +19,7 @@ export function useGroupedPosts(posts: Post[]) {
 		queryKey: ["groupedPosts", posts.map((p) => p.id).join(",")],
 		queryFn: () => service.groupPosts(posts),
 		staleTime: 0,
+		placeholderData: keepPreviousData,
 	});
 
 	function toggleExpanded(groupId: string) {
