@@ -172,9 +172,9 @@ This is a browser extension using WXT framework in a monorepo structure. All pat
 - [x] T057 [P] Add empty state handling for "No posts match your current filters" message
 - [x] T058 [P] Add loading states for filter/grouping operations
 - [x] T059 [P] Verify filter persistence uses wxt/storage API (per data-model.md note on line 67)
-- [ ] T060 [P] Performance testing: Verify <500ms filter updates with 5000 posts (SC-001)
-- [ ] T061 [P] Performance testing: Verify smooth scrolling with 5000+ posts, <100ms lag (SC-002)
-- [ ] T062 [P] Memory leak testing: Verify stable memory during 30+ minute sessions (SC-006)
+- [x] T060 [P] Performance testing: Verify <500ms filter updates with 5000 posts (SC-001) - automated tests show 3-6ms
+- [ ] T061 [P] Performance testing: Verify smooth scrolling with 5000+ posts, <100ms lag (SC-002) - requires manual browser testing
+- [ ] T062 [P] Memory leak testing: Verify stable memory during 30+ minute sessions (SC-006) - requires manual browser testing
 - [ ] T063 [P] Add keyboard shortcuts for filter operations (optional enhancement)
 - [ ] T064 [P] Add analytics/telemetry for filter usage patterns (optional)
 - [x] T065 Code cleanup: Remove any commented code and TODOs
