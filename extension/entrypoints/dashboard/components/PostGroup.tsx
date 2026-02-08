@@ -1,8 +1,10 @@
+import DOMPurify from "dompurify";
 import type { ReactNode } from "react";
 import { Button } from "@/components/ui/button";
 import type { PostGroup as PostGroupType } from "@/lib/grouping/types";
 import { computeGroupProperties } from "@/lib/grouping/types";
-import type { Post } from "@/lib/types";
+import type { Group, Post } from "@/lib/types";
+import { GroupsTooltip } from "./GroupsTooltip";
 
 export interface PostGroupProps {
 	/** Post group to display */
@@ -10,6 +12,12 @@ export interface PostGroupProps {
 
 	/** Posts belonging to this group */
 	posts: Post[];
+
+	/** The representative post to show details for (first/newest post) */
+	representativePost: Post;
+
+	/** Map of group IDs to Group objects for tooltip */
+	groupsMap: Map<string, Group>;
 
 	/** Whether group is expanded */
 	isExpanded: boolean;
@@ -30,6 +38,8 @@ export interface PostGroupProps {
 export function PostGroup({
 	group,
 	posts,
+	representativePost,
+	groupsMap,
 	isExpanded,
 	onToggle,
 	onMarkSeen,
@@ -37,13 +47,16 @@ export function PostGroup({
 	className,
 }: PostGroupProps) {
 	const computed = computeGroupProperties(group);
-	const previewText =
-		group.normalizedContent.length > 100
-			? `${group.normalizedContent.slice(0, 100)}...`
-			: group.normalizedContent;
+	const otherPostsCount = group.count - 1;
+
+	// Get all unique group IDs from posts in this group
+	const allGroupIds = [...new Set(posts.map((p) => p.groupId))];
+
+	// Get other posts (excluding the representative post)
+	const otherPosts = posts.filter((p) => p.id !== representativePost.id);
 
 	return (
-		<div
+		<article
 			className={`bg-white rounded-lg shadow border-l-4 ${
 				computed.isFullySeen
 					? "border-l-gray-300"
@@ -52,56 +65,98 @@ export function PostGroup({
 						: "border-l-blue-500"
 			} ${className ?? ""}`}
 		>
-			{/* Header */}
-			<div className="p-4 flex items-center justify-between">
-				<div className="flex-1 min-w-0">
-					<div className="flex items-center gap-2 mb-1">
-						<span className="text-sm font-medium text-gray-900">
-							{group.count} similar post{group.count !== 1 ? "s" : ""}
-						</span>
-						{computed.isFullySeen ? (
-							<span className="text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded-full">
-								All seen
-							</span>
-						) : group.seenCount > 0 ? (
-							<span className="text-xs bg-yellow-100 text-yellow-700 px-2 py-0.5 rounded-full">
-								{group.seenCount} of {group.count} seen
-							</span>
-						) : null}
+			{/* Representative post details */}
+			<div className="p-6">
+				{/* Header with author and actions */}
+				<div className="flex justify-between items-start mb-3">
+					<div>
+						<h3 className="font-semibold text-gray-900">
+							{representativePost.authorName}
+						</h3>
+						<p className="text-sm text-gray-500">
+							<GroupsTooltip groupIds={allGroupIds} groupsMap={groupsMap} />
+							{" • "}
+							Scraped: {new Date(representativePost.scrapedAt).toLocaleString()}
+						</p>
 					</div>
-					<p className="text-sm text-gray-600 truncate">{previewText}</p>
+					<div className="flex gap-2">
+						{!computed.isFullySeen && (
+							<Button
+								variant="link"
+								size="sm"
+								onClick={onMarkSeen}
+								aria-label="Mark all as seen"
+							>
+								Mark all as seen
+							</Button>
+						)}
+					</div>
 				</div>
 
-				<div className="flex items-center gap-2 ml-4">
-					{!computed.isFullySeen && (
-						<Button
-							variant="link"
-							size="sm"
-							onClick={onMarkSeen}
-							aria-label="Mark all as seen"
-						>
-							Mark all as seen
-						</Button>
-					)}
+				{/* Post content */}
+				<div
+					className="prose max-w-full mb-3 break-all overflow-hidden"
+					// biome-ignore lint/security/noDangerouslySetInnerHtml: Content is sanitized with DOMPurify
+					dangerouslySetInnerHTML={{
+						__html: DOMPurify.sanitize(representativePost.contentHtml),
+					}}
+				/>
+
+				{/* Open on Facebook link */}
+				<a
+					href={representativePost.url}
+					target="_blank"
+					rel="noopener noreferrer"
+					aria-label={`Open post from ${representativePost.authorName} on Facebook in new tab`}
+					className="text-sm text-blue-600 hover:text-blue-800"
+				>
+					Open on Facebook
+				</a>
+			</div>
+
+			{/* Footer with group stats and expand button */}
+			<div className="border-t border-gray-200 px-6 py-3 flex items-center justify-between bg-gray-50">
+				<div className="flex items-center gap-2">
+					<span className="text-sm font-medium text-gray-700">
+						{group.count} similar post{group.count !== 1 ? "s" : ""}
+					</span>
+					{computed.isFullySeen ? (
+						<span className="text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded-full">
+							All seen
+						</span>
+					) : group.seenCount > 0 ? (
+						<span className="text-xs bg-yellow-100 text-yellow-700 px-2 py-0.5 rounded-full">
+							{group.seenCount} of {group.count} seen
+						</span>
+					) : null}
+				</div>
+
+				{otherPostsCount > 0 && (
 					<Button
 						variant="primary"
 						size="sm"
 						onClick={onToggle}
-						aria-label={isExpanded ? "Collapse group" : "Expand group"}
+						aria-label={
+							isExpanded
+								? "Hide other posts"
+								: `See ${otherPostsCount} other post${otherPostsCount !== 1 ? "s" : ""}`
+						}
 					>
-						{isExpanded ? "Collapse" : "Expand"}
+						{isExpanded
+							? "Hide"
+							: `See ${otherPostsCount} other post${otherPostsCount !== 1 ? "s" : ""}`}
 					</Button>
-				</div>
+				)}
 			</div>
 
-			{/* Expanded posts */}
-			{isExpanded && (
-				<div className="border-t border-gray-200 p-4 space-y-4">
-					{posts.map((post) => (
+			{/* Expanded: Other posts (not the representative one) */}
+			{isExpanded && otherPosts.length > 0 && (
+				<div className="border-t border-gray-200 p-4 space-y-4 bg-gray-50">
+					{otherPosts.map((post) => (
 						<div key={post.id}>{renderPost(post)}</div>
 					))}
 				</div>
 			)}
-		</div>
+		</article>
 	);
 }

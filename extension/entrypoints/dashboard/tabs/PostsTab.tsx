@@ -63,11 +63,16 @@ function GroupedPostsView({
 					filteredPosts,
 					groupingData,
 				);
+				// Skip if no posts in this group
+				if (groupPosts.length === 0) return null;
+				const representativePost = groupPosts[0];
 				return (
 					<PostGroup
 						key={group.id}
 						group={group}
 						posts={groupPosts}
+						representativePost={representativePost}
+						groupsMap={groupsMap}
 						isExpanded={expansionState.get(group.id) ?? false}
 						onToggle={() => onToggleExpanded(group.id)}
 						onMarkSeen={() => onMarkGroupSeen(group.postIds)}
