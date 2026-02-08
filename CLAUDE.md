@@ -335,6 +335,45 @@ function handleToggle(id: string) {
 - `useDeleteGroup()` - Delete group
 - `useMarkPostSeen()` - Mark post as seen/unseen (with optimistic updates)
 
+**Filter Hooks** (in `lib/hooks/filters/`):
+- `useFilters()` - Fetch current filter settings from wxt/storage
+- `useSaveFilters()` - Save filter settings mutation
+- `useFilteredPosts()` - Get posts filtered by current filter settings
+
+**Grouping Hooks** (in `lib/hooks/grouping/`):
+- `useGroupedPosts(posts)` - Group posts by identical text content, returns:
+  - `data`: GroupingResult with groups and ungrouped post IDs
+  - `isLoading`: Whether grouping is in progress
+  - `service`: PostGroupingService instance for helper methods
+  - `expansionState`: Map of group ID to expanded state
+  - `toggleExpanded(groupId)`: Toggle group expansion
+
+**Filter/Grouping Usage Pattern**:
+```typescript
+function PostsTab() {
+  // Filter hooks
+  const filtersQuery = useFilters();
+  const saveFiltersMutation = useSaveFilters();
+  const filters = filtersQuery.data ?? DEFAULT_FILTERS;
+
+  // Apply filters to posts
+  const filteredPosts = useMemo(() => {
+    return filterPosts(posts, filters);
+  }, [posts, filters]);
+
+  // Grouping hook (only group when enabled)
+  const groupingResult = useGroupedPosts(enableGrouping ? filteredPosts : []);
+
+  // Save filter changes
+  function handleAddKeyword(keyword: string) {
+    saveFiltersMutation.mutate({
+      ...filters,
+      positiveKeywords: [...filters.positiveKeywords, keyword],
+    });
+  }
+}
+```
+
 **Usage Pattern**:
 
 ```typescript

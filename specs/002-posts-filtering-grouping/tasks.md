@@ -169,17 +169,17 @@ This is a browser extension using WXT framework in a monorepo structure. All pat
 
 **Purpose**: Improvements that affect multiple user stories
 
-- [ ] T057 [P] Add empty state handling for "No posts match your current filters" message
-- [ ] T058 [P] Add loading states for filter/grouping operations
-- [ ] T059 [P] Verify filter persistence uses wxt/storage API (per data-model.md note on line 67)
+- [x] T057 [P] Add empty state handling for "No posts match your current filters" message
+- [x] T058 [P] Add loading states for filter/grouping operations
+- [x] T059 [P] Verify filter persistence uses wxt/storage API (per data-model.md note on line 67)
 - [ ] T060 [P] Performance testing: Verify <500ms filter updates with 5000 posts (SC-001)
 - [ ] T061 [P] Performance testing: Verify smooth scrolling with 5000+ posts, <100ms lag (SC-002)
 - [ ] T062 [P] Memory leak testing: Verify stable memory during 30+ minute sessions (SC-006)
 - [ ] T063 [P] Add keyboard shortcuts for filter operations (optional enhancement)
 - [ ] T064 [P] Add analytics/telemetry for filter usage patterns (optional)
-- [ ] T065 Code cleanup: Remove any commented code and TODOs
-- [ ] T066 Documentation: Update CLAUDE.md with new filter/grouping hooks patterns
-- [ ] T067 Run quickstart.md validation examples to verify all code samples work
+- [x] T065 Code cleanup: Remove any commented code and TODOs
+- [x] T066 Documentation: Update CLAUDE.md with new filter/grouping hooks patterns
+- [x] T067 Run quickstart.md validation examples to verify all code samples work
 
 ---
 

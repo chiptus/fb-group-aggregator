@@ -10,3 +10,10 @@ export const FilterSettingsSchema = z.object({
 });
 
 export type FilterSettings = z.infer<typeof FilterSettingsSchema>;
+
+export const DEFAULT_FILTER_SETTINGS: FilterSettings = {
+	positiveKeywords: [],
+	negativeKeywords: [],
+	caseSensitive: false,
+	searchFields: ["contentHtml", "authorName"],
+};

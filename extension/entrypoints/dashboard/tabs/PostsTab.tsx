@@ -410,8 +410,16 @@ export function PostsTab() {
 					</div>
 				</div>
 
+				{/* Grouping loading indicator */}
+				{enableGrouping && groupingResult.isLoading && (
+					<div className="mb-4 flex items-center gap-2 text-sm text-gray-600">
+						<div className="w-4 h-4 border-2 border-blue-200 border-t-blue-600 rounded-full animate-spin" />
+						<span>Grouping posts...</span>
+					</div>
+				)}
+
 				{/* Grouping stats banner */}
-				{enableGrouping && groupingResult.data && (
+				{enableGrouping && groupingResult.data && !groupingResult.isLoading && (
 					<GroupingStatsBanner
 						totalGroups={groupingResult.data.totalGroups}
 						totalPostsGrouped={groupingResult.data.totalPostsGrouped}
@@ -424,8 +432,49 @@ export function PostsTab() {
 				)}
 
 				{filteredPosts.length === 0 ? (
-					<div className="block bg-white rounded-lg shadow p-8 text-center">
-						<p className="text-gray-600">No posts found</p>
+					<div className="block bg-white rounded-lg shadow p-8 text-center space-y-4">
+						<p className="text-gray-600">
+							{hasActiveFilters ||
+							searchQuery ||
+							showOnlyUnseen ||
+							showOnlyStarred ||
+							selectedSubscriptionId
+								? "No posts match your current filters"
+								: "No posts found"}
+						</p>
+						{(hasActiveFilters ||
+							searchQuery ||
+							showOnlyUnseen ||
+							showOnlyStarred) && (
+							<div className="text-sm text-gray-500 space-y-1">
+								{searchQuery && <p>Search: "{searchQuery}"</p>}
+								{hasActiveFilters && filters.positiveKeywords.length > 0 && (
+									<p>Include: {filters.positiveKeywords.join(", ")}</p>
+								)}
+								{hasActiveFilters && filters.negativeKeywords.length > 0 && (
+									<p>Exclude: {filters.negativeKeywords.join(", ")}</p>
+								)}
+								{showOnlyUnseen && <p>Showing only unseen posts</p>}
+								{showOnlyStarred && <p>Showing only starred posts</p>}
+							</div>
+						)}
+						{(hasActiveFilters ||
+							searchQuery ||
+							showOnlyUnseen ||
+							showOnlyStarred) && (
+							<button
+								type="button"
+								onClick={() => {
+									setSearchQuery("");
+									setShowOnlyUnseen(false);
+									setShowOnlyStarred(false);
+									saveFiltersMutation.mutate(DEFAULT_FILTERS);
+								}}
+								className="text-blue-600 hover:text-blue-800 text-sm underline"
+							>
+								Clear all filters
+							</button>
+						)}
 					</div>
 				) : enableGrouping && groupingResult.data ? (
 					<GroupedPostsView

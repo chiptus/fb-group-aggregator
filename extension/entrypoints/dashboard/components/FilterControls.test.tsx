@@ -40,19 +40,23 @@ describe("FilterControls", () => {
 		vi.mocked(storage.setItem).mockResolvedValue(undefined);
 	});
 
-	it("should render keyword input and add button", () => {
+	it("should render keyword input and add button", async () => {
 		render(<FilterControls />, { wrapper: createWrapper() });
 
-		expect(screen.getByPlaceholderText(/add keyword/i)).toBeInTheDocument();
+		await waitFor(() => {
+			expect(screen.getByPlaceholderText(/add keyword/i)).toBeInTheDocument();
+		});
 		expect(screen.getByRole("button", { name: /add/i })).toBeInTheDocument();
 	});
 
-	it("should have positive/negative keyword toggle", () => {
+	it("should have positive/negative keyword toggle", async () => {
 		render(<FilterControls />, { wrapper: createWrapper() });
 
-		expect(
-			screen.getByRole("radio", { name: /positive/i }),
-		).toBeInTheDocument();
+		await waitFor(() => {
+			expect(
+				screen.getByRole("radio", { name: /positive/i }),
+			).toBeInTheDocument();
+		});
 		expect(
 			screen.getByRole("radio", { name: /negative/i }),
 		).toBeInTheDocument();
@@ -72,7 +76,7 @@ describe("FilterControls", () => {
 
 		render(<FilterControls />, { wrapper: createWrapper() });
 
-		const input = screen.getByPlaceholderText(/add keyword/i);
+		const input = await screen.findByPlaceholderText(/add keyword/i);
 		const addButton = screen.getByRole("button", { name: /add/i });
 
 		fireEvent.change(input, { target: { value: "apartment" } });
@@ -94,7 +98,9 @@ describe("FilterControls", () => {
 
 		render(<FilterControls />, { wrapper: createWrapper() });
 
-		const negativeToggle = screen.getByRole("radio", { name: /negative/i });
+		const negativeToggle = await screen.findByRole("radio", {
+			name: /negative/i,
+		});
 		const input = screen.getByPlaceholderText(/add keyword/i);
 		const addButton = screen.getByRole("button", { name: /add/i });
 
@@ -113,9 +119,9 @@ describe("FilterControls", () => {
 	it("should clear input after adding keyword", async () => {
 		render(<FilterControls />, { wrapper: createWrapper() });
 
-		const input = screen.getByPlaceholderText(
+		const input = (await screen.findByPlaceholderText(
 			/add keyword/i,
-		) as HTMLInputElement;
+		)) as HTMLInputElement;
 		const addButton = screen.getByRole("button", { name: /add/i });
 
 		fireEvent.change(input, { target: { value: "apartment" } });
@@ -126,10 +132,10 @@ describe("FilterControls", () => {
 		});
 	});
 
-	it("should not add empty keyword", () => {
+	it("should not add empty keyword", async () => {
 		render(<FilterControls />, { wrapper: createWrapper() });
 
-		const addButton = screen.getByRole("button", { name: /add/i });
+		const addButton = await screen.findByRole("button", { name: /add/i });
 
 		fireEvent.click(addButton);
 
@@ -137,20 +143,24 @@ describe("FilterControls", () => {
 		expect(screen.queryByRole("alert")).not.toBeInTheDocument();
 	});
 
-	it("should have case-sensitive toggle", () => {
+	it("should have case-sensitive toggle", async () => {
 		render(<FilterControls />, { wrapper: createWrapper() });
 
-		expect(
-			screen.getByRole("checkbox", { name: /case.sensitive/i }),
-		).toBeInTheDocument();
+		await waitFor(() => {
+			expect(
+				screen.getByRole("checkbox", { name: /case.sensitive/i }),
+			).toBeInTheDocument();
+		});
 	});
 
-	it("should have search fields selection", () => {
+	it("should have search fields selection", async () => {
 		render(<FilterControls />, { wrapper: createWrapper() });
 
-		expect(
-			screen.getByRole("checkbox", { name: /content/i }),
-		).toBeInTheDocument();
+		await waitFor(() => {
+			expect(
+				screen.getByRole("checkbox", { name: /content/i }),
+			).toBeInTheDocument();
+		});
 		expect(
 			screen.getByRole("checkbox", { name: /author/i }),
 		).toBeInTheDocument();
@@ -164,7 +174,7 @@ describe("FilterControls", () => {
 
 		render(<FilterControls />, { wrapper: createWrapper() });
 
-		const input = screen.getByPlaceholderText(/add keyword/i);
+		const input = await screen.findByPlaceholderText(/add keyword/i);
 
 		fireEvent.change(input, { target: { value: "apartment" } });
 		fireEvent.keyDown(input, { key: "Enter", code: "Enter" });
@@ -185,7 +195,7 @@ describe("FilterControls", () => {
 
 		render(<FilterControls />, { wrapper: createWrapper() });
 
-		const input = screen.getByPlaceholderText(/add keyword/i);
+		const input = await screen.findByPlaceholderText(/add keyword/i);
 		const addButton = screen.getByRole("button", { name: /add/i });
 
 		fireEvent.change(input, { target: { value: "  apartment  " } });
