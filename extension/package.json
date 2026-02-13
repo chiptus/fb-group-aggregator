@@ -14,7 +14,6 @@
 		"postinstall": "wxt prepare",
 		"test": "vitest",
 		"test:ui": "vitest --ui",
-		"test:run": "vitest run",
 		"lint": "biome lint .",
 		"lint:fix": "biome lint --write .",
 		"format": "biome format .",
