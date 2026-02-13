@@ -16,6 +16,7 @@ export default defineConfig({
 		chromiumArgs: ["--user-data-dir=./.wxt/chrome-data"],
 	},
 	manifest: {
+		name: "fb-group-aggregator",
 		permissions: ["storage"],
 	},
 });
