@@ -72,12 +72,20 @@ export function JobViewer() {
 
 	function handleCancelJob(jobId: string) {
 		if (confirm("Are you sure you want to cancel this job?")) {
-			cancelJobMutation.mutate(jobId);
+			cancelJobMutation.mutate(jobId, {
+				onError: (error) => {
+					alert(`Failed to cancel job: ${error.message}`);
+				},
+			});
 		}
 	}
 
 	function handleResumeJob(jobId: string) {
-		resumeJobMutation.mutate(jobId);
+		resumeJobMutation.mutate(jobId, {
+			onError: (error) => {
+				alert(`Failed to resume job: ${error.message}`);
+			},
+		});
 	}
 
 	function handleDeleteJob(jobId: string) {
