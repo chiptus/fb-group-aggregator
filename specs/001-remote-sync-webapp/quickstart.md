@@ -25,6 +25,7 @@ This feature adds three projects to the repository:
 See **Phase -1: Repository Restructuring** in [plan.md](plan.md) for detailed steps.
 
 **Quick version**:
+
 ```bash
 # 1. Create extension directory and move files
 mkdir extension
@@ -41,6 +42,7 @@ git commit -m "refactor: restructure repo with extension, server, webapp as peer
 ```
 
 **After restructuring**, your repository should look like:
+
 ```
 fb-group-aggregator/
 ├── extension/     # Existing extension code
@@ -235,7 +237,7 @@ export function registerPostRoutes(app: FastifyInstance) {
         });
 
       return { synced: inserted.length, conflicts: 0, errors: [] };
-    }
+    },
   );
 }
 ```
@@ -394,7 +396,7 @@ cd server
 pnpm dev                  # Start server with hot reload
 pnpm test                 # Run tests in watch mode
 pnpm test:run             # Run tests once (CI)
-pnpm compile              # Type-check only
+pnpm typecheck              # Type-check only
 
 # Database
 pnpm db:generate          # Generate migration from schema changes
@@ -416,7 +418,7 @@ cd webapp
 pnpm dev                  # Start Vite dev server
 pnpm test                 # Run tests in watch mode
 pnpm test:run             # Run tests once (CI)
-pnpm compile              # Type-check only
+pnpm typecheck              # Type-check only
 
 # Production
 pnpm build                # Build for production
@@ -431,7 +433,7 @@ cd extension
 # Development
 pnpm dev                  # WXT dev mode
 pnpm test                 # Run all tests (including new sync tests)
-pnpm compile              # Type-check
+pnpm typecheck              # Type-check
 
 # Production
 pnpm build                # Build extension

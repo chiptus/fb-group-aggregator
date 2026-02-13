@@ -9,11 +9,11 @@
     "preview": "vite preview",
     "test": "vitest",
     "test:run": "vitest run",
-    "compile": "tsc --noEmit"
+    "typecheck": "tsc --noEmit"
   },
   "lint-staged": {
     "*.{ts,tsx}": [
-      "bash -c 'pnpm compile'"
+      "bash -c 'pnpm typecheck'"
     ]
   },
   "dependencies": {

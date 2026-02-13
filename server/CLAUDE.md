@@ -15,7 +15,7 @@ Fastify API server for remote post sync.
 pnpm dev          # Start dev server (tsx watch)
 pnpm build        # Compile TypeScript
 pnpm start        # Run production build
-pnpm compile      # Type check
+pnpm typecheck      # Type check
 pnpm test         # Run tests
 ```
 
