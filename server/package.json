@@ -1,0 +1,42 @@
+{
+	"name": "server",
+	"version": "0.0.0",
+	"private": true,
+	"type": "module",
+	"scripts": {
+		"dev": "tsx watch src/index.ts",
+		"build": "tsc",
+		"start": "node dist/index.js",
+		"test": "vitest",
+		"test:run": "vitest run",
+		"typecheck": "tsc --noEmit",
+		"db:generate": "drizzle-kit generate",
+		"db:migrate": "drizzle-kit migrate",
+		"db:studio": "drizzle-kit studio",
+		"db:push": "drizzle-kit push"
+	},
+	"lint-staged": {
+		"*.{js,jsx,ts,tsx,json,jsonc}": [
+			"biome check --write --no-errors-on-unmatched"
+		],
+		"*.{ts,tsx}": [
+			"bash -c 'pnpm run typecheck'"
+		]
+	},
+	"dependencies": {
+		"@fastify/cors": "^10.0.1",
+		"drizzle-orm": "^0.38.3",
+		"fastify": "^5.2.0",
+		"postgres": "^3.4.5",
+		"zod": "^3.24.1"
+	},
+	"devDependencies": {
+		"@biomejs/biome": "^2.3.8",
+		"@types/node": "^22.10.5",
+		"drizzle-kit": "^0.30.1",
+		"supertest": "^7.0.0",
+		"tsx": "^4.19.2",
+		"typescript": "^5.7.2",
+		"vitest": "^2.1.8"
+	}
+}

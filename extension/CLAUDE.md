@@ -11,12 +11,12 @@ WXT browser extension for scraping Facebook group posts.
 
 ## Entry Points
 
-| Entry | Purpose | File |
-|-------|---------|------|
-| Background | Service worker, coordinates storage | `entrypoints/background/` |
-| Content | Injected into FB groups, scrapes posts | `entrypoints/content/` |
-| Popup | Quick actions UI | `entrypoints/popup/` |
-| Dashboard | Full post viewer | `entrypoints/dashboard/` |
+| Entry      | Purpose                                | File                      |
+| ---------- | -------------------------------------- | ------------------------- |
+| Background | Service worker, coordinates storage    | `entrypoints/background/` |
+| Content    | Injected into FB groups, scrapes posts | `entrypoints/content/`    |
+| Popup      | Quick actions UI                       | `entrypoints/popup/`      |
+| Dashboard  | Full post viewer                       | `entrypoints/dashboard/`  |
 
 ## Data Model
 
@@ -34,21 +34,22 @@ All in `lib/hooks/`:
 
 ```typescript
 // Queries
-useSubscriptions(), useGroups(), usePosts()
+(useSubscriptions(), useGroups(), usePosts());
 
 // Mutations
-useCreateSubscription(), useUpdateGroup(), useMarkPostSeen()
+(useCreateSubscription(), useUpdateGroup(), useMarkPostSeen());
 
 // Filters (lib/hooks/filters/)
-useFilters(), useSaveFilters(), useFilteredPosts()
+(useFilters(), useSaveFilters(), useFilteredPosts());
 
 // Grouping (lib/hooks/grouping/)
-useGroupedPosts(posts)
+useGroupedPosts(posts);
 ```
 
 ## Message Protocol
 
 Content Script → Background:
+
 - `SCRAPE_POSTS` - Send scraped posts
 - `GET_CURRENT_GROUP` - Check if group is tracked
 - `ADD_GROUP_TO_SUBSCRIPTION` - Assign group
@@ -59,7 +60,7 @@ Content Script → Background:
 pnpm dev              # Chrome dev
 pnpm dev:firefox      # Firefox dev
 pnpm build            # Production build
-pnpm compile          # Type check
+pnpm typecheck          # Type check
 pnpm test             # Run tests
 ```
 

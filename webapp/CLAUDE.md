@@ -16,7 +16,7 @@ Vite React dashboard for viewing synced posts.
 pnpm dev          # Start dev server
 pnpm build        # Production build (tsc + vite)
 pnpm preview      # Preview production build
-pnpm compile      # Type check
+pnpm typecheck      # Type check
 pnpm test         # Run tests
 ```
 
