@@ -32,8 +32,8 @@ jobs:
       - name: Run Biome check (lint + format)
         run: pnpm check
 
-      - name: Run TypeScript compiler
-        run: pnpm compile
+      - name: Run TypeScript typecheck
+        run: pnpm typecheck
 
   test:
     name: Run Tests

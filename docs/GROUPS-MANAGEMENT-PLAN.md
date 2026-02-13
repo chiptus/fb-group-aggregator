@@ -9,12 +9,14 @@
 ## Feature Overview
 
 ### Requirements
+
 1. **Scan Facebook Groups List**: Automatically discover all groups user has joined
 2. **Groups Management Page**: Centralized dashboard page for managing groups
 3. **Bulk Operations**: Select multiple groups and assign to subscriptions
 4. **Scrape Subscription**: Trigger batch scraping for all groups in a subscription
 
 ### Key Technical Decisions
+
 - **Scraping Strategy**: Open tabs method (safest, mimics human behavior)
 - **Facebook Groups URL**: `https://www.facebook.com/groups/joins/?nav_source=tab&ordering=viewer_added`
 - **Early Stop Optimization**: Groups are ordered "recently joined first", so can stop when reaching existing group
@@ -27,7 +29,9 @@
 ### ✅ Phase 1: Content Script & Backend (COMPLETED)
 
 #### 1.1 Message Types Extended
+
 **File**: [lib/types.ts](../lib/types.ts)
+
 - ✅ Added `GroupDiscovery` type
 - ✅ Added `SCRAPE_GROUPS_LIST` message type
 - ✅ Added `SCRAPE_SUBSCRIPTION` message type
@@ -35,7 +39,9 @@
 - ✅ Added `ScrapeSubscriptionResponse` type
 
 #### 1.2 Groups List Scraper Created
+
 **File**: [lib/groups-list-scraper.ts](../lib/groups-list-scraper.ts) (NEW)
+
 - ✅ `scrapeGroupsList()` - Extract groups from Facebook list page
 - ✅ `extractTotalGroupCount()` - Parse "All groups you've joined (X)"
 - ✅ Multi-strategy extraction with fallbacks
@@ -43,7 +49,9 @@
 - ✅ `isNearBottom()` - Scroll detection for lazy loading
 
 #### 1.3 Content Script Extended
+
 **File**: [entrypoints/content/index.ts](../entrypoints/content/index.ts)
+
 - ✅ Detect groups list page vs group page
 - ✅ `initializeGroupsListScraping()` - Setup for groups list page
 - ✅ `scrapeAndSendGroupsList()` - Scrape and send groups to background
@@ -51,7 +59,9 @@
 - ✅ Scroll-triggered scraping for lazy loading
 
 #### 1.4 Background Handler Extended
+
 **File**: [entrypoints/background/background-handler.ts](../entrypoints/background/background-handler.ts)
+
 - ✅ `handleScrapeGroupsList()` - Process discovered groups
 - ✅ Auto-create new groups with `enabled: true`, `subscriptionIds: []`
 - ✅ Update existing groups (name, URL if changed)
@@ -62,6 +72,7 @@
 ### ✅ Phase 5: Storage Layer (COMPLETED)
 
 **File**: [lib/storage.ts](../lib/storage.ts)
+
 - ✅ `getGroupsBySubscription()` - Filter groups by subscription ID
 - ✅ `bulkUpdateGroups()` - Update multiple groups at once
 - ✅ `bulkDeleteGroups()` - Delete multiple groups + cascade delete posts
@@ -71,6 +82,7 @@
 ### ✅ Phase 4: React Query Hooks (COMPLETED)
 
 **File**: [lib/hooks/storage/useGroups.ts](../lib/hooks/storage/useGroups.ts)
+
 - ✅ `useScanGroupsList()` - Trigger opening groups list page
 - ✅ `useBulkUpdateGroups()` - Bulk update mutation
 - ✅ `useBulkDeleteGroups()` - Bulk delete mutation
@@ -81,6 +93,7 @@
 ### ✅ Phase 3: Dashboard Navigation (COMPLETED)
 
 **File**: [entrypoints/dashboard/App.tsx](../entrypoints/dashboard/App.tsx)
+
 - ✅ Added tab navigation (Posts | Groups)
 - ✅ Tab switching logic
 - ✅ Conditional rendering for Posts vs Groups view
@@ -90,6 +103,7 @@
 ### 🚧 Phase 3: GroupsPage Component (IN PROGRESS)
 
 **Next Steps**:
+
 1. Create `GroupsPage.tsx` component
 2. Create sub-components:
    - `GroupsPageHeader.tsx` - Scan button + stats
@@ -98,6 +112,7 @@
    - `GroupRow.tsx` - Individual group row
 
 **Features to Implement**:
+
 - Scan My Groups button
 - Groups list with selection checkboxes
 - Bulk assign to subscription
@@ -112,9 +127,11 @@
 ### ⏳ Phase 2: Batch Scraping (PENDING)
 
 #### 2.1 Tab Orchestrator Module
+
 **File**: `entrypoints/background/scraper-orchestrator.ts` (NOT CREATED YET)
 
 **TODO**:
+
 - `scrapeSubscription()` - Main orchestration function
 - Sequential tab opening with delays
 - Wait for scrape completion
@@ -123,9 +140,11 @@
 - Timeout handling
 
 #### 2.2 Background Handler Extension
+
 **File**: [entrypoints/background/background-handler.ts](../entrypoints/background/background-handler.ts)
 
 **TODO**:
+
 - Add `SCRAPE_SUBSCRIPTION` message handler
 - Integrate with tab orchestrator
 - Send progress updates to UI
@@ -135,12 +154,14 @@
 ### ⏳ Phase 6: Remove Popup Groups Tab (PENDING)
 
 **Files to DELETE**:
+
 - `entrypoints/popup/components/GroupsTab.tsx`
 - `entrypoints/popup/components/GroupItem.tsx`
 - `entrypoints/popup/components/GroupToggle.tsx`
 - `entrypoints/popup/components/GroupAssignSubscription.tsx`
 
 **Files to MODIFY**:
+
 - [entrypoints/popup/App.tsx](../entrypoints/popup/App.tsx)
   - Remove Groups tab
   - Update `Tab` type to only "overview" | "subscriptions"
@@ -152,15 +173,18 @@
 ### ⏳ Phase 7: Testing (PENDING)
 
 #### Unit Tests to Create:
+
 - `lib/groups-list-scraper.test.ts` - Test group extraction logic
 - `entrypoints/background/scraper-orchestrator.test.ts` - Test tab orchestration
 
 #### Integration Tests to Update:
+
 - `entrypoints/background/background-handler.test.ts`
   - Add tests for `SCRAPE_GROUPS_LIST` handling
   - Add tests for `SCRAPE_SUBSCRIPTION` handling
 
 #### Component Tests to Create:
+
 - `entrypoints/dashboard/components/GroupsPage.test.tsx`
 - `entrypoints/dashboard/components/GroupsTable.test.tsx`
 - `entrypoints/dashboard/components/BulkActionsBar.test.tsx`
@@ -189,7 +213,7 @@
    - Test UI components
 
 5. **Type Check & Build**:
-   - Run `pnpm compile`
+   - Run `pnpm typecheck`
    - Run `pnpm test:run`
    - Fix any errors
 
@@ -198,10 +222,12 @@
 ## Files Modified So Far
 
 ### Created (5 files):
+
 1. `lib/groups-list-scraper.ts` - Groups list scraping logic
 2. `docs/GROUPS-MANAGEMENT-PLAN.md` - This plan document
 
 ### Modified (6 files):
+
 1. `lib/types.ts` - Added message types
 2. `entrypoints/content/index.ts` - Groups list detection & scraping
 3. `entrypoints/background/background-handler.ts` - Groups list handler
@@ -210,6 +236,7 @@
 6. `entrypoints/dashboard/App.tsx` - Tab navigation
 
 ### Still To Create (7 files):
+
 1. `entrypoints/background/scraper-orchestrator.ts`
 2. `entrypoints/dashboard/components/GroupsPage.tsx`
 3. `entrypoints/dashboard/components/GroupsPageHeader.tsx`
@@ -223,6 +250,7 @@
 ## Testing Strategy
 
 ### Manual Testing Steps:
+
 1. Open `facebook.com/groups/joins/` and verify groups are scraped
 2. Check that groups appear in dashboard Groups tab
 3. Test bulk selection and assignment
@@ -230,6 +258,7 @@
 5. Verify posts view still works
 
 ### Automated Testing:
+
 - Unit tests for scraping logic
 - Integration tests for message handlers
 - Component tests for UI

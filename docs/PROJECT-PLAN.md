@@ -15,6 +15,7 @@ A Chrome/Firefox browser extension that aggregates posts from multiple Facebook 
 ## Project Status: Job Management System Complete ✅
 
 ### ✅ Phase 0: Test Infrastructure (COMPLETED)
+
 - [x] Configure Vitest with WXT plugin
 - [x] Set up jsdom environment
 - [x] Add WxtVitest plugin for browser API polyfills
@@ -22,6 +23,7 @@ A Chrome/Firefox browser extension that aggregates posts from multiple Facebook 
 - [x] Verify smoke tests pass
 
 **Files Created:**
+
 - [vitest.config.ts](vitest.config.ts) - Vitest configuration with WxtVitest plugin
 - [test/setup.ts](test/setup.ts) - Global test setup with cleanup
 - [test/smoke.test.ts](test/smoke.test.ts) - Basic smoke tests
@@ -33,21 +35,25 @@ A Chrome/Firefox browser extension that aggregates posts from multiple Facebook 
 ### ✅ Phase 1: Foundation & Data Layer (COMPLETED)
 
 #### Zod Integration
+
 - [x] Add Zod schemas for type validation
 - [x] Update storage functions to use Zod parsing
 - [x] All storage operations have runtime validation
 
 #### Data Models
+
 - [x] `Subscription` - User-created subscription groupings
 - [x] `Group` - Facebook groups with metadata
 - [x] `Post` - Scraped Facebook posts with content
 
 #### Storage Layer
+
 - [x] Type-safe chrome.storage.local wrappers
 - [x] CRUD operations for subscriptions, groups, posts
 - [x] Zod validation on all read operations
 
 **Files Created/Updated:**
+
 - [lib/types.ts](lib/types.ts) - Zod schemas and TypeScript types
 - [lib/storage.ts](lib/storage.ts) - Storage API with Zod validation
 - [lib/storage.test.ts](lib/storage.test.ts) - 16 tests for storage operations
@@ -59,6 +65,7 @@ A Chrome/Firefox browser extension that aggregates posts from multiple Facebook 
 ### ✅ Phase 2: Facebook Scraping (COMPLETED)
 
 #### Scraper Module
+
 - [x] Multi-strategy DOM extraction (handles Facebook's changing structure)
 - [x] Post ID extraction (4 strategies with comment filtering)
 - [x] Author extraction (3 strategies, skips timestamps)
@@ -67,12 +74,14 @@ A Chrome/Firefox browser extension that aggregates posts from multiple Facebook 
 - [x] Group info extraction from page
 
 #### Real Facebook DOM Analysis
+
 - [x] Tested with actual Facebook HTML
 - [x] Identified comment vs post patterns
 - [x] Created browser exploration tool (scraper-explorer.js)
 - [x] Documented findings in SCRAPER-NOTES.md
 
 #### Content Script
+
 - [x] Auto-detects Facebook group pages
 - [x] Scrapes on page load (1s delay for rendering)
 - [x] Scrapes on scroll (for lazy-loaded posts)
@@ -82,6 +91,7 @@ A Chrome/Firefox browser extension that aggregates posts from multiple Facebook 
 - [x] Listens for manual scrape triggers
 
 **Files Created:**
+
 - [lib/scraper.ts](lib/scraper.ts) - Facebook DOM scraper with multi-strategy extraction
 - [lib/scraper.test.ts](lib/scraper.test.ts) - 14 tests for scraper
 - [lib/scraper-explorer.js](lib/scraper-explorer.js) - Browser console exploration tool
@@ -91,6 +101,7 @@ A Chrome/Firefox browser extension that aggregates posts from multiple Facebook 
 **Test Count:** 33 tests passing total
 
 **Key Technical Achievements:**
+
 - Comment filtering via aria-label detection
 - Relative timestamp parsing ("4d" → milliseconds)
 - Multiple fallback strategies for each data field
@@ -101,7 +112,9 @@ A Chrome/Firefox browser extension that aggregates posts from multiple Facebook 
 ## ✅ Phase 3: Background Script Coordination (COMPLETED)
 
 ### Objectives
+
 Implement the background service worker that:
+
 1. Receives scraped posts from content scripts ✅
 2. Deduplicates posts (don't save duplicates) ✅
 3. Stores posts using storage API ✅
@@ -111,6 +124,7 @@ Implement the background service worker that:
 7. Manages extension lifecycle ✅
 
 ### Tasks
+
 - [x] Write tests for background script message handling
 - [x] Implement background.ts message listeners
 - [x] Implement post deduplication logic (handled by storage.createPosts)
@@ -119,6 +133,7 @@ Implement the background service worker that:
 - [x] Test error scenarios
 
 ### Files Created/Updated
+
 - [entrypoints/background/index.ts](../entrypoints/background/index.ts) - Background script entry point
 - [entrypoints/background/background-handler.ts](../entrypoints/background/background-handler.ts) - Testable message handling logic (colocated)
 - [entrypoints/background/background-handler.test.ts](../entrypoints/background/background-handler.test.ts) - 10 tests for background handler (colocated)
@@ -127,6 +142,7 @@ Implement the background service worker that:
 **Test Count:** 10 tests passing (43 total with all phases)
 
 ### Implementation Highlights
+
 - **Auto-registration**: New groups are automatically registered when posts are scraped
 - **Deduplication**: Posts are deduplicated by ID (no duplicates saved)
 - **Timestamp tracking**: lastScrapedAt is updated for both new and existing groups
@@ -136,6 +152,7 @@ Implement the background service worker that:
 - **Colocation**: All background-related files in entrypoints/background/ directory
 
 ### Message Protocol
+
 ```typescript
 // Content → Background
 {
@@ -160,9 +177,11 @@ Implement the background service worker that:
 ## ✅ Phase 4: Dashboard UI (COMPLETED)
 
 ### Objectives
+
 Build the main dashboard where users view aggregated posts.
 
 ### Features
+
 - [x] Post list with filtering by subscription
 - [x] Mark posts as seen/unseen
 - [x] Search and filter posts
@@ -171,6 +190,7 @@ Build the main dashboard where users view aggregated posts.
 - [~] Pagination/infinite scroll (Deferred - all posts loaded at once for MVP)
 
 ### Files Created/Updated
+
 - [entrypoints/dashboard/index.html](../entrypoints/dashboard/index.html) - Dashboard HTML with proper title
 - [entrypoints/dashboard/main.tsx](../entrypoints/dashboard/main.tsx) - Dashboard React entry point (existing)
 - [entrypoints/dashboard/App.tsx](../entrypoints/dashboard/App.tsx) - Main dashboard component with full functionality
@@ -179,6 +199,7 @@ Build the main dashboard where users view aggregated posts.
 **Test Count:** 11 tests passing (54 total with all phases)
 
 ### Implementation Highlights
+
 - **TDD Approach**: All features test-driven with comprehensive coverage
 - **Subscription Filtering**: Sidebar selector for filtering posts by subscription or viewing all
 - **Search**: Real-time search filtering by post content and author name
@@ -191,6 +212,7 @@ Build the main dashboard where users view aggregated posts.
 - **Performance**: useMemo for filtered posts calculation
 
 ### Dashboard Features
+
 1. **Header**: Shows app title and unseen post count
 2. **Sidebar**: Subscription selector with "All Posts" option
 3. **Search Bar**: Filter posts by content or author
@@ -200,6 +222,7 @@ Build the main dashboard where users view aggregated posts.
    - Open on Facebook (new tab)
 
 ### Technical Details
+
 - Uses `listSubscriptions()`, `listGroups()`, `listPosts()` from storage API
 - Updates posts via `markPostAsSeen(postId, seen)`
 - Filters posts by group subscription IDs
@@ -212,9 +235,11 @@ Build the main dashboard where users view aggregated posts.
 ## ✅ Phase 5: Popup UI (COMPLETED)
 
 ### Objectives
+
 Build the extension popup for quick actions and management.
 
 ### Features
+
 - [x] Subscription CRUD (create, rename, delete)
 - [x] Group management (enable/disable, assign to subscription, delete)
 - [x] Assign groups to subscriptions
@@ -223,6 +248,7 @@ Build the extension popup for quick actions and management.
 - [~] Settings (Deferred - not needed for MVP)
 
 ### Files Created/Updated
+
 - [entrypoints/popup/App.tsx](../entrypoints/popup/App.tsx) - Full-featured popup with tabbed interface
 - [entrypoints/popup/App.test.tsx](../entrypoints/popup/App.test.tsx) - 21 comprehensive tests for popup
 - [entrypoints/popup/main.tsx](../entrypoints/popup/main.tsx) - Entry point with QueryClientProvider
@@ -232,6 +258,7 @@ Build the extension popup for quick actions and management.
 **Test Count:** 21 tests passing (80 total with all phases)
 
 ### Implementation Highlights
+
 - **TDD Approach**: All features test-driven with comprehensive coverage
 - **React Query Integration**: Centralized state management with shared hooks
 - **Tabbed Interface**: Three tabs (Overview, Subscriptions, Groups) for organized navigation
@@ -256,6 +283,7 @@ Build the extension popup for quick actions and management.
 - **Responsive Design**: Clean Tailwind CSS styling optimized for popup size (384px x 600px)
 
 ### Technical Details
+
 - Uses shared React Query hooks from `lib/hooks/useStorageData.ts`
 - Mutations with optimistic updates where appropriate
 - Automatic cache invalidation on mutations
@@ -268,9 +296,11 @@ Build the extension popup for quick actions and management.
 ## ✅ Job Management System (COMPLETED)
 
 ### Objectives
+
 Implement background job management for scraping all enabled groups with persistence across extension restarts.
 
 ### Features
+
 - [x] Background job engine with checkpoint-based resumption
 - [x] Job persistence across extension restarts/dashboard closure
 - [x] React Query hooks for job management
@@ -281,32 +311,38 @@ Implement background job management for scraping all enabled groups with persist
 ### Files Created/Updated
 
 **Data Layer:**
+
 - [lib/types.ts](../lib/types.ts) - Added `ScrapeJob`, `JobStatus`, `JobGroupResult` types and schemas
 - [lib/storage/jobs.ts](../lib/storage/jobs.ts) - Job CRUD operations (createJob, listJobs, updateJob, deleteJob, cleanupOldJobs)
 - [lib/storage/logs.ts](../lib/storage/logs.ts) - Log operations (createLog, listLogs, listLogsByJob, clearLogs)
 - [lib/storage.ts](../lib/storage.ts) - Added `getAllEnabledGroups()` for global deduplication
 
 **Background Engine:**
+
 - [entrypoints/background/job-manager.ts](../entrypoints/background/job-manager.ts) - Job execution engine with start, cancel, resume operations
 - [entrypoints/background/scraper-orchestrator.ts](../entrypoints/background/scraper-orchestrator.ts) - Updated to accept jobId parameter
 - [entrypoints/background/background-handler.ts](../entrypoints/background/background-handler.ts) - Added job message handlers (START_JOB, CANCEL_JOB, RESUME_JOB, GET_JOB, DELETE_JOB)
 
 **React Query Hooks:**
+
 - [lib/hooks/storage/useJobs.ts](../lib/hooks/storage/useJobs.ts) - Job query and mutation hooks (useJobs, useStartJob, useCancelJob, useResumeJob, useDeleteJob)
 - [lib/hooks/storage/queryKeys.ts](../lib/hooks/storage/queryKeys.ts) - Added jobs query key
 - [lib/hooks/storage/useLogs.ts](../lib/hooks/storage/useLogs.ts) - Added optional jobId filter
 
 **Dashboard UI:**
+
 - [entrypoints/dashboard/components/JobViewer.tsx](../entrypoints/dashboard/components/JobViewer.tsx) - Jobs UI with active/historical job displays
 - [entrypoints/dashboard/App.tsx](../entrypoints/dashboard/App.tsx) - Added Jobs tab to dashboard
 
 **Group Management:**
+
 - [entrypoints/background/handle-scrape-groups-list.ts](../entrypoints/background/handle-scrape-groups-list.ts) - New groups default to `enabled: false`
 - [entrypoints/dashboard/components/GroupsPage.tsx](../entrypoints/dashboard/components/GroupsPage.tsx) - Auto-enable when assigned to subscription, auto-disable when removed from all subscriptions
 
 ### Implementation Highlights
 
 **Job Engine:**
+
 - Checkpoint-based resumption: saves progress after each group
 - Graceful cancellation with resume capability
 - 3-second delay between groups for rate limiting
@@ -314,11 +350,13 @@ Implement background job management for scraping all enabled groups with persist
 - In-memory state tracking (currentJobId, isCancelling)
 
 **Job Persistence:**
+
 - Jobs persist in chrome.storage.local
 - Resume interrupted jobs on extension restart (optional)
 - Full job history with group-level results
 
 **Jobs UI:**
+
 - Real-time progress tracking with polling (2s refetch interval)
 - Active job section showing current running/paused job
 - Progress bar with percentage and group count
@@ -329,16 +367,19 @@ Implement background job management for scraping all enabled groups with persist
 - Job controls: start, cancel, resume, delete
 
 **Group Enabled State:**
+
 - New groups start as `enabled: false` (won't be scraped)
 - Auto-enable when assigned to any subscription
 - Auto-disable when removed from all subscriptions
 - Manual override available via Groups page toggle
 
 **Global Deduplication:**
+
 - `getAllEnabledGroups()` returns unique groups across all subscriptions
 - Job scrapes each group once, even if in multiple subscriptions
 
 ### Technical Details
+
 - **Job Status Flow**: pending → running → completed/failed/cancelled
 - **Resume Flow**: failed/paused → running
 - **Cancellation**: Sets `isCancelling` flag, waits for current group to finish, then saves as cancelled
@@ -351,9 +392,11 @@ Implement background job management for scraping all enabled groups with persist
 ## 📋 Phase 6: Integration & Polish (PLANNED)
 
 ### Objectives
+
 End-to-end testing and refinement.
 
 ### Tasks
+
 - [ ] **Add content script tests** - Properly test entrypoints/content/index.ts:
   - Test `scrapeAndSend()` function behavior
   - Test `isNearBottom()` scroll detection logic
@@ -367,12 +410,12 @@ End-to-end testing and refinement.
 - [ ] Documentation updates
 - [ ] Build and package extension
 
-
 ---
 
 ## Development Methodology
 
 **Test-Driven Development (TDD)**:
+
 1. Write failing tests first
 2. Implement to pass tests
 3. Refactor if needed
@@ -385,12 +428,14 @@ End-to-end testing and refinement.
 ## Known Issues & Limitations
 
 ### Facebook Scraper
+
 - Relative timestamps are approximate (months = 30 days) - there's a way to get from the message
 - May capture comments if Facebook changes aria-label patterns - no need for comments
 - Facebook DOM changes frequently - requires monitoring - we will need a test to detect there were changes
 - No distinction between post types (photo/text/link/video)
 
 ### Maintenance Required
+
 - Monitor for Facebook DOM changes
 - Run [scraper-explorer.js](lib/scraper-explorer.js) to identify new patterns
 - Update extraction strategies as needed
@@ -417,7 +462,7 @@ pnpm dev:firefox      # Start Firefox dev mode
 # Testing
 pnpm test:run         # Run all tests
 pnpm test:watch       # Watch mode
-pnpm compile          # Type-check only
+pnpm typecheck          # Type-check only
 
 # Building
 pnpm build            # Build for Chrome

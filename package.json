@@ -8,7 +8,9 @@
     "dev:all": "pnpm run --parallel dev:extension dev:server dev:webapp",
     "test": "pnpm run --recursive test",
     "build:all": "pnpm run --recursive build",
-    "prepare": "husky"
+    "prepare": "husky",
+    "check": "pnpm -r check",
+    "typecheck": "pnpm -r typecheck"
   },
   "devDependencies": {
     "husky": "^9.1.7",

@@ -11,6 +11,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 **Purpose**: Organize and track posts from multiple Facebook groups by categorizing them into named subscriptions (e.g., "Apartments TLV", "Jobs Tech").
 
 **Key Features**:
+
 - Automatically scrape posts when visiting Facebook group pages
 - Organize groups into custom subscriptions
 - View aggregated posts in a dedicated dashboard
@@ -23,13 +24,14 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 **Package Manager**: pnpm (not npm or yarn)
 
 **Development Commands**:
+
 - `pnpm dev` - Start development mode (Chrome by default)
 - `pnpm dev:firefox` - Start development mode for Firefox
 - `pnpm build` - Build production extension (Chrome)
 - `pnpm build:firefox` - Build production extension for Firefox
 - `pnpm zip` - Create distributable zip file (Chrome)
 - `pnpm zip:firefox` - Create distributable zip file for Firefox
-- `pnpm compile` - Type-check TypeScript without emitting files
+- `pnpm typecheck` - Type-check TypeScript without emitting files
 - `pnpm test` - Run tests in watch mode
 - `pnpm test:run` - Run tests once
 - `pnpm test:ui` - Run tests with UI
@@ -44,6 +46,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 **IMPORTANT**: This project follows a colocation pattern for test files to improve maintainability.
 
 **Colocation Rules**:
+
 - **Prefer colocation**: Test files should be placed next to the code they test
 - **Test naming**: Test files should be named `<filename>.test.ts` matching the file they test
 - **Entrypoints with subdirectories**: For entrypoints, create a subdirectory and use `index.ts` for the main file:
@@ -69,6 +72,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - **Benefits**: Easier to find related tests, ensures tests move with code, better IDE navigation, clear test-to-code mapping
 
 **Why not test/ directory?**
+
 - WXT treats files in `entrypoints/` as potential entrypoints, which can cause build conflicts
 - The subdirectory pattern (`entrypoints/feature/index.ts`) solves this while maintaining colocation
 - Test files use `*.test.ts` suffix, which WXT ignores during builds
@@ -76,6 +80,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ### Import Patterns
 
 **No Barrel Exports**:
+
 - DO NOT create `index.ts` files that re-export from other modules (barrel exports)
 - Always import directly from the specific file where the code is defined
 - This improves tree-shaking, makes dependencies explicit, and simplifies maintenance
@@ -89,6 +94,7 @@ import { useSubscriptions } from "@/lib/hooks/storage/useSubscriptions";
 ```
 
 **Rationale**:
+
 - Barrel exports obscure dependencies and make refactoring harder
 - Direct imports make it clear which file contains which code
 - Better IDE navigation and faster builds
@@ -97,6 +103,7 @@ import { useSubscriptions } from "@/lib/hooks/storage/useSubscriptions";
 ### WXT Framework
 
 This project uses WXT, a framework for building browser extensions with:
+
 - Automatic manifest generation
 - Hot Module Replacement (HMR) during development
 - Built-in TypeScript support
@@ -153,11 +160,13 @@ Browser extensions in WXT use distinct entry points, each with a specific role:
 Core TypeScript interfaces defined in [lib/types.ts](lib/types.ts):
 
 **Subscription**:
+
 - `id`: string - Unique identifier
 - `name`: string - Display name (e.g., "Apartments TLV")
 - `createdAt`: number - Unix timestamp
 
 **Group**:
+
 - `id`: string - Facebook group ID
 - `url`: string - Full Facebook group URL
 - `name`: string - Group display name
@@ -167,6 +176,7 @@ Core TypeScript interfaces defined in [lib/types.ts](lib/types.ts):
 - `enabled`: boolean - Whether scraping is enabled
 
 **Post**:
+
 - `id`: string - Facebook post ID (used for chronological ordering - higher ID = newer)
 - `groupId`: string - Reference to Group
 - `authorName`: string - Post author
@@ -181,11 +191,13 @@ Core TypeScript interfaces defined in [lib/types.ts](lib/types.ts):
 **Storage Backend**: chrome.storage.local (not sync - posts are too large)
 
 **Storage Module** ([lib/storage.ts](lib/storage.ts)):
+
 - CRUD operations for subscriptions, groups, and posts
 - Automatic post deduplication by ID
 - Type-safe wrappers around chrome.storage.local API
 
 **Storage Schema**:
+
 ```typescript
 {
   subscriptions: Subscription[],
@@ -199,6 +211,7 @@ Core TypeScript interfaces defined in [lib/types.ts](lib/types.ts):
 **Message Protocol** (defined in [lib/types.ts](lib/types.ts)):
 
 Content Script → Background:
+
 - `SCRAPE_POSTS` - Send scraped posts for storage
 - `GET_CURRENT_GROUP` - Query if current page's group is tracked
 - `ADD_GROUP_TO_SUBSCRIPTION` - Add/update group assignment
@@ -210,6 +223,7 @@ Content Script → Background:
 **Purpose**: Extract post data from Facebook group DOM
 
 **Extraction Strategy**:
+
 - Identify post containers via DOM selectors
 - Extract post ID from data attributes
 - Extract author name and content HTML
@@ -219,11 +233,13 @@ Content Script → Background:
 - Graceful error handling if selectors change
 
 **Post Ordering**:
+
 - Posts are sorted by Facebook post ID (higher ID = newer post)
 - Post IDs are chronologically sequential, making them suitable for ordering
 - Use `scrapedAt` field for age-based operations (deleting old posts, displaying scrape time)
 
 **Scraping Trigger**:
+
 - **Current**: Automatic when visiting Facebook group page
 - **Future Enhancement**: OCR-based timestamp extraction (screenshot + image-to-text service)
 
@@ -238,21 +254,33 @@ Content Script → Background:
 ### React and TypeScript Coding Standards
 
 **Function Declaration Rules**:
+
 - Use named function declarations for event handlers and regular functions
 - DO NOT use arrow functions for these cases
+
 ```typescript
 // INVALID
-const handleClick = (id: string) => { /* ... */ };
-const processData = () => { /* ... */ };
+const handleClick = (id: string) => {
+  /* ... */
+};
+const processData = () => {
+  /* ... */
+};
 
 // VALID
-function handleClick(id: string) { /* ... */ }
-function processData() { /* ... */ }
+function handleClick(id: string) {
+  /* ... */
+}
+function processData() {
+  /* ... */
+}
 ```
 
 **React Query Hook Usage**:
+
 - DO NOT destructure query results
 - Access properties via dot notation
+
 ```typescript
 // INVALID
 const { data: posts = [], isLoading, error } = usePosts();
@@ -268,30 +296,38 @@ const data = query.data;
 ```
 
 **Pattern Matching**:
+
 ```typescript
 // INVALID: Destructuring queries + arrow function
 const { data: posts = [] } = usePosts();
-const handleToggle = (id: string) => { markSeen(id); };
+const handleToggle = (id: string) => {
+  markSeen(id);
+};
 
 // VALID: Direct access + named function
 const postsQuery = usePosts();
 const posts = postsQuery.data ?? [];
-function handleToggle(id: string) { markSeen(id); }
+function handleToggle(id: string) {
+  markSeen(id);
+}
 ```
 
 ### React Query State Management
 
 **Shared Hooks Location**:
+
 - All storage-related React Query hooks are centralized in `lib/hooks/useStorageData.ts`
 - DO NOT create duplicate hooks in component directories
 - Import from the shared location: `import { useSubscriptions, usePosts } from '@/lib/hooks/useStorageData'`
 
 **Data Fetching Hooks**:
+
 - `useSubscriptions()` - Fetch all subscriptions
 - `useGroups()` - Fetch all groups
 - `usePosts()` - Fetch all posts
 
 **Mutation Hooks**:
+
 - `useCreateSubscription()` - Create new subscription
 - `useUpdateSubscription()` - Update subscription properties
 - `useDeleteSubscription()` - Delete subscription
@@ -300,6 +336,7 @@ function handleToggle(id: string) { markSeen(id); }
 - `useMarkPostSeen()` - Mark post as seen/unseen (with optimistic updates)
 
 **Usage Pattern**:
+
 ```typescript
 function MyComponent() {
   // Queries - use descriptive variable names with "Query" suffix
@@ -320,12 +357,12 @@ function MyComponent() {
 
   // Call mutations with callbacks (not mutateAsync)
   function handleCreate() {
-    createSubscriptionMutation.mutate('New Sub', {
+    createSubscriptionMutation.mutate("New Sub", {
       onSuccess: () => {
         // Handle success (e.g., close form, reset state)
       },
       onError: (err) => {
-        console.error('Failed:', err);
+        console.error("Failed:", err);
       },
     });
   }
@@ -333,6 +370,7 @@ function MyComponent() {
 ```
 
 **QueryClientProvider Setup**:
+
 - Each React entry point (popup, dashboard) must wrap the app with `QueryClientProvider`
 - Configure default options for staleTime and refetchOnWindowFocus
 - Example in `entrypoints/popup/main.tsx` and `entrypoints/dashboard/main.tsx`
@@ -340,18 +378,21 @@ function MyComponent() {
 ### Component Size Guidelines
 
 **Keep Components Small and Focused**:
+
 - A component should do ONE thing well
 - If a component exceeds 150 lines, consider breaking it down
 - Extract repeated UI patterns into smaller components
 - Separate business logic into custom hooks
 
 **Component Extraction Signals**:
+
 - Repeated JSX patterns (2+ occurrences)
 - Distinct UI sections that can stand alone
 - Complex conditional rendering that obscures the main component
 - Event handlers that could be reused
 
 **Good Examples**:
+
 ```typescript
 // GOOD: Small, focused components
 function SubscriptionCard({ subscription, onEdit, onDelete }) {
@@ -366,6 +407,7 @@ function SubscriptionCard({ subscription, onEdit, onDelete }) {
 ```
 
 **Avoid**:
+
 - Monolithic components with 200+ lines
 - Mixing data fetching, business logic, and complex UI in one component
 - Deeply nested conditional rendering (> 3 levels)
@@ -374,6 +416,7 @@ function SubscriptionCard({ subscription, onEdit, onDelete }) {
 ### TypeScript Configuration
 
 The project extends `.wxt/tsconfig.json` with custom options:
+
 - `allowImportingTsExtensions: true` - Import `.ts`/`.tsx` files directly
 - `jsx: "react-jsx"` - Use React 17+ JSX transform
 
@@ -394,12 +437,14 @@ The project extends `.wxt/tsconfig.json` with custom options:
 ## Git and Commit Practices
 
 **Commit Granularity**:
+
 - Create one commit per logical change
 - Do NOT combine multiple concerns (feature + refactor, multiple features, multiple fixes)
 - Each commit must be complete and independently revertible
 - Run tests before each commit
 
 **Commit Message Format**:
+
 ```
 type(scope): imperative description under 72 chars
 
@@ -409,6 +454,7 @@ Optional body with detailed explanation.
 **Types**: `feat`, `fix`, `refactor`, `test`, `docs`, `style`, `chore`
 
 **Commit Triggers** (create commit after):
+
 - Implementing single feature → `feat(scope): add feature X`
 - Fixing single bug → `fix(scope): correct behavior Y`
 - Refactoring single component → `refactor(scope): simplify component Z`
@@ -416,6 +462,7 @@ Optional body with detailed explanation.
 - Updating documentation → `docs(scope): document pattern Y`
 
 **Pattern Matching**:
+
 ```
 VALID:
 fix(dashboard): add XSS protection with DOMPurify
@@ -435,23 +482,27 @@ feat(dashboard): add spinner, fix XSS  # Multiple changes in one commit
 **Framework**: Vitest (fast, Vite-native, great TypeScript support)
 
 **Libraries**:
+
 - `vitest` - Test runner
 - `@testing-library/react` - React component testing
 - `@testing-library/jest-dom` - Custom matchers
 - `jsdom` - DOM environment for tests
 
 **TDD Workflow**:
+
 1. Write failing tests first
 2. Implement minimal code to pass tests
 3. Refactor while keeping tests green
 4. Repeat
 
 **Test Files**:
+
 - `lib/*.test.ts` - Unit tests for storage, scraper, utilities
 - `entrypoints/*.test.ts(x)` - Integration tests for entry points
 - `test/setup.ts` - Global test setup and chrome API mocks
 
 **Running Tests**:
+
 - `pnpm test` - Watch mode
 - `pnpm test:run` - Run once (CI)
 - `pnpm test:ui` - Interactive UI
@@ -478,6 +529,7 @@ feat(dashboard): add spinner, fix XSS  # Multiple changes in one commit
 **Current Implementation**: Automatic scraping when visiting Facebook group pages
 
 **Future Enhancement**: Background periodic scraping
+
 - Add chrome.alarms API in background script
 - Reuse same scraper module
 - Trigger scraping via programmatic content script injection

@@ -18,6 +18,7 @@ Follow-up TODOs: None
 ### I. Test-First Development (NON-NEGOTIABLE)
 
 Tests MUST be written before implementation code. For new features or bug fixes:
+
 - Write failing tests that define expected behavior
 - Ensure tests fail for the right reason
 - Implement minimal code to pass tests
@@ -29,6 +30,7 @@ regression safety. Testing after code leads to implementation-biased tests that 
 ### II. File Colocation
 
 Test files MUST be placed next to the code they test using `<filename>.test.ts` naming:
+
 - Library files: tests adjacent in same directory (`lib/storage.ts` → `lib/storage.test.ts`)
 - Entrypoints: create subdirectory with `index.ts` for entry point (`entrypoints/background/index.ts`, `entrypoints/background/background-handler.test.ts`)
 - DO NOT use separate `test/` directories for feature tests (only for global setup/utilities)
@@ -40,6 +42,7 @@ pattern avoids build conflicts while maintaining colocation.
 ### III. No Barrel Exports
 
 DO NOT create `index.ts` files that re-export from other modules:
+
 - Always import directly from specific files where code is defined
 - Example: `import { useSubscriptions } from '@/lib/hooks/storage/useSubscriptions'` (GOOD)
 - Example: `import { useSubscriptions } from '@/lib/hooks'` (BAD - barrel export)
@@ -50,15 +53,21 @@ risks, and complicate refactoring. Direct imports make dependencies explicit and
 ### IV. React Coding Standards
 
 **Function Declarations**: Use named function declarations, NOT arrow functions:
+
 ```typescript
 // VALID
-function handleClick(id: string) { /* ... */ }
+function handleClick(id: string) {
+  /* ... */
+}
 
 // INVALID
-const handleClick = (id: string) => { /* ... */ };
+const handleClick = (id: string) => {
+  /* ... */
+};
 ```
 
 **React Query Usage**: DO NOT destructure query results, use dot notation:
+
 ```typescript
 // VALID
 const postsQuery = usePosts();
@@ -74,6 +83,7 @@ queries make refactoring safer and align with query object patterns.
 ### V. Component Size & Focus
 
 Components MUST do ONE thing well:
+
 - If component exceeds 150 lines, consider breaking down
 - Extract repeated UI patterns (2+ occurrences) into smaller components
 - Separate business logic into custom hooks
@@ -85,6 +95,7 @@ Monolithic components become bottlenecks for parallel development.
 ### VI. Commit Granularity
 
 Create ONE commit per logical change:
+
 - DO NOT combine multiple concerns (feature + refactor, multiple features, multiple fixes)
 - Each commit MUST be complete and independently revertible
 - Run tests before each commit
@@ -99,6 +110,7 @@ code review. Mixed-concern commits make bisecting and cherry-picking impossible.
 ### WXT Framework Requirements
 
 This project uses WXT (Web Extension Tools):
+
 - Automatic manifest generation - DO NOT manually edit manifest
 - Entry points use `defineBackground()`, `defineContentScript()`, etc.
 - Hot Module Replacement during development
@@ -108,6 +120,7 @@ This project uses WXT (Web Extension Tools):
 ### Extension Message Protocol
 
 Cross-context communication MUST use chrome.runtime messaging:
+
 - Content scripts → Background: Send messages via `chrome.runtime.sendMessage`
 - Background → Content: Respond via callback or return value
 - All messages MUST use typed message objects from `lib/types.ts`
@@ -116,6 +129,7 @@ Cross-context communication MUST use chrome.runtime messaging:
 ### Storage Conventions
 
 Use chrome.storage.local (NOT sync due to data size):
+
 - All storage operations MUST use wrappers from `lib/storage.ts`
 - Automatic Zod validation on all read operations
 - Post deduplication by ID enforced at storage layer
@@ -131,7 +145,8 @@ Use chrome.storage.local (NOT sync due to data size):
 
 ### Type Checking
 
-Run `pnpm compile` to verify TypeScript before committing:
+Run `pnpm typecheck` to verify TypeScript before committing:
+
 - DO NOT commit code with type errors
 - Fix errors at source, not with `@ts-ignore`
 - Use proper TypeScript types, avoid `any` unless absolutely necessary
@@ -147,6 +162,7 @@ Run `pnpm compile` to verify TypeScript before committing:
 ## Governance
 
 This constitution supersedes all other development practices. When in doubt:
+
 1. Follow TDD principles (Principle I)
 2. Prefer simplicity and directness
 3. Optimize for maintainability over cleverness
@@ -155,6 +171,7 @@ This constitution supersedes all other development practices. When in doubt:
 ### Amendments
 
 Constitution changes require:
+
 1. Clear rationale for change
 2. Version bump following semantic versioning:
    - MAJOR: Backward-incompatible principle changes
@@ -166,6 +183,7 @@ Constitution changes require:
 ### Compliance Review
 
 All pull requests MUST verify compliance with:
+
 - Test-first development (tests before code)
 - File colocation (tests next to code)
 - No barrel exports (direct imports only)
