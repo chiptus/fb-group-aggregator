@@ -14,6 +14,18 @@ stats-*.json
 .wxt
 web-ext.config.ts
 
+# Extension build outputs
+extension/.output/
+extension/.wxt/
+
+# Server build outputs
+server/dist/
+server/.env
+
+# Webapp build outputs
+webapp/dist/
+webapp/.env
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
