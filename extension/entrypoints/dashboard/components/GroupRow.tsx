@@ -1,5 +1,6 @@
 import { Button } from "@/components/ui/button";
 import type { Group } from "@/lib/types";
+import { formatDate } from "@/lib/utils";
 
 export function GroupRow({
 	group,
@@ -22,9 +23,9 @@ export function GroupRow({
 		group.subscriptionIds.includes(s.id),
 	);
 
-	function formatDate(timestamp: number | null) {
+	function formatGroupDate(timestamp: number | null) {
 		if (!timestamp) return "Never";
-		return new Date(timestamp).toLocaleDateString();
+		return formatDate(timestamp);
 	}
 
 	return (
@@ -69,11 +70,11 @@ export function GroupRow({
 						onChange={(e) => onToggleEnabled(group.id, e.target.checked)}
 						className="sr-only peer"
 					/>
-					<div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+					<div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-0.5 after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
 				</label>
 			</td>
 			<td className="px-4 py-3 text-sm text-gray-500">
-				{formatDate(group.lastScrapedAt)}
+				{formatGroupDate(group.lastScrapedAt)}
 			</td>
 			<td className="px-4 py-3 text-right">
 				<Button

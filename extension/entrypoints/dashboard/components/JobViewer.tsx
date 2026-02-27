@@ -9,6 +9,7 @@ import {
 } from "@/lib/hooks/storage/useJobs";
 import { useLogs } from "@/lib/hooks/storage/useLogs";
 import type { JobStatus, ScrapeJob } from "@/lib/types";
+import { formatDateTime } from "@/lib/utils";
 import { LoadingSpinner } from "./LoadingSpinner";
 
 const STATUS_COLORS: Record<JobStatus, string> = {
@@ -256,7 +257,7 @@ function JobCard(props: JobCardProps) {
 	}
 
 	function formatTimestamp(timestamp: number) {
-		return new Date(timestamp).toLocaleString();
+		return formatDateTime(timestamp);
 	}
 
 	return (

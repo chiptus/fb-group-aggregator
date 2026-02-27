@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import type { PostGroup as PostGroupType } from "@/lib/grouping/types";
 import { computeGroupProperties } from "@/lib/grouping/types";
 import type { Group, Post } from "@/lib/types";
+import { formatDateTime } from "@/lib/utils";
 import { GroupsTooltip } from "./GroupsTooltip";
 
 export interface PostGroupProps {
@@ -76,7 +77,7 @@ export function PostGroup({
 						<p className="text-sm text-gray-500">
 							<GroupsTooltip groupIds={allGroupIds} groupsMap={groupsMap} />
 							{" • "}
-							Scraped: {new Date(representativePost.scrapedAt).toLocaleString()}
+							Scraped: {formatDateTime(representativePost.scrapedAt)}
 						</p>
 					</div>
 					<div className="flex gap-2">
