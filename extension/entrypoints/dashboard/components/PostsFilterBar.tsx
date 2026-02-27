@@ -5,7 +5,6 @@ import { FilterStatsBanner } from "./FilterStatsBanner";
 
 interface PostsFilterBarProps {
 	showFilterPanel: boolean;
-	onToggleFilterPanel: () => void;
 	hasActiveFilters: boolean;
 	filters: FilterSettings;
 	onRemoveKeyword: (keyword: string, type: "positive" | "negative") => void;
@@ -15,7 +14,6 @@ interface PostsFilterBarProps {
 
 export function PostsFilterBar({
 	showFilterPanel,
-	onToggleFilterPanel,
 	hasActiveFilters,
 	filters,
 	onRemoveKeyword,
@@ -24,22 +22,6 @@ export function PostsFilterBar({
 }: PostsFilterBarProps) {
 	return (
 		<>
-			<div className="mb-4">
-				<button
-					type="button"
-					onClick={onToggleFilterPanel}
-					className="text-sm text-blue-600 hover:text-blue-800 flex items-center gap-1"
-				>
-					{showFilterPanel ? "Hide" : "Show"} keyword filters
-					{hasActiveFilters && (
-						<span className="bg-blue-100 text-blue-800 text-xs px-2 py-0.5 rounded-full">
-							{filters.positiveKeywords.length +
-								filters.negativeKeywords.length}
-						</span>
-					)}
-				</button>
-			</div>
-
 			{showFilterPanel && (
 				<div className="mb-4">
 					<FilterControls />

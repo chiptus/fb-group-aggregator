@@ -1,3 +1,7 @@
+import { CheckCheck, Eye, Filter, Layers, Star } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { TogglePill } from "./TogglePill";
+
 interface PostsListControlsProps {
 	unseenCount: number;
 	starredCount: number;
@@ -7,6 +11,10 @@ interface PostsListControlsProps {
 	onToggleShowOnlyStarred: (value: boolean) => void;
 	enableGrouping: boolean;
 	onToggleEnableGrouping: (value: boolean) => void;
+	showFilterPanel: boolean;
+	onToggleFilterPanel: () => void;
+	activeFilterCount: number;
+	onMarkAllSeen: () => void;
 }
 
 export function PostsListControls({
@@ -18,42 +26,53 @@ export function PostsListControls({
 	onToggleShowOnlyStarred,
 	enableGrouping,
 	onToggleEnableGrouping,
+	showFilterPanel,
+	onToggleFilterPanel,
+	activeFilterCount,
+	onMarkAllSeen,
 }: PostsListControlsProps) {
 	return (
-		<div className="flex items-center justify-between mb-4">
-			<p className="text-sm text-gray-600" aria-live="polite">
-				{unseenCount} unseen post{unseenCount !== 1 ? "s" : ""} • {starredCount}{" "}
-				starred post{starredCount !== 1 ? "s" : ""}
-			</p>
-			<div className="flex gap-4">
-				<label className="flex items-center gap-2 text-sm cursor-pointer">
-					<input
-						type="checkbox"
-						checked={showOnlyUnseen}
-						onChange={(e) => onToggleShowOnlyUnseen(e.target.checked)}
-						className="w-4 h-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-					/>
-					<span>Show only unseen</span>
-				</label>
-				<label className="flex items-center gap-2 text-sm cursor-pointer">
-					<input
-						type="checkbox"
-						checked={showOnlyStarred}
-						onChange={(e) => onToggleShowOnlyStarred(e.target.checked)}
-						className="w-4 h-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-					/>
-					<span>Show only starred</span>
-				</label>
-				<label className="flex items-center gap-2 text-sm cursor-pointer">
-					<input
-						type="checkbox"
-						checked={enableGrouping}
-						onChange={(e) => onToggleEnableGrouping(e.target.checked)}
-						className="w-4 h-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-					/>
-					<span>Group similar posts</span>
-				</label>
+		<div className="flex items-center justify-between mb-3" aria-live="polite">
+			<div className="flex items-center gap-1.5 flex-wrap">
+				<TogglePill
+					active={showOnlyUnseen}
+					onClick={() => onToggleShowOnlyUnseen(!showOnlyUnseen)}
+					icon={<Eye size={12} />}
+					label="Unseen"
+					count={unseenCount}
+				/>
+				<TogglePill
+					active={showOnlyStarred}
+					onClick={() => onToggleShowOnlyStarred(!showOnlyStarred)}
+					icon={<Star size={12} />}
+					label="Starred"
+					count={starredCount}
+				/>
+				<TogglePill
+					active={enableGrouping}
+					onClick={() => onToggleEnableGrouping(!enableGrouping)}
+					icon={<Layers size={12} />}
+					label="Grouped"
+				/>
+				<TogglePill
+					active={showFilterPanel}
+					onClick={onToggleFilterPanel}
+					icon={<Filter size={12} />}
+					label="Filters"
+					count={activeFilterCount}
+				/>
 			</div>
+			{unseenCount > 0 && (
+				<Button
+					variant="ghost"
+					size="sm"
+					onClick={onMarkAllSeen}
+					className="text-xs text-gray-500 hover:text-gray-900 gap-1.5"
+				>
+					<CheckCheck size={14} />
+					Mark all seen
+				</Button>
+			)}
 		</div>
 	);
 }

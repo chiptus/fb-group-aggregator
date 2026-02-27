@@ -1,45 +1,41 @@
-import { Button } from "@/components/ui/button";
 import type { Subscription } from "@/lib/types";
+import { TogglePill } from "./TogglePill";
 
 interface SubscriptionSidebarProps {
 	subscriptions: Subscription[];
 	selectedSubscriptionId: string | null;
 	onSelectSubscription: (id: string | null) => void;
+	unseenCounts: Map<string, number>;
 }
 
 export function SubscriptionSidebar({
 	subscriptions,
 	selectedSubscriptionId,
 	onSelectSubscription,
+	unseenCounts,
 }: SubscriptionSidebarProps) {
 	return (
-		<nav className="w-64 shrink-0" aria-label="Subscription filters">
-			<div className="bg-white rounded-lg shadow p-4">
-				<h2 className="font-semibold mb-3">Subscriptions</h2>
-				<div className="space-y-1">
-					<Button
-						onClick={() => onSelectSubscription(null)}
-						aria-pressed={selectedSubscriptionId === null}
-						aria-label="Show all posts from all subscriptions"
-						variant={selectedSubscriptionId === null ? "primary" : "ghost"}
-						className="w-full justify-start"
-					>
-						All Posts
-					</Button>
-					{subscriptions.map((sub) => (
-						<Button
-							key={sub.id}
-							onClick={() => onSelectSubscription(sub.id)}
-							aria-pressed={selectedSubscriptionId === sub.id}
-							aria-label={`Filter posts by ${sub.name} subscription`}
-							variant={selectedSubscriptionId === sub.id ? "primary" : "ghost"}
-							className="w-full justify-start"
-						>
-							{sub.name}
-						</Button>
-					))}
-				</div>
-			</div>
+		<nav
+			aria-label="Subscription filters"
+			className="flex flex-wrap gap-2 mb-3"
+		>
+			<TogglePill
+				variant="nav"
+				active={selectedSubscriptionId === null}
+				onClick={() => onSelectSubscription(null)}
+				label="All Posts"
+				count={unseenCounts.get("__all__")}
+			/>
+			{subscriptions.map((sub) => (
+				<TogglePill
+					key={sub.id}
+					variant="nav"
+					active={selectedSubscriptionId === sub.id}
+					onClick={() => onSelectSubscription(sub.id)}
+					label={sub.name}
+					count={unseenCounts.get(sub.id)}
+				/>
+			))}
 		</nav>
 	);
 }

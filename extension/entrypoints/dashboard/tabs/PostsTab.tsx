@@ -1,5 +1,6 @@
-import { useCallback, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
+import { useMarkAllPostsSeen } from "@/lib/hooks/storage/usePosts";
 import type { Post } from "@/lib/types";
 import { GroupedPostsSection } from "../components/GroupedPostsSection";
 import { LoadingSpinner } from "../components/LoadingSpinner";
@@ -37,6 +38,8 @@ export function PostsTab() {
 		removeKeyword,
 	} = usePostsData();
 
+	const markAllPostsSeen = useMarkAllPostsSeen();
+
 	const { filteredPosts, unseenCount, starredCount } = useFilteredPosts({
 		posts,
 		groups,
@@ -46,6 +49,23 @@ export function PostsTab() {
 		showOnlyUnseen,
 		showOnlyStarred,
 	});
+
+	const subscriptionUnseenCounts = useMemo(() => {
+		const counts = new Map<string, number>();
+		counts.set("__all__", posts.filter((p) => !p.seen).length);
+		for (const sub of subscriptions) {
+			const subGroupIds = new Set(
+				groups
+					.filter((g) => g.subscriptionIds.includes(sub.id))
+					.map((g) => g.id),
+			);
+			counts.set(
+				sub.id,
+				posts.filter((p) => subGroupIds.has(p.groupId) && !p.seen).length,
+			);
+		}
+		return counts;
+	}, [subscriptions, groups, posts]);
 
 	const renderPost = useCallback(
 		(post: Post) => {
@@ -86,69 +106,77 @@ export function PostsTab() {
 		filters.positiveKeywords.length > 0 || filters.negativeKeywords.length > 0;
 
 	return (
-		<div className="max-w-7xl mx-auto px-4 py-6 flex gap-6">
+		<div className="max-w-7xl mx-auto px-4 py-6">
+			<SearchBar value={searchQuery} onChange={setSearchQuery} />
+
 			<SubscriptionSidebar
 				subscriptions={subscriptions}
 				selectedSubscriptionId={selectedSubscriptionId}
 				onSelectSubscription={setSelectedSubscriptionId}
+				unseenCounts={subscriptionUnseenCounts}
 			/>
 
-			<main className="flex-1">
-				<SearchBar value={searchQuery} onChange={setSearchQuery} />
+			<PostsListControls
+				unseenCount={unseenCount}
+				starredCount={starredCount}
+				showOnlyUnseen={showOnlyUnseen}
+				onToggleShowOnlyUnseen={setShowOnlyUnseen}
+				showOnlyStarred={showOnlyStarred}
+				onToggleShowOnlyStarred={setShowOnlyStarred}
+				enableGrouping={enableGrouping}
+				onToggleEnableGrouping={setEnableGrouping}
+				showFilterPanel={showFilterPanel}
+				onToggleFilterPanel={() => setShowFilterPanel(!showFilterPanel)}
+				activeFilterCount={
+					filters.positiveKeywords.length + filters.negativeKeywords.length
+				}
+				onMarkAllSeen={() =>
+					markAllPostsSeen.mutate(
+						filteredPosts.filter((p) => !p.seen).map((p) => p.id),
+					)
+				}
+			/>
 
-				<PostsFilterBar
-					showFilterPanel={showFilterPanel}
-					onToggleFilterPanel={() => setShowFilterPanel(!showFilterPanel)}
+			<PostsFilterBar
+				showFilterPanel={showFilterPanel}
+				hasActiveFilters={hasActiveFilters}
+				filters={filters}
+				onRemoveKeyword={removeKeyword}
+				totalPosts={posts.length}
+				filteredPostsCount={filteredPosts.length}
+			/>
+
+			{filteredPosts.length === 0 ? (
+				<PostsEmptyState
 					hasActiveFilters={hasActiveFilters}
-					filters={filters}
-					onRemoveKeyword={removeKeyword}
-					totalPosts={posts.length}
-					filteredPostsCount={filteredPosts.length}
-				/>
-
-				<PostsListControls
-					unseenCount={unseenCount}
-					starredCount={starredCount}
+					searchQuery={searchQuery}
 					showOnlyUnseen={showOnlyUnseen}
-					onToggleShowOnlyUnseen={setShowOnlyUnseen}
 					showOnlyStarred={showOnlyStarred}
-					onToggleShowOnlyStarred={setShowOnlyStarred}
-					enableGrouping={enableGrouping}
-					onToggleEnableGrouping={setEnableGrouping}
+					selectedSubscriptionId={selectedSubscriptionId}
+					filters={filters}
+					onClearFilters={() => {
+						setSearchQuery("");
+						setShowOnlyUnseen(false);
+						setShowOnlyStarred(false);
+						saveFiltersMutation.mutate(DEFAULT_FILTERS);
+					}}
 				/>
-
-				{filteredPosts.length === 0 ? (
-					<PostsEmptyState
-						hasActiveFilters={hasActiveFilters}
-						searchQuery={searchQuery}
-						showOnlyUnseen={showOnlyUnseen}
-						showOnlyStarred={showOnlyStarred}
-						selectedSubscriptionId={selectedSubscriptionId}
-						filters={filters}
-						onClearFilters={() => {
-							setSearchQuery("");
-							setShowOnlyUnseen(false);
-							setShowOnlyStarred(false);
-							saveFiltersMutation.mutate(DEFAULT_FILTERS);
-						}}
-					/>
-				) : enableGrouping ? (
-					<GroupedPostsSection
-						filteredPosts={filteredPosts}
-						groupsMap={groupsMap}
-						onSetSeen={setPostSeen}
-						onToggleStarred={togglePostStarred}
-					/>
-				) : (
-					<VirtualPostList
-						posts={filteredPosts}
-						height={600}
-						estimateSize={200}
-						overscan={5}
-						renderPost={renderPost}
-					/>
-				)}
-			</main>
+			) : enableGrouping ? (
+				<GroupedPostsSection
+					filteredPosts={filteredPosts}
+					groupsMap={groupsMap}
+					onSetSeen={setPostSeen}
+					onToggleStarred={togglePostStarred}
+				/>
+			) : (
+				<VirtualPostList
+					posts={filteredPosts}
+					height={600}
+					estimateSize={200}
+					overscan={5}
+					renderPost={renderPost}
+				/>
+			)}
 		</div>
 	);
 }
