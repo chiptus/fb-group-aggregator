@@ -1,5 +1,6 @@
 import { useCallback, useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
+import { filterPosts } from "@/lib/filters/filterPosts";
 import { useMarkAllPostsSeen } from "@/lib/hooks/storage/usePosts";
 import type { Post } from "@/lib/types";
 import { GroupedPostsSection } from "../components/GroupedPostsSection";
@@ -51,8 +52,16 @@ export function PostsTab() {
 	});
 
 	const subscriptionUnseenCounts = useMemo(() => {
+		// Apply keyword filters so subscription counts agree with the filtered post list
+		const hasKeywordFilters =
+			filters.positiveKeywords.length > 0 ||
+			filters.negativeKeywords.length > 0;
+		const keywordFilteredPosts = hasKeywordFilters
+			? filterPosts(posts, filters)
+			: posts;
+
 		const counts = new Map<string, number>();
-		counts.set("__all__", posts.filter((p) => !p.seen).length);
+		counts.set("__all__", keywordFilteredPosts.filter((p) => !p.seen).length);
 		for (const sub of subscriptions) {
 			const subGroupIds = new Set(
 				groups
@@ -61,11 +70,13 @@ export function PostsTab() {
 			);
 			counts.set(
 				sub.id,
-				posts.filter((p) => subGroupIds.has(p.groupId) && !p.seen).length,
+				keywordFilteredPosts.filter(
+					(p) => subGroupIds.has(p.groupId) && !p.seen,
+				).length,
 			);
 		}
 		return counts;
-	}, [subscriptions, groups, posts]);
+	}, [subscriptions, groups, posts, filters]);
 
 	const renderPost = useCallback(
 		(post: Post) => {

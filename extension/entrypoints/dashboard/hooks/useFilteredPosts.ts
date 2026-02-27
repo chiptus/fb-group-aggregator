@@ -31,7 +31,10 @@ export function useFilteredPosts({
 		);
 	}, [groups, selectedSubscriptionId]);
 
-	const filteredPosts = useMemo(() => {
+	// Base set: subscription + search + keyword filters only (no seen/starred).
+	// Used for counts so pill badges always reflect "how many match in current view"
+	// regardless of whether the seen/starred filters are active.
+	const basePosts = useMemo(() => {
 		let result = posts;
 		if (subscriptionGroupIds) {
 			result = result.filter((p) => subscriptionGroupIds.has(p.groupId));
@@ -50,6 +53,11 @@ export function useFilteredPosts({
 		if (hasKeywordFilters) {
 			result = filterPosts(result, filters);
 		}
+		return result;
+	}, [posts, subscriptionGroupIds, searchQuery, filters]);
+
+	const filteredPosts = useMemo(() => {
+		let result = basePosts;
 		if (showOnlyUnseen) {
 			result = result.filter((p) => !p.seen);
 		}
@@ -66,23 +74,16 @@ export function useFilteredPosts({
 				return b.id.localeCompare(a.id);
 			}
 		});
-	}, [
-		posts,
-		subscriptionGroupIds,
-		searchQuery,
-		filters,
-		showOnlyUnseen,
-		showOnlyStarred,
-	]);
+	}, [basePosts, showOnlyUnseen, showOnlyStarred]);
 
 	const unseenCount = useMemo(
-		() => filteredPosts.filter((p) => !p.seen).length,
-		[filteredPosts],
+		() => basePosts.filter((p) => !p.seen).length,
+		[basePosts],
 	);
 
 	const starredCount = useMemo(
-		() => filteredPosts.filter((p) => p.starred).length,
-		[filteredPosts],
+		() => basePosts.filter((p) => p.starred).length,
+		[basePosts],
 	);
 
 	return { filteredPosts, unseenCount, starredCount };
