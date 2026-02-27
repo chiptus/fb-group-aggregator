@@ -1,19 +1,14 @@
-import type { Subscription } from "@/lib/types";
+import { usePostsView } from "../context/PostsViewContext";
 import { TogglePill } from "./TogglePill";
 
-interface SubscriptionSidebarProps {
-	subscriptions: Subscription[];
-	selectedSubscriptionId: string | null;
-	onSelectSubscription: (id: string | null) => void;
-	unseenCounts: Map<string, number>;
-}
+export function SubscriptionSidebar() {
+	const {
+		subscriptions,
+		selectedSubscriptionId,
+		setSelectedSubscriptionId,
+		subscriptionUnseenCounts,
+	} = usePostsView();
 
-export function SubscriptionSidebar({
-	subscriptions,
-	selectedSubscriptionId,
-	onSelectSubscription,
-	unseenCounts,
-}: SubscriptionSidebarProps) {
 	return (
 		<nav
 			aria-label="Subscription filters"
@@ -22,18 +17,18 @@ export function SubscriptionSidebar({
 			<TogglePill
 				variant="nav"
 				active={selectedSubscriptionId === null}
-				onClick={() => onSelectSubscription(null)}
+				onClick={() => setSelectedSubscriptionId(null)}
 				label="All Posts"
-				count={unseenCounts.get("__all__")}
+				count={subscriptionUnseenCounts.get("__all__")}
 			/>
 			{subscriptions.map((sub) => (
 				<TogglePill
 					key={sub.id}
 					variant="nav"
 					active={selectedSubscriptionId === sub.id}
-					onClick={() => onSelectSubscription(sub.id)}
+					onClick={() => setSelectedSubscriptionId(sub.id)}
 					label={sub.name}
-					count={unseenCounts.get(sub.id)}
+					count={subscriptionUnseenCounts.get(sub.id)}
 				/>
 			))}
 		</nav>

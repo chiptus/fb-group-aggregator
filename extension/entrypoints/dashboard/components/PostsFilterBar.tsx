@@ -1,25 +1,18 @@
-import type { FilterSettings } from "@/lib/filters/types";
+import { usePostsView } from "../context/PostsViewContext";
 import { FilterChips } from "./FilterChips";
 import { FilterControls } from "./FilterControls";
 import { FilterStatsBanner } from "./FilterStatsBanner";
 
-interface PostsFilterBarProps {
-	showFilterPanel: boolean;
-	hasActiveFilters: boolean;
-	filters: FilterSettings;
-	onRemoveKeyword: (keyword: string, type: "positive" | "negative") => void;
-	totalPosts: number;
-	filteredPostsCount: number;
-}
+export function PostsFilterBar() {
+	const {
+		showFilterPanel,
+		hasActiveFilters,
+		filters,
+		removeKeyword,
+		posts,
+		filteredPosts,
+	} = usePostsView();
 
-export function PostsFilterBar({
-	showFilterPanel,
-	hasActiveFilters,
-	filters,
-	onRemoveKeyword,
-	totalPosts,
-	filteredPostsCount,
-}: PostsFilterBarProps) {
 	return (
 		<>
 			{showFilterPanel && (
@@ -30,14 +23,14 @@ export function PostsFilterBar({
 
 			{hasActiveFilters && (
 				<div className="mb-4">
-					<FilterChips filters={filters} onRemoveKeyword={onRemoveKeyword} />
+					<FilterChips filters={filters} onRemoveKeyword={removeKeyword} />
 				</div>
 			)}
 
 			{hasActiveFilters && (
 				<FilterStatsBanner
-					totalPosts={totalPosts}
-					filteredPosts={filteredPostsCount}
+					totalPosts={posts.length}
+					filteredPosts={filteredPosts.length}
 					positiveKeywordCount={filters.positiveKeywords.length}
 					negativeKeywordCount={filters.negativeKeywords.length}
 					className="mb-4"

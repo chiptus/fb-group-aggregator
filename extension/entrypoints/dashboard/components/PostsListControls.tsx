@@ -1,62 +1,50 @@
 import { CheckCheck, Eye, Filter, Layers, Star } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { usePostsView } from "../context/PostsViewContext";
 import { TogglePill } from "./TogglePill";
 
-interface PostsListControlsProps {
-	unseenCount: number;
-	starredCount: number;
-	showOnlyUnseen: boolean;
-	onToggleShowOnlyUnseen: (value: boolean) => void;
-	showOnlyStarred: boolean;
-	onToggleShowOnlyStarred: (value: boolean) => void;
-	enableGrouping: boolean;
-	onToggleEnableGrouping: (value: boolean) => void;
-	showFilterPanel: boolean;
-	onToggleFilterPanel: () => void;
-	activeFilterCount: number;
-	onMarkAllSeen: () => void;
-}
+export function PostsListControls() {
+	const {
+		unseenCount,
+		starredCount,
+		showOnlyUnseen,
+		setShowOnlyUnseen,
+		showOnlyStarred,
+		setShowOnlyStarred,
+		enableGrouping,
+		setEnableGrouping,
+		showFilterPanel,
+		setShowFilterPanel,
+		activeFilterCount,
+		markAllSeen,
+	} = usePostsView();
 
-export function PostsListControls({
-	unseenCount,
-	starredCount,
-	showOnlyUnseen,
-	onToggleShowOnlyUnseen,
-	showOnlyStarred,
-	onToggleShowOnlyStarred,
-	enableGrouping,
-	onToggleEnableGrouping,
-	showFilterPanel,
-	onToggleFilterPanel,
-	activeFilterCount,
-	onMarkAllSeen,
-}: PostsListControlsProps) {
 	return (
 		<div className="flex items-center justify-between mb-3" aria-live="polite">
 			<div className="flex items-center gap-1.5 flex-wrap">
 				<TogglePill
 					active={showOnlyUnseen}
-					onClick={() => onToggleShowOnlyUnseen(!showOnlyUnseen)}
+					onClick={() => setShowOnlyUnseen(!showOnlyUnseen)}
 					icon={<Eye size={12} />}
 					label="Unseen"
 					count={unseenCount}
 				/>
 				<TogglePill
 					active={showOnlyStarred}
-					onClick={() => onToggleShowOnlyStarred(!showOnlyStarred)}
+					onClick={() => setShowOnlyStarred(!showOnlyStarred)}
 					icon={<Star size={12} />}
 					label="Starred"
 					count={starredCount}
 				/>
 				<TogglePill
 					active={enableGrouping}
-					onClick={() => onToggleEnableGrouping(!enableGrouping)}
+					onClick={() => setEnableGrouping(!enableGrouping)}
 					icon={<Layers size={12} />}
 					label="Grouped"
 				/>
 				<TogglePill
 					active={showFilterPanel}
-					onClick={onToggleFilterPanel}
+					onClick={() => setShowFilterPanel(!showFilterPanel)}
 					icon={<Filter size={12} />}
 					label="Filters"
 					count={activeFilterCount}
@@ -66,7 +54,7 @@ export function PostsListControls({
 				<Button
 					variant="ghost"
 					size="sm"
-					onClick={onMarkAllSeen}
+					onClick={markAllSeen}
 					className="text-xs text-gray-500 hover:text-gray-900 gap-1.5"
 				>
 					<CheckCheck size={14} />

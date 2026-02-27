@@ -1,24 +1,16 @@
-import type { FilterSettings } from "@/lib/filters/types";
+import { usePostsView } from "../context/PostsViewContext";
 
-interface PostsEmptyStateProps {
-	hasActiveFilters: boolean;
-	searchQuery: string;
-	showOnlyUnseen: boolean;
-	showOnlyStarred: boolean;
-	selectedSubscriptionId: string | null;
-	filters: FilterSettings;
-	onClearFilters: () => void;
-}
+export function PostsEmptyState() {
+	const {
+		hasActiveFilters,
+		searchQuery,
+		showOnlyUnseen,
+		showOnlyStarred,
+		selectedSubscriptionId,
+		filters,
+		clearFilters,
+	} = usePostsView();
 
-export function PostsEmptyState({
-	hasActiveFilters,
-	searchQuery,
-	showOnlyUnseen,
-	showOnlyStarred,
-	selectedSubscriptionId,
-	filters,
-	onClearFilters,
-}: PostsEmptyStateProps) {
 	const hasAnyFilter =
 		hasActiveFilters ||
 		searchQuery ||
@@ -51,7 +43,7 @@ export function PostsEmptyState({
 					</div>
 					<button
 						type="button"
-						onClick={onClearFilters}
+						onClick={clearFilters}
 						className="text-blue-600 hover:text-blue-800 text-sm underline"
 					>
 						Clear all filters

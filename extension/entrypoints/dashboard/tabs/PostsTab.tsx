@@ -1,7 +1,5 @@
-import { useCallback, useMemo, useState } from "react";
+import { useCallback } from "react";
 import { Button } from "@/components/ui/button";
-import { filterPosts } from "@/lib/filters/filterPosts";
-import { useMarkAllPostsSeen } from "@/lib/hooks/storage/usePosts";
 import type { Post } from "@/lib/types";
 import { GroupedPostsSection } from "../components/GroupedPostsSection";
 import { LoadingSpinner } from "../components/LoadingSpinner";
@@ -12,71 +10,28 @@ import { PostsListControls } from "../components/PostsListControls";
 import { SearchBar } from "../components/SearchBar";
 import { SubscriptionSidebar } from "../components/SubscriptionSidebar";
 import { VirtualPostList } from "../components/VirtualPostList";
-import { useFilteredPosts } from "../hooks/useFilteredPosts";
-import { DEFAULT_FILTERS, usePostsData } from "../hooks/usePostsData";
+import { PostsViewProvider, usePostsView } from "../context/PostsViewContext";
 
 export function PostsTab() {
-	const [selectedSubscriptionId, setSelectedSubscriptionId] = useState<
-		string | null
-	>(null);
-	const [searchQuery, setSearchQuery] = useState("");
-	const [showOnlyUnseen, setShowOnlyUnseen] = useState(true);
-	const [showOnlyStarred, setShowOnlyStarred] = useState(false);
-	const [showFilterPanel, setShowFilterPanel] = useState(false);
-	const [enableGrouping, setEnableGrouping] = useState(false);
+	return (
+		<PostsViewProvider>
+			<PostsTabInner />
+		</PostsViewProvider>
+	);
+}
 
+function PostsTabInner() {
 	const {
-		subscriptions,
-		groups,
-		posts,
 		groupsMap,
-		filters,
-		saveFiltersMutation,
-		setPostSeen,
+		filteredPosts,
+		enableGrouping,
 		isLoading,
 		error,
+		setPostSeen,
 		togglePostStarred,
-		removeKeyword,
-	} = usePostsData();
-
-	const markAllPostsSeen = useMarkAllPostsSeen();
-
-	const { filteredPosts, unseenCount, starredCount } = useFilteredPosts({
-		posts,
-		groups,
-		selectedSubscriptionId,
 		searchQuery,
-		filters,
-		showOnlyUnseen,
-		showOnlyStarred,
-	});
-
-	const subscriptionUnseenCounts = useMemo(() => {
-		// Apply keyword filters so subscription counts agree with the filtered post list
-		const hasKeywordFilters =
-			filters.positiveKeywords.length > 0 ||
-			filters.negativeKeywords.length > 0;
-		const keywordFilteredPosts = hasKeywordFilters
-			? filterPosts(posts, filters)
-			: posts;
-
-		const counts = new Map<string, number>();
-		counts.set("__all__", keywordFilteredPosts.filter((p) => !p.seen).length);
-		for (const sub of subscriptions) {
-			const subGroupIds = new Set(
-				groups
-					.filter((g) => g.subscriptionIds.includes(sub.id))
-					.map((g) => g.id),
-			);
-			counts.set(
-				sub.id,
-				keywordFilteredPosts.filter(
-					(p) => subGroupIds.has(p.groupId) && !p.seen,
-				).length,
-			);
-		}
-		return counts;
-	}, [subscriptions, groups, posts, filters]);
+		setSearchQuery,
+	} = usePostsView();
 
 	const renderPost = useCallback(
 		(post: Post) => {
@@ -113,65 +68,18 @@ export function PostsTab() {
 		);
 	}
 
-	const hasActiveFilters =
-		filters.positiveKeywords.length > 0 || filters.negativeKeywords.length > 0;
-
 	return (
 		<div className="max-w-7xl mx-auto px-4 py-6">
 			<SearchBar value={searchQuery} onChange={setSearchQuery} />
 
-			<SubscriptionSidebar
-				subscriptions={subscriptions}
-				selectedSubscriptionId={selectedSubscriptionId}
-				onSelectSubscription={setSelectedSubscriptionId}
-				unseenCounts={subscriptionUnseenCounts}
-			/>
+			<SubscriptionSidebar />
 
-			<PostsListControls
-				unseenCount={unseenCount}
-				starredCount={starredCount}
-				showOnlyUnseen={showOnlyUnseen}
-				onToggleShowOnlyUnseen={setShowOnlyUnseen}
-				showOnlyStarred={showOnlyStarred}
-				onToggleShowOnlyStarred={setShowOnlyStarred}
-				enableGrouping={enableGrouping}
-				onToggleEnableGrouping={setEnableGrouping}
-				showFilterPanel={showFilterPanel}
-				onToggleFilterPanel={() => setShowFilterPanel(!showFilterPanel)}
-				activeFilterCount={
-					filters.positiveKeywords.length + filters.negativeKeywords.length
-				}
-				onMarkAllSeen={() =>
-					markAllPostsSeen.mutate(
-						filteredPosts.filter((p) => !p.seen).map((p) => p.id),
-					)
-				}
-			/>
+			<PostsListControls />
 
-			<PostsFilterBar
-				showFilterPanel={showFilterPanel}
-				hasActiveFilters={hasActiveFilters}
-				filters={filters}
-				onRemoveKeyword={removeKeyword}
-				totalPosts={posts.length}
-				filteredPostsCount={filteredPosts.length}
-			/>
+			<PostsFilterBar />
 
 			{filteredPosts.length === 0 ? (
-				<PostsEmptyState
-					hasActiveFilters={hasActiveFilters}
-					searchQuery={searchQuery}
-					showOnlyUnseen={showOnlyUnseen}
-					showOnlyStarred={showOnlyStarred}
-					selectedSubscriptionId={selectedSubscriptionId}
-					filters={filters}
-					onClearFilters={() => {
-						setSearchQuery("");
-						setShowOnlyUnseen(false);
-						setShowOnlyStarred(false);
-						saveFiltersMutation.mutate(DEFAULT_FILTERS);
-					}}
-				/>
+				<PostsEmptyState />
 			) : enableGrouping ? (
 				<GroupedPostsSection
 					filteredPosts={filteredPosts}
