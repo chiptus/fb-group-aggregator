@@ -1,6 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   listPosts,
+  markAllPostsAsSeen,
   markPostAsSeen,
   togglePostStarred,
 } from '@/lib/storage/posts';
@@ -43,6 +44,31 @@ export function useMarkPostSeen() {
     },
     onSettled: () => {
       // Refetch after mutation
+      void queryClient.invalidateQueries({ queryKey: queryKeys.posts });
+    },
+  });
+}
+
+export function useMarkAllPostsSeen() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (postIds: string[]) => markAllPostsAsSeen(postIds),
+    onMutate: async (postIds) => {
+      await queryClient.cancelQueries({ queryKey: queryKeys.posts });
+      const previousPosts = queryClient.getQueryData<Post[]>(queryKeys.posts);
+      const seenSet = new Set(postIds);
+      queryClient.setQueryData<Post[]>(queryKeys.posts, (old) =>
+        old?.map((p) => (seenSet.has(p.id) ? { ...p, seen: true } : p))
+      );
+      return { previousPosts };
+    },
+    onError: (_err, _variables, context) => {
+      if (context?.previousPosts) {
+        queryClient.setQueryData(queryKeys.posts, context.previousPosts);
+      }
+    },
+    onSettled: () => {
       void queryClient.invalidateQueries({ queryKey: queryKeys.posts });
     },
   });
