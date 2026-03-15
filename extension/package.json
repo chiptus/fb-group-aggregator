@@ -10,17 +10,18 @@
 		"build:firefox": "wxt build -b firefox",
 		"zip": "wxt zip",
 		"zip:firefox": "wxt zip -b firefox",
-		"typecheck": "tsc --noEmit",
+		"compile": "tsc --noEmit",
 		"postinstall": "wxt prepare",
 		"test": "vitest",
 		"test:ui": "vitest --ui",
+		"test:run": "vitest run",
 		"lint": "biome lint .",
 		"lint:fix": "biome lint --write .",
 		"format": "biome format .",
 		"format:fix": "biome format --write .",
 		"check": "biome check .",
 		"check:fix": "biome check --write .",
-		"ci": "pnpm typecheck && pnpm check && pnpm test:run"
+		"ci": "pnpm compile && pnpm check && pnpm test:run"
 	},
 	"lint-staged": {
 		"*.{js,jsx,ts,tsx,json,jsonc}": [
@@ -34,6 +35,7 @@
 		"@radix-ui/react-dialog": "^1.1.15",
 		"@tailwindcss/vite": "^4.1.17",
 		"@tanstack/react-form": "^1.27.1",
+		"@tanstack/react-virtual": "^3.13.16",
 		"@tanstack/react-query": "^5.90.12",
 		"class-variance-authority": "^0.7.1",
 		"clsx": "^2.1.1",
