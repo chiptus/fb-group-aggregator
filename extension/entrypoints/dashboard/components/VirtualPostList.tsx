@@ -1,6 +1,7 @@
 import { useVirtualizer } from "@tanstack/react-virtual";
 import { useRef } from "react";
 import type { Post } from "@/lib/types";
+import { cn } from "@/lib/utils";
 
 export interface VirtualPostListProps {
 	posts: Post[];
@@ -11,30 +12,16 @@ export interface VirtualPostListProps {
 	className?: string;
 }
 
-export function VirtualPostList(props: VirtualPostListProps) {
-	const {
-		posts,
-		height,
-		estimateSize = 200,
-		overscan = 5,
-		renderPost,
-		className = "",
-	} = props;
-
+export function VirtualPostList({
+	posts,
+	height,
+	estimateSize = 200,
+	overscan = 5,
+	renderPost,
+	className,
+}: VirtualPostListProps) {
 	const parentRef = useRef<HTMLDivElement>(null);
 
-	// React 19 workaround: wrap virtualizer in useRef to prevent over-optimization
-	// See: https://github.com/TanStack/virtual/issues/743
-	const _virtualizerRef = useRef(
-		useVirtualizer({
-			count: posts.length,
-			getScrollElement: () => parentRef.current,
-			estimateSize: () => estimateSize,
-			overscan,
-		}),
-	);
-
-	// Update virtualizer when posts change
 	const virtualizer = useVirtualizer({
 		count: posts.length,
 		getScrollElement: () => parentRef.current,
@@ -42,23 +29,25 @@ export function VirtualPostList(props: VirtualPostListProps) {
 		overscan,
 	});
 
-	const virtualItems = virtualizer.getVirtualItems();
+	// React 19 workaround: store in ref to prevent compiler over-optimization
+	// See: https://github.com/TanStack/virtual/issues/743
+	const virtualizerRef = useRef(virtualizer);
+	virtualizerRef.current = virtualizer;
+
+	const virtualItems = virtualizerRef.current.getVirtualItems();
 
 	return (
 		<div
 			ref={parentRef}
 			data-testid="virtual-scroll-container"
-			className={`overflow-auto ${className}`}
+			className={cn("overflow-auto", className)}
 			style={{ height }}
 		>
 			<div
 				role="feed"
 				aria-label="Facebook group posts"
-				style={{
-					height: `${virtualizer.getTotalSize()}px`,
-					width: "100%",
-					position: "relative",
-				}}
+				className="w-full relative"
+				style={{ height: `${virtualizerRef.current.getTotalSize()}px` }}
 			>
 				{virtualItems.map((virtualItem) => {
 					const post = posts[virtualItem.index];
@@ -68,14 +57,9 @@ export function VirtualPostList(props: VirtualPostListProps) {
 						<div
 							key={post.id}
 							data-index={virtualItem.index}
-							ref={virtualizer.measureElement}
-							style={{
-								position: "absolute",
-								top: 0,
-								left: 0,
-								width: "100%",
-								transform: `translateY(${virtualItem.start}px)`,
-							}}
+							ref={virtualizerRef.current.measureElement}
+							className="absolute top-0 left-0 w-full"
+							style={{ transform: `translateY(${virtualItem.start}px)` }}
 						>
 							{renderPost(post, virtualItem.index)}
 						</div>
