@@ -31,6 +31,7 @@ interface PostsViewContextValue {
   showOnlyUnseen: boolean;
   showOnlyStarred: boolean;
   showFilterPanel: boolean;
+  enableGrouping: boolean;
 
   // View state setters
   setSelectedSubscriptionId: (id: string | null) => void;
@@ -38,6 +39,7 @@ interface PostsViewContextValue {
   setShowOnlyUnseen: (value: boolean) => void;
   setShowOnlyStarred: (value: boolean) => void;
   setShowFilterPanel: (value: boolean) => void;
+  setEnableGrouping: (value: boolean) => void;
 
   // Derived data
   filteredPosts: Post[];
@@ -70,6 +72,7 @@ export function PostsViewProvider({ children }: { children: ReactNode }) {
   const [showOnlyUnseen, setShowOnlyUnseen] = useState(true);
   const [showOnlyStarred, setShowOnlyStarred] = useState(false);
   const [showFilterPanel, setShowFilterPanel] = useState(false);
+  const [enableGrouping, setEnableGrouping] = useState(false);
 
   const {
     subscriptions,
@@ -143,11 +146,13 @@ export function PostsViewProvider({ children }: { children: ReactNode }) {
     showOnlyUnseen,
     showOnlyStarred,
     showFilterPanel,
+    enableGrouping,
     setSelectedSubscriptionId,
     setSearchQuery,
     setShowOnlyUnseen,
     setShowOnlyStarred,
     setShowFilterPanel,
+    setEnableGrouping,
     filteredPosts,
     unseenCount,
     starredCount,

@@ -1,6 +1,7 @@
 import { useCallback } from 'react';
 import { Button } from '@/components/ui/button';
 import type { Post } from '@/lib/types';
+import { GroupedPostsSection } from '../components/GroupedPostsSection';
 import { LoadingSpinner } from '../components/LoadingSpinner';
 import { PostCard } from '../components/PostCard';
 import { PostsEmptyState } from '../components/PostsEmptyState';
@@ -23,6 +24,7 @@ function PostsTabInner() {
   const {
     getGroupById,
     filteredPosts,
+    enableGrouping,
     isLoading,
     error,
     setPostSeen,
@@ -81,6 +83,13 @@ function PostsTabInner() {
 
       {filteredPosts.length === 0 ? (
         <PostsEmptyState />
+      ) : enableGrouping ? (
+        <GroupedPostsSection
+          filteredPosts={filteredPosts}
+          getGroupById={getGroupById}
+          onSetSeen={setPostSeen}
+          onToggleStarred={togglePostStarred}
+        />
       ) : (
         <VirtualPostList
           posts={filteredPosts}

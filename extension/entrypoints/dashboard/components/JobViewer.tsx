@@ -7,18 +7,18 @@ import {
   useStartJob,
 } from '@/lib/hooks/storage/useJobs';
 import { LoadingSpinner } from './LoadingSpinner';
-import { JobCard, STATUS_BADGES } from './JobCard';
+import { JobCard } from './JobCard';
 import { JobViewerHeader } from './JobViewerHeader';
 
 export function JobViewer() {
-  const jobsQuery = useJobs();
-  const startJobMutation = useStartJob();
-  const cancelJobMutation = useCancelJob();
-  const resumeJobMutation = useResumeJob();
-  const deleteJobMutation = useDeleteJob();
+	const jobsQuery = useJobs();
+	const startJobMutation = useStartJob();
+	const cancelJobMutation = useCancelJob();
+	const resumeJobMutation = useResumeJob();
+	const deleteJobMutation = useDeleteJob();
 
-  const [expandedJobId, setExpandedJobId] = useState<string | null>(null);
-  const [showLogsForJob, setShowLogsForJob] = useState<string | null>(null);
+	const [expandedJobId, setExpandedJobId] = useState<string | null>(null);
+	const [showLogsForJob, setShowLogsForJob] = useState<string | null>(null);
 
   const jobs = useMemo(() => jobsQuery.data ?? [], [jobsQuery.data]);
 
@@ -38,26 +38,34 @@ export function JobViewer() {
     return { activeJob: active, completedJobs: completed };
   }, [jobs]);
 
-  function handleStartJob() {
-    startJobMutation.mutate(undefined, {
-      onSuccess: (data) => {
-        setExpandedJobId(data.jobId);
-      },
-      onError: (error) => {
-        alert(`Failed to start job: ${error.message}`);
-      },
-    });
-  }
+	function handleStartJob() {
+		startJobMutation.mutate(undefined, {
+			onSuccess: (data) => {
+				setExpandedJobId(data.jobId);
+			},
+			onError: (error) => {
+				alert(`Failed to start job: ${error.message}`);
+			},
+		});
+	}
 
-  function handleCancelJob(jobId: string) {
-    if (confirm('Are you sure you want to cancel this job?')) {
-      cancelJobMutation.mutate(jobId);
-    }
-  }
+	function handleCancelJob(jobId: string) {
+		if (confirm("Are you sure you want to cancel this job?")) {
+			cancelJobMutation.mutate(jobId, {
+				onError: (error) => {
+					alert(`Failed to cancel job: ${error.message}`);
+				},
+			});
+		}
+	}
 
-  function handleResumeJob(jobId: string) {
-    resumeJobMutation.mutate(jobId);
-  }
+	function handleResumeJob(jobId: string) {
+		resumeJobMutation.mutate(jobId, {
+			onError: (error) => {
+				alert(`Failed to resume job: ${error.message}`);
+			},
+		});
+	}
 
   function handleDeleteJob(jobId: string) {
     if (confirm('Are you sure you want to delete this job?')) {
@@ -70,25 +78,25 @@ export function JobViewer() {
     }
   }
 
-  function toggleJobExpand(jobId: string) {
-    setExpandedJobId((current) => (current === jobId ? null : jobId));
-  }
+	function toggleJobExpand(jobId: string) {
+		setExpandedJobId((current) => (current === jobId ? null : jobId));
+	}
 
-  function toggleJobLogs(jobId: string) {
-    setShowLogsForJob((current) => (current === jobId ? null : jobId));
-  }
+	function toggleJobLogs(jobId: string) {
+		setShowLogsForJob((current) => (current === jobId ? null : jobId));
+	}
 
-  if (jobsQuery.isLoading) {
-    return <LoadingSpinner />;
-  }
+	if (jobsQuery.isLoading) {
+		return <LoadingSpinner />;
+	}
 
-  if (jobsQuery.error) {
-    return (
-      <div className="p-4 bg-red-50 border border-red-200 rounded">
-        <p className="text-red-700">Failed to load jobs</p>
-      </div>
-    );
-  }
+	if (jobsQuery.error) {
+		return (
+			<div className="p-4 bg-red-50 border border-red-200 rounded">
+				<p className="text-red-700">Failed to load jobs</p>
+			</div>
+		);
+	}
 
   return (
     <div className="space-y-6">
@@ -102,11 +110,6 @@ export function JobViewer() {
         <div className="bg-white rounded-lg shadow">
           <div className="p-6 border-b border-gray-200">
             <h3 className="text-lg font-semibold flex items-center gap-2">
-              <span
-                className={`px-2 py-1 rounded text-xs font-semibold text-white uppercase ${STATUS_BADGES[activeJob.status]}`}
-              >
-                {activeJob.status}
-              </span>
               Current Job
             </h3>
           </div>
