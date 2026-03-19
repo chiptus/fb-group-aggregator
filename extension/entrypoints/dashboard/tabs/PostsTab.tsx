@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { useGroups } from "@/lib/hooks/storage/useGroups";
 import {
@@ -7,10 +7,12 @@ import {
 	useTogglePostStarred,
 } from "@/lib/hooks/storage/usePosts";
 import { useSubscriptions } from "@/lib/hooks/storage/useSubscriptions";
+import type { Post } from "@/lib/types";
 import { LoadingSpinner } from "../components/LoadingSpinner";
 import { PostCard } from "../components/PostCard";
 import { SearchBar } from "../components/SearchBar";
 import { SubscriptionSidebar } from "../components/SubscriptionSidebar";
+import { VirtualPostList } from "../components/VirtualPostList";
 
 export function PostsTab() {
 	const [selectedSubscriptionId, setSelectedSubscriptionId] = useState<
@@ -109,13 +111,47 @@ export function PostsTab() {
 		[filteredPosts],
 	);
 
+	const handleToggleSeen = useCallback(
+		(postId: string, currentSeen: boolean) => {
+			markPostSeen.mutate({ postId, seen: !currentSeen });
+		},
+		[markPostSeen],
+	);
+
+	const handleToggleStarred = useCallback(
+		(postId: string, currentStarred: boolean) => {
+			togglePostStarred.mutate({ postId, starred: !currentStarred });
+		},
+		[togglePostStarred],
+	);
+
+	const renderPost = useCallback(
+		(post: Post) => {
+			const group = groups.find((g) => g.id === post.groupId);
+			return (
+				<div className="pb-4">
+					<PostCard
+						post={post}
+						group={group}
+						onToggleSeen={handleToggleSeen}
+						onToggleStarred={handleToggleStarred}
+					/>
+				</div>
+			);
+		},
+		[groups, handleToggleSeen, handleToggleStarred],
+	);
+
 	if (isLoading) {
 		return <LoadingSpinner />;
 	}
 
 	if (error) {
 		return (
-			<div className="flex flex-col items-center justify-center h-64 space-y-4">
+			<div
+				role="alert"
+				className="flex flex-col items-center justify-center h-64 space-y-4"
+			>
 				<p className="text-red-600">
 					Failed to load posts. Please refresh the page or check your extension
 					storage.
@@ -170,34 +206,15 @@ export function PostsTab() {
 						<p className="text-gray-600">No posts found</p>
 					</div>
 				) : (
-					<div
-						className="space-y-4"
-						role="feed"
-						aria-label="Facebook group posts"
-					>
-						{filteredPosts.map((post) => {
-							const group = groups.find((g) => g.id === post.groupId);
-							return (
-								<PostCard
-									key={post.id}
-									post={post}
-									group={group}
-									onToggleSeen={handleToggleSeen}
-									onToggleStarred={handleToggleStarred}
-								/>
-							);
-						})}
-					</div>
+					<VirtualPostList
+						posts={filteredPosts}
+						height="calc(100vh - 260px)"
+						estimateSize={200}
+						overscan={5}
+						renderPost={renderPost}
+					/>
 				)}
 			</main>
 		</div>
 	);
-
-	function handleToggleSeen(postId: string, currentSeen: boolean) {
-		markPostSeen.mutate({ postId, seen: !currentSeen });
-	}
-
-	function handleToggleStarred(postId: string, currentStarred: boolean) {
-		togglePostStarred.mutate({ postId, starred: !currentStarred });
-	}
 }

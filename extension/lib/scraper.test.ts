@@ -40,22 +40,23 @@ describe("Facebook Scraper", () => {
 
 			expect(posts).toHaveLength(2);
 
+			// Scraper sorts by ID descending (newest first), so 67890 > 12345
 			expect(posts[0]).toMatchObject({
-				id: expect.any(String),
-				groupId: "testgroup",
-				authorName: "John Doe",
-				contentHtml: expect.stringContaining("test post"),
-				timestamp: undefined,
-				url: expect.stringContaining("12345"),
-			});
-
-			expect(posts[1]).toMatchObject({
 				id: expect.any(String),
 				groupId: "testgroup",
 				authorName: "Jane Doe",
 				contentHtml: expect.stringContaining("Another post"),
 				timestamp: undefined,
 				url: expect.stringContaining("67890"),
+			});
+
+			expect(posts[1]).toMatchObject({
+				id: expect.any(String),
+				groupId: "testgroup",
+				authorName: "John Doe",
+				contentHtml: expect.stringContaining("test post"),
+				timestamp: undefined,
+				url: expect.stringContaining("12345"),
 			});
 		});
 

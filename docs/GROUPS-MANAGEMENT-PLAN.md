@@ -214,7 +214,7 @@
 
 5. **Type Check & Build**:
    - Run `pnpm typecheck`
-   - Run `pnpm test:run`
+   - Run `pnpm test run`
    - Fix any errors
 
 ---

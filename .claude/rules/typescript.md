@@ -26,6 +26,23 @@ function handleClick(id: string) { /* ... */ }
 function processData() { /* ... */ }
 ```
 
+## Destructure in Function Signature
+
+Destructure props/parameters in the function signature, not the body.
+
+```typescript
+// BAD
+function MyComponent(props: MyProps) {
+  const { foo, bar = 'default' } = props;
+}
+
+// GOOD
+function MyComponent({ foo, bar = 'default' }: MyProps) {
+}
+```
+
+No biome rule enforces this — apply it by convention.
+
 ## Type Preferences
 
 - Use `ReactNode` instead of `JSX.Element` for render prop types (React 19 compatibility)

@@ -20,7 +20,7 @@
 		"format:fix": "biome format --write .",
 		"check": "biome check .",
 		"check:fix": "biome check --write .",
-		"ci": "pnpm typecheck && pnpm check && pnpm test:run"
+		"ci": "pnpm typecheck && pnpm check && pnpm test run"
 	},
 	"lint-staged": {
 		"*.{js,jsx,ts,tsx,json,jsonc}": [
@@ -34,6 +34,7 @@
 		"@radix-ui/react-dialog": "^1.1.15",
 		"@tailwindcss/vite": "^4.1.17",
 		"@tanstack/react-form": "^1.27.1",
+		"@tanstack/react-virtual": "^3.13.16",
 		"@tanstack/react-query": "^5.90.12",
 		"class-variance-authority": "^0.7.1",
 		"clsx": "^2.1.1",

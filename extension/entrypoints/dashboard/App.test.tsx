@@ -1,5 +1,6 @@
 import { screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import type { ReactNode } from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import * as groupsStorage from "@/lib/storage/groups";
 import * as postsStorage from "@/lib/storage/posts";
@@ -7,6 +8,17 @@ import * as subscriptionsStorage from "@/lib/storage/subscriptions";
 import type { Group, Post, Subscription } from "@/lib/types";
 import { renderWithQuery } from "@/test/test-utils";
 import App from "./App";
+
+// Mock VirtualPostList to render all posts flat (virtualizer doesn't work in jsdom)
+vi.mock("./components/VirtualPostList", () => ({
+	VirtualPostList: ({
+		posts,
+		renderPost,
+	}: {
+		posts: Post[];
+		renderPost: (post: Post, index: number) => ReactNode;
+	}) => <div>{posts.map((post, index) => renderPost(post, index))}</div>,
+}));
 
 // Mock the storage modules
 vi.mock("@/lib/storage/subscriptions", () => ({
@@ -18,6 +30,7 @@ vi.mock("@/lib/storage/groups", () => ({
 vi.mock("@/lib/storage/posts", () => ({
 	listPosts: vi.fn(),
 	markPostAsSeen: vi.fn(),
+	togglePostStarred: vi.fn(),
 }));
 
 describe("Dashboard App", () => {
@@ -107,7 +120,18 @@ describe("Dashboard App", () => {
 	});
 
 	it("should display all posts when no subscription is selected", async () => {
+		const user = userEvent.setup();
 		renderWithQuery(<App />);
+
+		// Uncheck "Show only unseen" to see all posts including seen ones
+		await waitFor(() => {
+			expect(
+				screen.getByRole("checkbox", { name: /show only unseen/i }),
+			).toBeInTheDocument();
+		});
+		await user.click(
+			screen.getByRole("checkbox", { name: /show only unseen/i }),
+		);
 
 		await waitFor(() => {
 			expect(
@@ -122,10 +146,13 @@ describe("Dashboard App", () => {
 		const user = userEvent.setup();
 		renderWithQuery(<App />);
 
-		// Wait for initial load
+		// Wait for initial load and uncheck "Show only unseen" to see all posts
 		await waitFor(() => {
 			expect(screen.getByText("Tech Jobs")).toBeInTheDocument();
 		});
+		await user.click(
+			screen.getByRole("checkbox", { name: /show only unseen/i }),
+		);
 
 		// Click on Tech Jobs subscription
 		await user.click(screen.getByText("Tech Jobs"));
@@ -172,6 +199,16 @@ describe("Dashboard App", () => {
 		vi.mocked(postsStorage.markPostAsSeen).mockResolvedValue();
 		const user = userEvent.setup();
 		renderWithQuery(<App />);
+
+		// Uncheck "Show only unseen" to see all posts including already-seen ones
+		await waitFor(() => {
+			expect(
+				screen.getByRole("checkbox", { name: /show only unseen/i }),
+			).toBeInTheDocument();
+		});
+		await user.click(
+			screen.getByRole("checkbox", { name: /show only unseen/i }),
+		);
 
 		await waitFor(() => {
 			expect(screen.getByText(/Junior Frontend opening/)).toBeInTheDocument();
@@ -257,7 +294,18 @@ describe("Dashboard App", () => {
 	});
 
 	it("should sort posts by ID (newest first)", async () => {
+		const user = userEvent.setup();
 		renderWithQuery(<App />);
+
+		// Uncheck "Show only unseen" to see all 3 posts
+		await waitFor(() => {
+			expect(
+				screen.getByRole("checkbox", { name: /show only unseen/i }),
+			).toBeInTheDocument();
+		});
+		await user.click(
+			screen.getByRole("checkbox", { name: /show only unseen/i }),
+		);
 
 		await waitFor(() => {
 			const posts = screen.getAllByRole("article");
@@ -317,7 +365,7 @@ describe("Dashboard App", () => {
 
 			await waitFor(() => {
 				const reloadButton = screen.getByRole("button", {
-					name: /reload page/i,
+					name: /retry/i,
 				});
 				expect(reloadButton).toBeInTheDocument();
 			});
@@ -341,7 +389,7 @@ describe("Dashboard App", () => {
 				expect(screen.getByText(/Failed to load posts/i)).toBeInTheDocument();
 			});
 
-			const reloadButton = screen.getByRole("button", { name: /reload page/i });
+			const reloadButton = screen.getByRole("button", { name: /retry/i });
 			await user.click(reloadButton);
 
 			expect(reloadFn).toHaveBeenCalled();

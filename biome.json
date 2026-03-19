@@ -26,6 +26,9 @@
 			"suspicious": {
 				"noExplicitAny": "error"
 			}
+		},
+		"domains": {
+			"react": "recommended"
 		}
 	},
 	"assist": {
