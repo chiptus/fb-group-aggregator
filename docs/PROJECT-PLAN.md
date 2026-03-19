@@ -445,7 +445,7 @@ End-to-end testing and refinement.
 ## Next Steps for New Claude Code Session
 
 1. **Review this file** to understand current progress
-2. **Run tests** to verify everything works: `pnpm test:run`
+2. **Run tests** to verify everything works: `pnpm test run`
 3. **Start Phase 6**: Integration & Polish (content script tests, manual testing, performance)
 4. **Check [CLAUDE.md](../CLAUDE.md)** for WXT framework conventions and React Query guidelines
 5. **Check [lib/SCRAPER-NOTES.md](../lib/SCRAPER-NOTES.md)** for scraper maintenance info
@@ -460,7 +460,7 @@ pnpm dev              # Start Chrome dev mode
 pnpm dev:firefox      # Start Firefox dev mode
 
 # Testing
-pnpm test:run         # Run all tests
+pnpm test run         # Run all tests
 pnpm test:watch       # Watch mode
 pnpm typecheck          # Type-check only
 

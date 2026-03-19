@@ -32,7 +32,7 @@ entrypoints/
 
 ```bash
 pnpm test        # Watch mode
-pnpm test:run    # Single run (CI)
+pnpm test run    # Single run (CI)
 pnpm test:ui     # Interactive UI
 ```
 
