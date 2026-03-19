@@ -28,6 +28,9 @@ export function VirtualPostList({
 		getScrollElement: () => parentRef.current,
 		estimateSize: () => estimateSize,
 		overscan,
+		getItemKey(index) {
+			return posts[index]?.id || index;
+		},
 	});
 
 	// React 19 workaround: store in ref to prevent compiler over-optimization
@@ -56,7 +59,7 @@ export function VirtualPostList({
 
 					return (
 						<div
-							key={post.id}
+							key={virtualItem.index}
 							data-index={virtualItem.index}
 							ref={virtualizerRef.current.measureElement}
 							className="absolute top-0 left-0 w-full"
