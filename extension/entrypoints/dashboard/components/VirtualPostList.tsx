@@ -1,14 +1,15 @@
 import { useVirtualizer } from "@tanstack/react-virtual";
+import type { ReactNode } from "react";
 import { useRef } from "react";
 import type { Post } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
 export interface VirtualPostListProps {
 	posts: Post[];
-	height: number;
+	height: number | string;
 	estimateSize?: number;
 	overscan?: number;
-	renderPost: (post: Post, index: number) => React.ReactNode;
+	renderPost: (post: Post, index: number) => ReactNode;
 	className?: string;
 }
 

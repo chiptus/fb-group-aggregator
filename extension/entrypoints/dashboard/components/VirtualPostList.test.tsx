@@ -57,9 +57,25 @@ describe("VirtualPostList", () => {
 		expect(screen.getByTestId("post-post-2")).toBeInTheDocument();
 	});
 
+	it("calls renderPost with the correct post object", () => {
+		const posts = createMockPosts(3);
+		const renderPost = vi.fn((post: Post) => (
+			<div data-testid={`post-${post.id}`}>{post.contentHtml}</div>
+		));
+		renderWithQuery(
+			<VirtualPostList posts={posts} height={400} renderPost={renderPost} />,
+		);
+		// Virtualizer mock returns items at indices 0-2
+		expect(renderPost).toHaveBeenCalledWith(posts[0], 0);
+		expect(renderPost).toHaveBeenCalledWith(posts[1], 1);
+		expect(renderPost).toHaveBeenCalledWith(posts[2], 2);
+	});
+
 	it("handles empty posts array", () => {
 		renderComponent({ posts: [] });
 		expect(screen.getByTestId("virtual-scroll-container")).toBeInTheDocument();
+		// The virtualizer mock always returns 3 items (indices 0-2), but posts[index]
+		// is undefined for an empty array, so the component returns null for each item.
 		expect(screen.queryByTestId(/^post-/)).not.toBeInTheDocument();
 	});
 

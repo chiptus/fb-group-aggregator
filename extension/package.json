@@ -20,7 +20,7 @@
 		"format:fix": "biome format --write .",
 		"check": "biome check .",
 		"check:fix": "biome check --write .",
-		"ci": "pnpm typecheck && pnpm check && vitest run"
+		"ci": "pnpm typecheck && pnpm check && pnpm test run"
 	},
 	"lint-staged": {
 		"*.{js,jsx,ts,tsx,json,jsonc}": [

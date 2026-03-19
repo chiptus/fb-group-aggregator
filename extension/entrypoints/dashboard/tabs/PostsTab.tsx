@@ -205,7 +205,7 @@ export function PostsTab() {
 				) : (
 					<VirtualPostList
 						posts={filteredPosts}
-						height={600}
+						height="calc(100vh - 260px)"
 						estimateSize={200}
 						overscan={5}
 						renderPost={renderPost}
