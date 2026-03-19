@@ -148,7 +148,10 @@ export function PostsTab() {
 
 	if (error) {
 		return (
-			<div className="flex flex-col items-center justify-center h-64 space-y-4">
+			<div
+				role="alert"
+				className="flex flex-col items-center justify-center h-64 space-y-4"
+			>
 				<p className="text-red-600">
 					Failed to load posts. Please refresh the page or check your extension
 					storage.
