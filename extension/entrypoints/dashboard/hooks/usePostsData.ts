@@ -1,4 +1,5 @@
 import { useCallback, useMemo } from 'react';
+import type { KeywordType } from '@/lib/filters/types';
 import { DEFAULT_FILTER_SETTINGS } from '@/lib/filters/types';
 import { useFilters, useSaveFilters } from '@/lib/hooks/filters/useFilters';
 import { useGroups } from '@/lib/hooks/storage/useGroups';
@@ -53,7 +54,7 @@ export function usePostsData() {
   );
 
   const removeKeyword = useCallback(
-    (keyword: string, type: 'positive' | 'negative') => {
+    (keyword: string, type: KeywordType) => {
       saveFiltersMutation.mutate({
         ...filters,
         positiveKeywords:
