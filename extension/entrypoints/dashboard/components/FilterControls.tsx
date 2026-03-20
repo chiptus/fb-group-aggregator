@@ -1,22 +1,16 @@
-import { useState } from 'react';
-import type { FilterSettings } from '@/lib/filters/types';
-import { DEFAULT_FILTER_SETTINGS } from '@/lib/filters/types';
-import { useFilters, useSaveFilters } from '@/lib/hooks/filters/useFilters';
-import { FilterSettingsSection } from './FilterSettingsSection';
-import { KeywordInputSection } from './KeywordInputSection';
+import type { FilterSettings } from "@/lib/filters/types";
+import { DEFAULT_FILTER_SETTINGS } from "@/lib/filters/types";
+import { useFilters, useSaveFilters } from "@/lib/hooks/filters/useFilters";
+import { FilterSettingsSection } from "./FilterSettingsSection";
+import { KeywordInputSection } from "./KeywordInputSection";
 
 export function FilterControls() {
   const filtersQuery = useFilters();
   const saveFiltersMutation = useSaveFilters();
 
-  const [keywordInput, setKeywordInput] = useState('');
-  const [keywordType, setKeywordType] = useState<'positive' | 'negative'>(
-    'positive'
-  );
-
-  const filters = filtersQuery.data ?? DEFAULT_FILTER_SETTINGS;
-  const isLoading = filtersQuery.isLoading;
-  const isSaving = saveFiltersMutation.isPending;
+	const filters = filtersQuery.data ?? DEFAULT_FILTER_SETTINGS;
+	const isLoading = filtersQuery.isLoading;
+	const isSaving = saveFiltersMutation.isPending;
 
   function handleAddKeyword({
     value,
@@ -50,14 +44,9 @@ export function FilterControls() {
     saveFiltersMutation.mutate(updatedFilters);
   }
 
-  function handleSubmitKeyword() {
-    handleAddKeyword({ value: keywordInput, type: keywordType });
-    setKeywordInput('');
-  }
-
-  function handleCaseSensitiveChange(checked: boolean) {
-    saveFiltersMutation.mutate({ ...filters, caseSensitive: checked });
-  }
+	function handleCaseSensitiveChange(checked: boolean) {
+		saveFiltersMutation.mutate({ ...filters, caseSensitive: checked });
+	}
 
   function handleSearchFieldChange(
     field: 'contentHtml' | 'authorName',
@@ -86,28 +75,21 @@ export function FilterControls() {
     );
   }
 
-  return (
-    <div className="space-y-4 p-4 border rounded-lg bg-white">
-      {isSaving && (
-        <div className="flex items-center gap-2 text-xs text-gray-500">
-          <div className="w-3 h-3 border-2 border-blue-200 border-t-blue-600 rounded-full animate-spin" />
-          <span>Saving...</span>
-        </div>
-      )}
-      <KeywordInputSection
-        keywordInput={keywordInput}
-        setKeywordInput={setKeywordInput}
-        keywordType={keywordType}
-        setKeywordType={setKeywordType}
-        onAdd={handleSubmitKeyword}
-        disabled={isSaving}
-      />
-      <FilterSettingsSection
-        filters={filters}
-        onCaseSensitiveChange={handleCaseSensitiveChange}
-        onSearchFieldChange={handleSearchFieldChange}
-        disabled={isSaving}
-      />
-    </div>
-  );
+	return (
+		<div className="space-y-4 p-4 border rounded-lg bg-white">
+			{isSaving && (
+				<div className="flex items-center gap-2 text-xs text-gray-500">
+					<div className="w-3 h-3 border-2 border-blue-200 border-t-blue-600 rounded-full animate-spin" />
+					<span>Saving...</span>
+				</div>
+			)}
+			<KeywordInputSection onAdd={handleAddKeyword} disabled={isSaving} />
+			<FilterSettingsSection
+				filters={filters}
+				onCaseSensitiveChange={handleCaseSensitiveChange}
+				onSearchFieldChange={handleSearchFieldChange}
+				disabled={isSaving}
+			/>
+		</div>
+	);
 }
