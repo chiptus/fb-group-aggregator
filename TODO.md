@@ -1,0 +1,8 @@
+- if it has pictures or videos - copy their urls
+- number of total posts
+- what to do if a post was updated?
+- filter by group
+- filter by keyword - negative keywords too. maybe can save filter sets
+- merge posts from different groups by text?
+- filter by user - usually a negative filter
+- undo

@@ -6,18 +6,18 @@
  * @returns A new function with strict argument typing.
  */
 export function debounce<Args extends unknown[]>(
-	fn: (...args: Args) => void,
-	ms: number,
+  fn: (...args: Args) => void,
+  ms: number
 ): (...args: Args) => void {
-	let timer: ReturnType<typeof setTimeout> | null = null;
+  let timer: ReturnType<typeof setTimeout> | null = null;
 
-	return (...args: Args) => {
-		if (timer) {
-			clearTimeout(timer);
-		}
+  return (...args: Args) => {
+    if (timer) {
+      clearTimeout(timer);
+    }
 
-		timer = setTimeout(() => {
-			fn(...args);
-		}, ms);
-	};
+    timer = setTimeout(() => {
+      fn(...args);
+    }, ms);
+  };
 }

@@ -1,16 +1,16 @@
-import { beforeEach, describe, expect, it } from "vitest";
-import { extractGroupInfo, scrapeGroupPosts } from "./scraper";
+import { beforeEach, describe, expect, it } from 'vitest';
+import { extractGroupInfo, scrapeGroupPosts } from './scraper';
 
-describe("Facebook Scraper", () => {
-	beforeEach(() => {
-		// Clear document before each test
-		document.body.innerHTML = "";
-	});
+describe('Facebook Scraper', () => {
+  beforeEach(() => {
+    // Clear document before each test
+    document.body.innerHTML = '';
+  });
 
-	describe("scrapeGroupPosts", () => {
-		it("should extract posts from Facebook group page", async () => {
-			// Mock Facebook group posts HTML structure
-			document.body.innerHTML = `
+  describe('scrapeGroupPosts', () => {
+    it('should extract posts from Facebook group page', async () => {
+      // Mock Facebook group posts HTML structure
+      document.body.innerHTML = `
         <div role="feed">
           <div role="article" data-ft='{"mf_story_key":"12345"}' class="x1n2onr6 xh8yej3 x1ja2u2z xod5an3">
             <div>
@@ -35,33 +35,33 @@ describe("Facebook Scraper", () => {
         </div>
       `;
 
-			const groupId = "testgroup";
-			const posts = await scrapeGroupPosts(groupId);
+      const groupId = 'testgroup';
+      const posts = await scrapeGroupPosts(groupId);
 
-			expect(posts).toHaveLength(2);
+      expect(posts).toHaveLength(2);
 
-			// Scraper sorts by ID descending (newest first), so 67890 > 12345
-			expect(posts[0]).toMatchObject({
-				id: expect.any(String),
-				groupId: "testgroup",
-				authorName: "Jane Doe",
-				contentHtml: expect.stringContaining("Another post"),
-				timestamp: undefined,
-				url: expect.stringContaining("67890"),
-			});
+      // Scraper sorts by ID descending (newest first), so 67890 > 12345
+      expect(posts[0]).toMatchObject({
+        id: expect.any(String),
+        groupId: 'testgroup',
+        authorName: 'Jane Doe',
+        contentHtml: expect.stringContaining('Another post'),
+        timestamp: undefined,
+        url: expect.stringContaining('67890'),
+      });
 
-			expect(posts[1]).toMatchObject({
-				id: expect.any(String),
-				groupId: "testgroup",
-				authorName: "John Doe",
-				contentHtml: expect.stringContaining("test post"),
-				timestamp: undefined,
-				url: expect.stringContaining("12345"),
-			});
-		});
+      expect(posts[1]).toMatchObject({
+        id: expect.any(String),
+        groupId: 'testgroup',
+        authorName: 'John Doe',
+        contentHtml: expect.stringContaining('test post'),
+        timestamp: undefined,
+        url: expect.stringContaining('12345'),
+      });
+    });
 
-		it("should handle posts with missing author gracefully", async () => {
-			document.body.innerHTML = `
+    it('should handle posts with missing author gracefully', async () => {
+      document.body.innerHTML = `
         <div role="feed">
           <div role="article" data-ft='{"mf_story_key":"12345"}' class="x1n2onr6 xh8yej3 x1ja2u2z xod5an3">
             <div data-ad-preview="message">
@@ -73,14 +73,14 @@ describe("Facebook Scraper", () => {
         </div>
       `;
 
-			const posts = await scrapeGroupPosts("testgroup");
+      const posts = await scrapeGroupPosts('testgroup');
 
-			expect(posts).toHaveLength(1);
-			expect(posts[0].authorName).toBe("Unknown");
-		});
+      expect(posts).toHaveLength(1);
+      expect(posts[0].authorName).toBe('Unknown');
+    });
 
-		it("should handle posts with missing content gracefully", async () => {
-			document.body.innerHTML = `
+    it('should handle posts with missing content gracefully', async () => {
+      document.body.innerHTML = `
         <div role="feed">
           <div role="article" data-ft='{"mf_story_key":"12345"}' class="x1n2onr6 xh8yej3 x1ja2u2z xod5an3">
             <div>
@@ -92,14 +92,14 @@ describe("Facebook Scraper", () => {
         </div>
       `;
 
-			const posts = await scrapeGroupPosts("testgroup");
+      const posts = await scrapeGroupPosts('testgroup');
 
-			expect(posts).toHaveLength(1);
-			expect(posts[0].contentHtml).toBe("");
-		});
+      expect(posts).toHaveLength(1);
+      expect(posts[0].contentHtml).toBe('');
+    });
 
-		it("should handle posts with missing timestamp (always returns undefined)", async () => {
-			document.body.innerHTML = `
+    it('should handle posts with missing timestamp (always returns undefined)', async () => {
+      document.body.innerHTML = `
         <div role="feed">
           <div role="article" data-ft='{"mf_story_key":"12345"}' class="x1n2onr6 xh8yej3 x1ja2u2z xod5an3">
             <div>
@@ -113,15 +113,15 @@ describe("Facebook Scraper", () => {
         </div>
       `;
 
-			const posts = await scrapeGroupPosts("testgroup");
+      const posts = await scrapeGroupPosts('testgroup');
 
-			expect(posts).toHaveLength(1);
-			// Timestamp extraction is no longer supported (Facebook obfuscates timestamps)
-			expect(posts[0].timestamp).toBeUndefined();
-		});
+      expect(posts).toHaveLength(1);
+      // Timestamp extraction is no longer supported (Facebook obfuscates timestamps)
+      expect(posts[0].timestamp).toBeUndefined();
+    });
 
-		it("should skip posts without post ID", async () => {
-			document.body.innerHTML = `
+    it('should skip posts without post ID', async () => {
+      document.body.innerHTML = `
         <div role="feed">
           <div role="article">
             <div>
@@ -134,33 +134,33 @@ describe("Facebook Scraper", () => {
         </div>
       `;
 
-			const posts = await scrapeGroupPosts("testgroup");
+      const posts = await scrapeGroupPosts('testgroup');
 
-			expect(posts).toHaveLength(0);
-		});
+      expect(posts).toHaveLength(0);
+    });
 
-		it("should return empty array when no posts found", async () => {
-			document.body.innerHTML = `
+    it('should return empty array when no posts found', async () => {
+      document.body.innerHTML = `
         <div role="feed">
           <div>No posts here</div>
         </div>
       `;
 
-			const posts = await scrapeGroupPosts("testgroup");
+      const posts = await scrapeGroupPosts('testgroup');
 
-			expect(posts).toEqual([]);
-		});
+      expect(posts).toEqual([]);
+    });
 
-		it("should return empty array when feed container not found", async () => {
-			document.body.innerHTML = "<div>Not a Facebook page</div>";
+    it('should return empty array when feed container not found', async () => {
+      document.body.innerHTML = '<div>Not a Facebook page</div>';
 
-			const posts = await scrapeGroupPosts("testgroup");
+      const posts = await scrapeGroupPosts('testgroup');
 
-			expect(posts).toEqual([]);
-		});
+      expect(posts).toEqual([]);
+    });
 
-		it("should extract contentHtml with formatting preserved", async () => {
-			document.body.innerHTML = `
+    it('should extract contentHtml with formatting preserved', async () => {
+      document.body.innerHTML = `
         <div role="feed">
           <div role="article" data-ft='{"mf_story_key":"12345"}' class="x1n2onr6 xh8yej3 x1ja2u2z xod5an3">
             <div>
@@ -179,17 +179,17 @@ describe("Facebook Scraper", () => {
         </div>
       `;
 
-			const posts = await scrapeGroupPosts("testgroup");
+      const posts = await scrapeGroupPosts('testgroup');
 
-			expect(posts).toHaveLength(1);
-			expect(posts[0].contentHtml).toContain("<p>");
-			expect(posts[0].contentHtml).toContain("<strong>");
-			expect(posts[0].contentHtml).toContain("<em>");
-			expect(posts[0].contentHtml).toContain("<a");
-		});
+      expect(posts).toHaveLength(1);
+      expect(posts[0].contentHtml).toContain('<p>');
+      expect(posts[0].contentHtml).toContain('<strong>');
+      expect(posts[0].contentHtml).toContain('<em>');
+      expect(posts[0].contentHtml).toContain('<a');
+    });
 
-		it("should construct correct post URL", async () => {
-			document.body.innerHTML = `
+    it('should construct correct post URL', async () => {
+      document.body.innerHTML = `
         <div role="feed">
           <div role="article" data-ft='{"mf_story_key":"12345"}' class="x1n2onr6 xh8yej3 x1ja2u2z xod5an3">
             <div>
@@ -203,17 +203,17 @@ describe("Facebook Scraper", () => {
         </div>
       `;
 
-			const posts = await scrapeGroupPosts("testgroup");
+      const posts = await scrapeGroupPosts('testgroup');
 
-			expect(posts).toHaveLength(1);
-			expect(posts[0].url).toMatch(/facebook\.com\/groups\/testgroup/);
-			expect(posts[0].url).toContain("12345");
-		});
+      expect(posts).toHaveLength(1);
+      expect(posts[0].url).toMatch(/facebook\.com\/groups\/testgroup/);
+      expect(posts[0].url).toContain('12345');
+    });
 
-		it("should return undefined timestamp even when data-utime is present", async () => {
-			const unixTimestamp = 1704067200; // Jan 1, 2024 00:00:00 GMT
+    it('should return undefined timestamp even when data-utime is present', async () => {
+      const unixTimestamp = 1704067200; // Jan 1, 2024 00:00:00 GMT
 
-			document.body.innerHTML = `
+      document.body.innerHTML = `
         <div role="feed">
           <div role="article" data-ft='{"mf_story_key":"12345"}' class="x1n2onr6 xh8yej3 x1ja2u2z xod5an3">
             <div>
@@ -227,17 +227,17 @@ describe("Facebook Scraper", () => {
         </div>
       `;
 
-			const posts = await scrapeGroupPosts("testgroup");
+      const posts = await scrapeGroupPosts('testgroup');
 
-			expect(posts).toHaveLength(1);
-			// Timestamp extraction is disabled - always returns undefined
-			expect(posts[0].timestamp).toBeUndefined();
-		});
-	});
+      expect(posts).toHaveLength(1);
+      // Timestamp extraction is disabled - always returns undefined
+      expect(posts[0].timestamp).toBeUndefined();
+    });
+  });
 
-	describe("extractGroupInfo", () => {
-		it("should extract group name from page", () => {
-			document.body.innerHTML = `
+  describe('extractGroupInfo', () => {
+    it('should extract group name from page', () => {
+      document.body.innerHTML = `
         <div>
           <h1>
             <a href="/groups/testgroup">Test Group Name</a>
@@ -245,16 +245,16 @@ describe("Facebook Scraper", () => {
         </div>
       `;
 
-			const info = extractGroupInfo();
+      const info = extractGroupInfo();
 
-			expect(info).toEqual({
-				name: "Test Group Name",
-				url: expect.stringContaining("testgroup"),
-			});
-		});
+      expect(info).toEqual({
+        name: 'Test Group Name',
+        url: expect.stringContaining('testgroup'),
+      });
+    });
 
-		it("should extract group name from alternative selector", () => {
-			document.body.innerHTML = `
+    it('should extract group name from alternative selector', () => {
+      document.body.innerHTML = `
         <div role="main">
           <span>
             <a href="/groups/12345">Alternative Group Name</a>
@@ -262,34 +262,34 @@ describe("Facebook Scraper", () => {
         </div>
       `;
 
-			const info = extractGroupInfo();
+      const info = extractGroupInfo();
 
-			expect(info.name).toBeTruthy();
-		});
+      expect(info.name).toBeTruthy();
+    });
 
-		it("should return current URL when group info not found", () => {
-			document.body.innerHTML = "<div>Not a group page</div>";
+    it('should return current URL when group info not found', () => {
+      document.body.innerHTML = '<div>Not a group page</div>';
 
-			const info = extractGroupInfo();
+      const info = extractGroupInfo();
 
-			expect(info).toEqual({
-				name: "",
-				url: expect.any(String),
-			});
-		});
+      expect(info).toEqual({
+        name: '',
+        url: expect.any(String),
+      });
+    });
 
-		it("should extract group ID from URL", () => {
-			// Mock window.location
-			Object.defineProperty(window, "location", {
-				value: {
-					href: "https://www.facebook.com/groups/12345/posts/67890",
-				},
-				writable: true,
-			});
+    it('should extract group ID from URL', () => {
+      // Mock window.location
+      Object.defineProperty(window, 'location', {
+        value: {
+          href: 'https://www.facebook.com/groups/12345/posts/67890',
+        },
+        writable: true,
+      });
 
-			const info = extractGroupInfo();
+      const info = extractGroupInfo();
 
-			expect(info.url).toContain("12345");
-		});
-	});
+      expect(info.url).toContain('12345');
+    });
+  });
 });
