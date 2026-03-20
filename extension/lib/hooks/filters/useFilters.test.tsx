@@ -1,8 +1,12 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { renderHook, waitFor } from "@testing-library/react";
+import type { ReactNode } from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { storage } from "wxt/utils/storage";
-import type { FilterSettings } from "@/lib/filters/types";
+import {
+	DEFAULT_FILTER_SETTINGS,
+	type FilterSettings,
+} from "@/lib/filters/types";
 import { useFilters, useSaveFilters } from "./useFilters";
 
 // Mock WXT storage
@@ -13,13 +17,6 @@ vi.mock("wxt/utils/storage", () => ({
 	},
 }));
 
-const DEFAULT_FILTERS: FilterSettings = {
-	positiveKeywords: [],
-	negativeKeywords: [],
-	caseSensitive: false,
-	searchFields: ["contentHtml", "authorName"],
-};
-
 function createWrapper() {
 	const queryClient = new QueryClient({
 		defaultOptions: {
@@ -28,7 +25,7 @@ function createWrapper() {
 		},
 	});
 
-	return ({ children }: { children: React.ReactNode }) => (
+	return ({ children }: { children: ReactNode }) => (
 		<QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
 	);
 }
@@ -47,7 +44,7 @@ describe("useFilters", () => {
 
 		await waitFor(() => expect(result.current.isSuccess).toBe(true));
 
-		expect(result.current.data).toEqual(DEFAULT_FILTERS);
+		expect(result.current.data).toEqual(DEFAULT_FILTER_SETTINGS);
 	});
 
 	it("should load filters from storage", async () => {
@@ -102,7 +99,7 @@ describe("useSaveFilters", () => {
 	});
 
 	it("should save filters to storage", async () => {
-		vi.mocked(storage.getItem).mockResolvedValue(DEFAULT_FILTERS);
+		vi.mocked(storage.getItem).mockResolvedValue(DEFAULT_FILTER_SETTINGS);
 		vi.mocked(storage.setItem).mockResolvedValue(undefined);
 
 		const { result } = renderHook(
@@ -135,7 +132,7 @@ describe("useSaveFilters", () => {
 	});
 
 	it("should update query cache on successful mutation", async () => {
-		vi.mocked(storage.getItem).mockResolvedValue(DEFAULT_FILTERS);
+		vi.mocked(storage.getItem).mockResolvedValue(DEFAULT_FILTER_SETTINGS);
 		vi.mocked(storage.setItem).mockResolvedValue(undefined);
 
 		const { result } = renderHook(
@@ -171,7 +168,7 @@ describe("useSaveFilters", () => {
 	});
 
 	it("should handle mutation errors", async () => {
-		vi.mocked(storage.getItem).mockResolvedValue(DEFAULT_FILTERS);
+		vi.mocked(storage.getItem).mockResolvedValue(DEFAULT_FILTER_SETTINGS);
 		vi.mocked(storage.setItem).mockRejectedValue(new Error("Save failed"));
 
 		const { result } = renderHook(
@@ -199,6 +196,6 @@ describe("useSaveFilters", () => {
 
 		expect(result.current.update.error).toBeTruthy();
 		// Original data should remain unchanged
-		expect(result.current.filters.data).toEqual(DEFAULT_FILTERS);
+		expect(result.current.filters.data).toEqual(DEFAULT_FILTER_SETTINGS);
 	});
 });

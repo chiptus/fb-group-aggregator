@@ -1,6 +1,7 @@
 import type { UseQueryResult } from "@tanstack/react-query";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { renderHook } from "@testing-library/react";
+import type { ReactNode } from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { FilterSettings } from "@/lib/filters/types";
 import { usePosts } from "@/lib/hooks/storage/usePosts";
@@ -62,7 +63,7 @@ function createWrapper() {
 		},
 	});
 
-	return ({ children }: { children: React.ReactNode }) => (
+	return ({ children }: { children: ReactNode }) => (
 		<QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
 	);
 }

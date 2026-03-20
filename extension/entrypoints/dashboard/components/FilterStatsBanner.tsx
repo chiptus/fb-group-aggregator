@@ -6,15 +6,13 @@ interface FilterStatsBannerProps {
 	className?: string;
 }
 
-export function FilterStatsBanner(props: FilterStatsBannerProps) {
-	const {
-		totalPosts,
-		filteredPosts,
-		positiveKeywordCount,
-		negativeKeywordCount,
-		className = "",
-	} = props;
-
+export function FilterStatsBanner({
+	totalPosts,
+	filteredPosts,
+	positiveKeywordCount,
+	negativeKeywordCount,
+	className = "",
+}: FilterStatsBannerProps) {
 	const hasFilters = positiveKeywordCount > 0 || negativeKeywordCount > 0;
 	const removedCount = totalPosts - filteredPosts;
 

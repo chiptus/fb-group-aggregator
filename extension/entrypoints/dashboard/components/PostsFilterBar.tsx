@@ -27,15 +27,13 @@ export function PostsFilterBar() {
 				</div>
 			)}
 
-			{hasActiveFilters && (
-				<FilterStatsBanner
-					totalPosts={posts.length}
-					filteredPosts={filteredPosts.length}
-					positiveKeywordCount={filters.positiveKeywords.length}
-					negativeKeywordCount={filters.negativeKeywords.length}
-					className="mb-4"
-				/>
-			)}
+			<FilterStatsBanner
+				totalPosts={posts.length}
+				filteredPosts={filteredPosts.length}
+				positiveKeywordCount={filters.positiveKeywords.length}
+				negativeKeywordCount={filters.negativeKeywords.length}
+				className="mb-4"
+			/>
 		</>
 	);
 }

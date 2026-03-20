@@ -1,5 +1,6 @@
 import { useCallback, useMemo } from "react";
 import type { FilterSettings } from "@/lib/filters/types";
+import { DEFAULT_FILTER_SETTINGS } from "@/lib/filters/types";
 import { useFilters, useSaveFilters } from "@/lib/hooks/filters/useFilters";
 import { useGroups } from "@/lib/hooks/storage/useGroups";
 import {
@@ -9,14 +10,7 @@ import {
 } from "@/lib/hooks/storage/usePosts";
 import { useSubscriptions } from "@/lib/hooks/storage/useSubscriptions";
 
-const DEFAULT_FILTERS: FilterSettings = {
-	positiveKeywords: [],
-	negativeKeywords: [],
-	caseSensitive: false,
-	searchFields: ["contentHtml", "authorName"],
-};
-
-export { DEFAULT_FILTERS };
+export { DEFAULT_FILTER_SETTINGS };
 
 export function usePostsData() {
 	const markPostSeenMutation = useMarkPostSeen();
@@ -28,7 +22,7 @@ export function usePostsData() {
 	const filtersQuery = useFilters();
 	const saveFiltersMutation = useSaveFilters();
 
-	const filters = filtersQuery.data ?? DEFAULT_FILTERS;
+	const filters = filtersQuery.data ?? DEFAULT_FILTER_SETTINGS;
 	const isLoading =
 		subscriptionsQuery.isLoading ||
 		groupsQuery.isLoading ||

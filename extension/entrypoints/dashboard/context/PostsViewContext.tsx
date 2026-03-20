@@ -11,7 +11,7 @@ import type { FilterSettings } from "@/lib/filters/types";
 import { useMarkAllPostsSeen } from "@/lib/hooks/storage/usePosts";
 import type { Group, Post, Subscription } from "@/lib/types";
 import { useFilteredPosts } from "../hooks/useFilteredPosts";
-import { DEFAULT_FILTERS, usePostsData } from "../hooks/usePostsData";
+import { DEFAULT_FILTER_SETTINGS, usePostsData } from "../hooks/usePostsData";
 
 interface PostsViewContextValue {
 	// Server data
@@ -135,7 +135,7 @@ export function PostsViewProvider({ children }: { children: ReactNode }) {
 		setSearchQuery("");
 		setShowOnlyUnseen(false);
 		setShowOnlyStarred(false);
-		saveFiltersMutation.mutate(DEFAULT_FILTERS);
+		saveFiltersMutation.mutate(DEFAULT_FILTER_SETTINGS);
 	}, [saveFiltersMutation]);
 
 	const markAllSeen = useCallback(() => {
