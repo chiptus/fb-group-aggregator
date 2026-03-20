@@ -1,6 +1,9 @@
 import { useState } from 'react';
 import type { FilterSettings } from '@/lib/filters/types';
+import { DEFAULT_FILTER_SETTINGS } from '@/lib/filters/types';
 import { useFilters, useSaveFilters } from '@/lib/hooks/filters/useFilters';
+import { FilterSettingsSection } from './FilterSettingsSection';
+import { KeywordInputSection } from './KeywordInputSection';
 
 export function FilterControls() {
   const filtersQuery = useFilters();
@@ -11,58 +14,49 @@ export function FilterControls() {
     'positive'
   );
 
-  const filters = filtersQuery.data ?? {
-    positiveKeywords: [],
-    negativeKeywords: [],
-    caseSensitive: false,
-    searchFields: ['contentHtml', 'authorName'] as const,
-  };
+  const filters = filtersQuery.data ?? DEFAULT_FILTER_SETTINGS;
+  const isLoading = filtersQuery.isLoading;
+  const isSaving = saveFiltersMutation.isPending;
 
-  function handleAddKeyword() {
-    const trimmed = keywordInput.trim();
+  function handleAddKeyword({
+    value,
+    type,
+  }: {
+    value: string;
+    type: 'positive' | 'negative';
+  }) {
+    const trimmed = value.trim();
     if (!trimmed) return;
 
-    // Check for duplicates
     const isDuplicate =
-      (keywordType === 'positive' &&
-        filters.positiveKeywords.includes(trimmed)) ||
-      (keywordType === 'negative' &&
-        filters.negativeKeywords.includes(trimmed));
+      type === 'positive'
+        ? filters.positiveKeywords.includes(trimmed)
+        : filters.negativeKeywords.includes(trimmed);
 
-    if (isDuplicate) {
-      setKeywordInput('');
-      return;
-    }
+    if (isDuplicate) return;
 
     const updatedFilters: FilterSettings = {
       ...filters,
       positiveKeywords:
-        keywordType === 'positive'
+        type === 'positive'
           ? [...filters.positiveKeywords, trimmed]
           : filters.positiveKeywords,
       negativeKeywords:
-        keywordType === 'negative'
+        type === 'negative'
           ? [...filters.negativeKeywords, trimmed]
           : filters.negativeKeywords,
     };
 
     saveFiltersMutation.mutate(updatedFilters);
+  }
+
+  function handleSubmitKeyword() {
+    handleAddKeyword({ value: keywordInput, type: keywordType });
     setKeywordInput('');
   }
 
-  function handleKeyDown(e: React.KeyboardEvent<HTMLInputElement>) {
-    if (e.key === 'Enter') {
-      e.preventDefault();
-      handleAddKeyword();
-    }
-  }
-
   function handleCaseSensitiveChange(checked: boolean) {
-    const updatedFilters: FilterSettings = {
-      ...filters,
-      caseSensitive: checked,
-    };
-    saveFiltersMutation.mutate(updatedFilters);
+    saveFiltersMutation.mutate({ ...filters, caseSensitive: checked });
   }
 
   function handleSearchFieldChange(
@@ -73,18 +67,13 @@ export function FilterControls() {
       ? [...filters.searchFields, field]
       : filters.searchFields.filter((f) => f !== field);
 
-    // Ensure at least one field is selected
     if (updatedFields.length === 0) return;
 
-    const updatedFilters: FilterSettings = {
+    saveFiltersMutation.mutate({
       ...filters,
       searchFields: updatedFields,
-    };
-    saveFiltersMutation.mutate(updatedFilters);
+    });
   }
-
-  const isLoading = filtersQuery.isLoading;
-  const isSaving = saveFiltersMutation.isPending;
 
   if (isLoading) {
     return (
@@ -105,83 +94,20 @@ export function FilterControls() {
           <span>Saving...</span>
         </div>
       )}
-      <div className="flex gap-2">
-        <input
-          type="text"
-          placeholder="Add keyword"
-          value={keywordInput}
-          onChange={(e) => setKeywordInput(e.target.value)}
-          onKeyDown={handleKeyDown}
-          disabled={isSaving}
-          className="flex-1 px-3 py-2 border rounded disabled:opacity-50"
-        />
-        <button
-          type="button"
-          onClick={handleAddKeyword}
-          disabled={isSaving}
-          className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 disabled:opacity-50"
-        >
-          Add
-        </button>
-      </div>
-
-      <div className="flex gap-4">
-        <label className="flex items-center gap-2">
-          <input
-            type="radio"
-            name="keywordType"
-            value="positive"
-            checked={keywordType === 'positive'}
-            onChange={() => setKeywordType('positive')}
-          />
-          Positive
-        </label>
-        <label className="flex items-center gap-2">
-          <input
-            type="radio"
-            name="keywordType"
-            value="negative"
-            checked={keywordType === 'negative'}
-            onChange={() => setKeywordType('negative')}
-          />
-          Negative
-        </label>
-      </div>
-
-      <div className="space-y-2">
-        <label className="flex items-center gap-2">
-          <input
-            type="checkbox"
-            checked={filters.caseSensitive}
-            onChange={(e) => handleCaseSensitiveChange(e.target.checked)}
-          />
-          Case-sensitive
-        </label>
-
-        <div className="space-y-1">
-          <div className="text-sm font-medium">Search in:</div>
-          <label className="flex items-center gap-2">
-            <input
-              type="checkbox"
-              checked={filters.searchFields.includes('contentHtml')}
-              onChange={(e) =>
-                handleSearchFieldChange('contentHtml', e.target.checked)
-              }
-            />
-            Content
-          </label>
-          <label className="flex items-center gap-2">
-            <input
-              type="checkbox"
-              checked={filters.searchFields.includes('authorName')}
-              onChange={(e) =>
-                handleSearchFieldChange('authorName', e.target.checked)
-              }
-            />
-            Author
-          </label>
-        </div>
-      </div>
+      <KeywordInputSection
+        keywordInput={keywordInput}
+        setKeywordInput={setKeywordInput}
+        keywordType={keywordType}
+        setKeywordType={setKeywordType}
+        onAdd={handleSubmitKeyword}
+        disabled={isSaving}
+      />
+      <FilterSettingsSection
+        filters={filters}
+        onCaseSensitiveChange={handleCaseSensitiveChange}
+        onSearchFieldChange={handleSearchFieldChange}
+        disabled={isSaving}
+      />
     </div>
   );
 }

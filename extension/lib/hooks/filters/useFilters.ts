@@ -1,15 +1,12 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { storage } from 'wxt/utils/storage';
-import { type FilterSettings, FilterSettingsSchema } from '@/lib/filters/types';
+import {
+  DEFAULT_FILTER_SETTINGS,
+  type FilterSettings,
+  FilterSettingsSchema,
+} from '@/lib/filters/types';
 
 const FILTER_SETTINGS_KEY = 'local:filterSettings' as const;
-
-const defaultFilters: FilterSettings = {
-  positiveKeywords: [],
-  negativeKeywords: [],
-  caseSensitive: false,
-  searchFields: ['contentHtml', 'authorName'],
-};
 
 export function useFilters() {
   return useQuery({
@@ -18,12 +15,12 @@ export function useFilters() {
       const stored = await storage.getItem<FilterSettings>(FILTER_SETTINGS_KEY);
 
       if (!stored) {
-        return defaultFilters;
+        return DEFAULT_FILTER_SETTINGS;
       }
 
       // Validate with Zod schema
       const result = FilterSettingsSchema.safeParse(stored);
-      return result.success ? result.data : defaultFilters;
+      return result.success ? result.data : DEFAULT_FILTER_SETTINGS;
     },
   });
 }

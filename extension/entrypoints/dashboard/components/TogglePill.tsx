@@ -31,6 +31,7 @@ export function TogglePill({
       type="button"
       onClick={onClick}
       disabled={disabled}
+      aria-pressed={active}
       className={cn(
         'inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-medium transition-colors',
         'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-1',

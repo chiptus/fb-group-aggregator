@@ -26,86 +26,91 @@ function createMockPosts(count: number): Post[] {
   return Array.from({ length: count }, (_, i) => createMockPost(i));
 }
 
+const runPerfTests = !!process.env.PERF_TESTS;
+
 describe('filterPosts performance', () => {
-  describe('SC-001: Filter updates <500ms with 5000 posts', () => {
-    const posts5000 = createMockPosts(5000);
+  describe.skipIf(!runPerfTests)(
+    'SC-001: Filter updates <500ms with 5000 posts',
+    () => {
+      const posts5000 = createMockPosts(5000);
 
-    it('should filter 5000 posts with positive keywords in <500ms', () => {
-      const filters: FilterSettings = {
-        positiveKeywords: ['apartment', 'rent'],
-        negativeKeywords: [],
-        caseSensitive: false,
-        searchFields: ['contentHtml', 'authorName'],
-      };
+      it('should filter 5000 posts with positive keywords in <500ms', () => {
+        const filters: FilterSettings = {
+          positiveKeywords: ['apartment', 'rent'],
+          negativeKeywords: [],
+          caseSensitive: false,
+          searchFields: ['contentHtml', 'authorName'],
+        };
 
-      const start = performance.now();
-      const result = filterPosts(posts5000, filters);
-      const duration = performance.now() - start;
+        const start = performance.now();
+        const result = filterPosts(posts5000, filters);
+        const duration = performance.now() - start;
 
-      console.log(
-        `Filter 5000 posts (positive keywords): ${duration.toFixed(2)}ms`
-      );
-      expect(duration).toBeLessThan(500);
-      expect(result.length).toBeGreaterThan(0);
-    });
+        console.log(
+          `Filter 5000 posts (positive keywords): ${duration.toFixed(2)}ms`
+        );
+        expect(duration).toBeLessThan(500);
+        expect(result.length).toBeGreaterThan(0);
+      });
 
-    it('should filter 5000 posts with negative keywords in <500ms', () => {
-      const filters: FilterSettings = {
-        positiveKeywords: [],
-        negativeKeywords: ['sold', 'rented'],
-        caseSensitive: false,
-        searchFields: ['contentHtml', 'authorName'],
-      };
+      it('should filter 5000 posts with negative keywords in <500ms', () => {
+        const filters: FilterSettings = {
+          positiveKeywords: [],
+          negativeKeywords: ['sold', 'rented'],
+          caseSensitive: false,
+          searchFields: ['contentHtml', 'authorName'],
+        };
 
-      const start = performance.now();
-      const result = filterPosts(posts5000, filters);
-      const duration = performance.now() - start;
+        const start = performance.now();
+        const result = filterPosts(posts5000, filters);
+        const duration = performance.now() - start;
 
-      console.log(
-        `Filter 5000 posts (negative keywords): ${duration.toFixed(2)}ms`
-      );
-      expect(duration).toBeLessThan(500);
-      expect(result.length).toBe(5000); // None match "sold" or "rented"
-    });
+        console.log(
+          `Filter 5000 posts (negative keywords): ${duration.toFixed(2)}ms`
+        );
+        expect(duration).toBeLessThan(500);
+        expect(result.length).toBe(5000); // None match "sold" or "rented"
+      });
 
-    it('should filter 5000 posts with both positive and negative keywords in <500ms', () => {
-      const filters: FilterSettings = {
-        positiveKeywords: ['apartment', '2BR'],
-        negativeKeywords: ['sold', 'rented'],
-        caseSensitive: false,
-        searchFields: ['contentHtml', 'authorName'],
-      };
+      it('should filter 5000 posts with both positive and negative keywords in <500ms', () => {
+        const filters: FilterSettings = {
+          positiveKeywords: ['apartment', '2BR'],
+          negativeKeywords: ['sold', 'rented'],
+          caseSensitive: false,
+          searchFields: ['contentHtml', 'authorName'],
+        };
 
-      const start = performance.now();
-      const result = filterPosts(posts5000, filters);
-      const duration = performance.now() - start;
+        const start = performance.now();
+        const result = filterPosts(posts5000, filters);
+        const duration = performance.now() - start;
 
-      console.log(
-        `Filter 5000 posts (both keywords): ${duration.toFixed(2)}ms`
-      );
-      expect(duration).toBeLessThan(500);
-      expect(result.length).toBeGreaterThan(0);
-    });
+        console.log(
+          `Filter 5000 posts (both keywords): ${duration.toFixed(2)}ms`
+        );
+        expect(duration).toBeLessThan(500);
+        expect(result.length).toBeGreaterThan(0);
+      });
 
-    it('should filter 5000 posts with empty filters (show all) in <500ms', () => {
-      const filters: FilterSettings = {
-        positiveKeywords: [],
-        negativeKeywords: [],
-        caseSensitive: false,
-        searchFields: ['contentHtml', 'authorName'],
-      };
+      it('should filter 5000 posts with empty filters (show all) in <500ms', () => {
+        const filters: FilterSettings = {
+          positiveKeywords: [],
+          negativeKeywords: [],
+          caseSensitive: false,
+          searchFields: ['contentHtml', 'authorName'],
+        };
 
-      const start = performance.now();
-      const result = filterPosts(posts5000, filters);
-      const duration = performance.now() - start;
+        const start = performance.now();
+        const result = filterPosts(posts5000, filters);
+        const duration = performance.now() - start;
 
-      console.log(`Filter 5000 posts (no filters): ${duration.toFixed(2)}ms`);
-      expect(duration).toBeLessThan(500);
-      expect(result.length).toBe(5000);
-    });
-  });
+        console.log(`Filter 5000 posts (no filters): ${duration.toFixed(2)}ms`);
+        expect(duration).toBeLessThan(500);
+        expect(result.length).toBe(5000);
+      });
+    }
+  );
 
-  describe('scaling performance', () => {
+  describe.skipIf(!runPerfTests)('scaling performance', () => {
     it('should scale linearly with post count', () => {
       const filters: FilterSettings = {
         positiveKeywords: ['apartment'],

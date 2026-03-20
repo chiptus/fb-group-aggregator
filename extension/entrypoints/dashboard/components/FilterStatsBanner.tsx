@@ -13,12 +13,7 @@ export function FilterStatsBanner({
   negativeKeywordCount,
   className = '',
 }: FilterStatsBannerProps) {
-  const hasFilters = positiveKeywordCount > 0 || negativeKeywordCount > 0;
   const removedCount = totalPosts - filteredPosts;
-
-  if (!hasFilters) {
-    return null;
-  }
 
   const filterSummary = [];
   if (positiveKeywordCount > 0) {
