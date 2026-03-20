@@ -1,4 +1,3 @@
-import { useState } from "react";
 import type { FilterSettings } from "@/lib/filters/types";
 import { DEFAULT_FILTER_SETTINGS } from "@/lib/filters/types";
 import { useFilters, useSaveFilters } from "@/lib/hooks/filters/useFilters";
@@ -8,11 +7,6 @@ import { KeywordInputSection } from "./KeywordInputSection";
 export function FilterControls() {
 	const filtersQuery = useFilters();
 	const saveFiltersMutation = useSaveFilters();
-
-	const [keywordInput, setKeywordInput] = useState("");
-	const [keywordType, setKeywordType] = useState<"positive" | "negative">(
-		"positive",
-	);
 
 	const filters = filtersQuery.data ?? DEFAULT_FILTER_SETTINGS;
 	const isLoading = filtersQuery.isLoading;
@@ -48,11 +42,6 @@ export function FilterControls() {
 		};
 
 		saveFiltersMutation.mutate(updatedFilters);
-	}
-
-	function handleSubmitKeyword() {
-		handleAddKeyword({ value: keywordInput, type: keywordType });
-		setKeywordInput("");
 	}
 
 	function handleCaseSensitiveChange(checked: boolean) {
@@ -94,14 +83,7 @@ export function FilterControls() {
 					<span>Saving...</span>
 				</div>
 			)}
-			<KeywordInputSection
-				keywordInput={keywordInput}
-				setKeywordInput={setKeywordInput}
-				keywordType={keywordType}
-				setKeywordType={setKeywordType}
-				onAdd={handleSubmitKeyword}
-				disabled={isSaving}
-			/>
+			<KeywordInputSection onAdd={handleAddKeyword} disabled={isSaving} />
 			<FilterSettingsSection
 				filters={filters}
 				onCaseSensitiveChange={handleCaseSensitiveChange}
