@@ -36,7 +36,7 @@ export function useStartJob() {
       return { jobId: response.jobId };
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: queryKeys.jobs });
+      void queryClient.invalidateQueries({ queryKey: queryKeys.jobs });
     },
   });
 }
@@ -55,7 +55,7 @@ export function useCancelJob() {
       }
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: queryKeys.jobs });
+      void queryClient.invalidateQueries({ queryKey: queryKeys.jobs });
     },
   });
 }
@@ -74,7 +74,7 @@ export function useResumeJob() {
       }
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: queryKeys.jobs });
+      void queryClient.invalidateQueries({ queryKey: queryKeys.jobs });
     },
   });
 }
@@ -93,7 +93,7 @@ export function useDeleteJob() {
       }
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: queryKeys.jobs });
+      void queryClient.invalidateQueries({ queryKey: queryKeys.jobs });
     },
   });
 }

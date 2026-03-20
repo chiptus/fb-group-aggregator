@@ -8,6 +8,42 @@ const logger = createLogger('content');
 const debouncedScrape = debounce(scrapeAndSend, 2000);
 
 /**
+ * Type guard for scrape response from background script
+ */
+function isScrapeResponse(
+  response: unknown
+): response is { success: boolean; count?: number; error?: string } {
+  if (typeof response !== 'object' || response === null) {
+    return false;
+  }
+  const r = response as Record<string, unknown>;
+  return (
+    typeof r.success === 'boolean' &&
+    (r.count === undefined || typeof r.count === 'number') &&
+    (r.error === undefined || typeof r.error === 'string')
+  );
+}
+
+/**
+ * Type guard for scroll config payload
+ */
+function isScrollConfig(payload: unknown): payload is {
+  scrollCount: number;
+  scrollInterval: number;
+  scrapeWaitTime: number;
+} {
+  if (typeof payload !== 'object' || payload === null) {
+    return false;
+  }
+  const p = payload as Record<string, unknown>;
+  return (
+    typeof p.scrollCount === 'number' &&
+    typeof p.scrollInterval === 'number' &&
+    typeof p.scrapeWaitTime === 'number'
+  );
+}
+
+/**
  * Initialize scraping for a group page
  */
 export function initializeGroupPageScraping(
@@ -30,37 +66,69 @@ export function initializeGroupPageScraping(
   ctx.addEventListener(window, 'scroll', handleScroll, { passive: true });
 
   // Listen for messages from background script
-  chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
-    if (message.type === 'TRIGGER_SCRAPE') {
-      logger.info('TRIGGER_SCRAPE received, starting scrape', { groupId });
-      scrapeAndSend(groupId).then(() => {
-        sendResponse({ success: true });
-      });
-      return true; // Keep channel open for async response
-    }
-
-    // NEW: Handle autonomous scroll-and-scrape sequence
-    if (message.type === 'START_SCROLL_AND_SCRAPE') {
-      logger.info('START_SCROLL_AND_SCRAPE received', {
-        groupId,
-        config: message.payload,
-      });
-
-      performScrollAndScrapeSequence(groupId, message.payload)
-        .then(() => {
-          sendResponse({ success: true });
-        })
-        .catch((error) => {
-          logger.error('Scroll-and-scrape sequence failed', {
-            groupId,
-            error: error instanceof Error ? error.message : String(error),
+  chrome.runtime.onMessage.addListener(
+    (
+      message: { type: string; payload?: unknown },
+      _sender,
+      sendResponse: (response: { success: boolean; error?: string }) => void
+    ) => {
+      if (message.type === 'TRIGGER_SCRAPE') {
+        logger.info('TRIGGER_SCRAPE received, starting scrape', { groupId });
+        scrapeAndSend(groupId)
+          .then(() => {
+            sendResponse({ success: true });
+          })
+          .catch((error) => {
+            logger.error('Scrape failed', {
+              groupId,
+              error: error instanceof Error ? error.message : String(error),
+            });
+            sendResponse({
+              success: false,
+              error: error instanceof Error ? error.message : String(error),
+            });
           });
-          sendResponse({ success: false, error: error.message });
+        return true; // Keep channel open for async response
+      }
+
+      // NEW: Handle autonomous scroll-and-scrape sequence
+      if (message.type === 'START_SCROLL_AND_SCRAPE') {
+        if (!isScrollConfig(message.payload)) {
+          logger.error('Invalid scroll config payload', {
+            groupId,
+            payload: message.payload,
+          });
+          sendResponse({
+            success: false,
+            error: 'Invalid scroll configuration',
+          });
+          return false;
+        }
+
+        logger.info('START_SCROLL_AND_SCRAPE received', {
+          groupId,
+          config: message.payload,
         });
 
-      return true; // Keep channel open for async response
+        performScrollAndScrapeSequence(groupId, message.payload)
+          .then(() => {
+            sendResponse({ success: true });
+          })
+          .catch((error) => {
+            logger.error('Scroll-and-scrape sequence failed', {
+              groupId,
+              error: error instanceof Error ? error.message : String(error),
+            });
+            sendResponse({
+              success: false,
+              error: error instanceof Error ? error.message : String(error),
+            });
+          });
+
+        return true; // Keep channel open for async response
+      }
     }
-  });
+  );
 
   logger.info('Group page scraping initialized', { groupId });
 }
@@ -104,6 +172,14 @@ async function scrapeAndSend(groupId: string) {
         posts,
       },
     });
+
+    if (!isScrapeResponse(response)) {
+      logger.error('Invalid response from background script', {
+        groupId,
+        response,
+      });
+      return;
+    }
 
     if (response.success) {
       logger.info('Successfully saved new posts', {
@@ -170,7 +246,7 @@ async function performScrollAndScrapeSequence(
       }
     );
 
-    chrome.runtime.sendMessage({
+    void chrome.runtime.sendMessage({
       type: 'SCROLL_AND_SCRAPE_COMPLETE',
       payload: {
         totalPostsScraped: scrapedPostIds.size,
@@ -226,7 +302,7 @@ async function performScrollAndScrapeSequence(
   }
 
   // Send completion message
-  chrome.runtime.sendMessage({
+  void chrome.runtime.sendMessage({
     type: 'SCROLL_AND_SCRAPE_COMPLETE',
     payload: {
       totalPostsScraped: scrapedPostIds.size,
@@ -272,7 +348,7 @@ async function scrapeAndSendWithTracking(
       });
 
       // Send progress update
-      chrome.runtime.sendMessage({
+      void chrome.runtime.sendMessage({
         type: 'SCROLL_AND_SCRAPE_PROGRESS',
         payload: {
           scrollNumber,
@@ -314,7 +390,7 @@ async function scrapeAndSendWithTracking(
     }
 
     // Send progress update
-    chrome.runtime.sendMessage({
+    void chrome.runtime.sendMessage({
       type: 'SCROLL_AND_SCRAPE_PROGRESS',
       payload: {
         scrollNumber,
