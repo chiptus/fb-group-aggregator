@@ -1,7 +1,9 @@
+import type { KeywordType } from "@/lib/filters/types";
+
 interface KeywordChipProps {
 	keyword: string;
-	type: "positive" | "negative";
-	onRemove: (keyword: string, type: "positive" | "negative") => void;
+	type: KeywordType;
+	onRemove: (keyword: string, type: KeywordType) => void;
 }
 
 export function KeywordChip({ keyword, type, onRemove }: KeywordChipProps) {

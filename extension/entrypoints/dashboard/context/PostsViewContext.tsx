@@ -7,7 +7,7 @@ import {
 	useState,
 } from "react";
 import { filterPosts } from "@/lib/filters/filterPosts";
-import type { FilterSettings } from "@/lib/filters/types";
+import type { FilterSettings, KeywordType } from "@/lib/filters/types";
 import { useMarkAllPostsSeen } from "@/lib/hooks/storage/usePosts";
 import type { Group, Post, Subscription } from "@/lib/types";
 import { useFilteredPosts } from "../hooks/useFilteredPosts";
@@ -26,7 +26,7 @@ interface PostsViewContextValue {
 	// Server actions
 	setPostSeen: (postId: string, seen: boolean) => void;
 	togglePostStarred: (postId: string, currentStarred: boolean) => void;
-	removeKeyword: (keyword: string, type: "positive" | "negative") => void;
+	removeKeyword: (keyword: string, type: KeywordType) => void;
 
 	// View state
 	selectedSubscriptionId: string | null;

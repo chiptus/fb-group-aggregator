@@ -1,4 +1,4 @@
-import type { FilterSettings } from "@/lib/filters/types";
+import type { FilterSettings, KeywordType } from "@/lib/filters/types";
 import { DEFAULT_FILTER_SETTINGS } from "@/lib/filters/types";
 import { useFilters, useSaveFilters } from "@/lib/hooks/filters/useFilters";
 import { FilterSettingsSection } from "./FilterSettingsSection";
@@ -17,7 +17,7 @@ export function FilterControls() {
 		type,
 	}: {
 		value: string;
-		type: "positive" | "negative";
+		type: KeywordType;
 	}) {
 		const trimmed = value.trim();
 		if (!trimmed) return;

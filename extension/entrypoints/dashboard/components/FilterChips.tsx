@@ -1,9 +1,9 @@
-import type { FilterSettings } from "@/lib/filters/types";
+import type { FilterSettings, KeywordType } from "@/lib/filters/types";
 import { KeywordChip } from "./KeywordChip";
 
 export interface FilterChipsProps {
 	filters: FilterSettings;
-	onRemoveKeyword: (keyword: string, type: "positive" | "negative") => void;
+	onRemoveKeyword: (keyword: string, type: KeywordType) => void;
 }
 
 export function FilterChips({ filters, onRemoveKeyword }: FilterChipsProps) {

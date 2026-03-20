@@ -1,7 +1,8 @@
 import { useForm } from "@tanstack/react-form";
+import type { KeywordType } from "@/lib/filters/types";
 
 interface KeywordInputSectionProps {
-	onAdd: (params: { value: string; type: "positive" | "negative" }) => void;
+	onAdd: (params: { value: string; type: KeywordType }) => void;
 	disabled: boolean;
 }
 
@@ -12,7 +13,7 @@ export function KeywordInputSection({
 	const form = useForm({
 		defaultValues: {
 			keyword: "",
-			type: "positive" as "positive" | "negative",
+			type: "positive" as KeywordType,
 		},
 		onSubmit({ value, formApi }) {
 			onAdd({ value: value.keyword, type: value.type });
