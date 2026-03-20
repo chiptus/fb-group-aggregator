@@ -28,7 +28,15 @@ export default tseslint.config(
           message: 'Barrel exports (export * from) are not allowed',
         },
       ],
-
+      // Max 150 lines per component
+      'max-lines-per-function': [
+        'warn',
+        {
+          max: 150,
+          skipBlankLines: true,
+          skipComments: true,
+        },
+      ],
       // TypeScript-specific
       '@typescript-eslint/explicit-function-return-type': 'off',
       '@typescript-eslint/no-explicit-any': 'error',
@@ -74,6 +82,8 @@ export default tseslint.config(
       '**/dist/**',
       '**/build/**',
       '**/.cache/**',
+      '**/eslint.config.js',
+      '**/eslint.config.*.js',
     ],
   }
 );

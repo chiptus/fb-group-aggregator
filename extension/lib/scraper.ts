@@ -9,12 +9,11 @@ import type { Post } from './types';
  */
 export async function scrapeGroupPosts(
   groupId: string,
-  options?: {
+  _options?: {
     existingPostIds?: Set<string>;
   }
 ): Promise<Omit<Post, 'scrapedAt' | 'seen' | 'starred'>[]> {
   const posts: Omit<Post, 'scrapedAt' | 'seen' | 'starred'>[] = [];
-  const existingPostIds = options?.existingPostIds || new Set<string>();
 
   // Find the group feed container
   const feedContainer = document.querySelector('[role="feed"]');
@@ -26,15 +25,13 @@ export async function scrapeGroupPosts(
   }
 
   console.log('[Scraper] Feed container found, searching for posts');
-
   // Try multiple strategies to find posts
-  let postElements: Element[] = [];
 
   // Strategy 1: Articles within feed
   const articlesInFeed = feedContainer.querySelectorAll(
     '.x1n2onr6.xh8yej3.x1ja2u2z.xod5an3'
   );
-  postElements = Array.from(articlesInFeed);
+  let postElements = Array.from(articlesInFeed);
 
   // DEBUG: Log what we're seeing in the feed
   const allArticles = document.querySelectorAll(
@@ -276,7 +273,7 @@ function extractPostId(element: HTMLElement): string | null {
   console.log('[Scraper] data-ft:', dataFt ? 'present' : 'absent');
   if (dataFt) {
     try {
-      const ftData = JSON.parse(dataFt);
+      const ftData = JSON.parse(dataFt) as unknown;
       if (ftData.mf_story_key) {
         console.log(
           '[Scraper] ✓ Found post ID via data-ft:',

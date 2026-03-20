@@ -22,7 +22,7 @@ export function useClearLogs() {
   return useMutation({
     mutationFn: () => clearLogs(),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: queryKeys.logs });
+      void queryClient.invalidateQueries({ queryKey: queryKeys.logs });
     },
   });
 }

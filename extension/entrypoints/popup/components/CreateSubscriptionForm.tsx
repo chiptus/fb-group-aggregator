@@ -20,7 +20,7 @@ export function CreateSubscriptionForm({
     validators: {
       onChange: subscriptionSchema,
     },
-    onSubmit: async ({ value }) => {
+    onSubmit: ({ value }) => {
       createMutation.mutate(value.name, {
         onSuccess: () => {
           onSuccess?.();
@@ -34,7 +34,7 @@ export function CreateSubscriptionForm({
       onSubmit={(e) => {
         e.preventDefault();
         e.stopPropagation();
-        form.handleSubmit();
+        void form.handleSubmit();
       }}
       className="mt-4 border rounded-lg p-3"
     >

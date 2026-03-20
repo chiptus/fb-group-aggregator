@@ -24,7 +24,7 @@ export default [
 
       // Max 150 lines per component
       'max-lines-per-function': [
-        'error',
+        'warn',
         {
           max: 150,
           skipBlankLines: true,

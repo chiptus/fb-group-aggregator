@@ -11,15 +11,6 @@ import { useLogs } from '@/lib/hooks/storage/useLogs';
 import type { JobStatus, ScrapeJob } from '@/lib/types';
 import { LoadingSpinner } from './LoadingSpinner';
 
-const STATUS_COLORS: Record<JobStatus, string> = {
-  pending: 'bg-gray-100 text-gray-700',
-  running: 'bg-blue-100 text-blue-700',
-  paused: 'bg-yellow-100 text-yellow-700',
-  completed: 'bg-green-100 text-green-700',
-  failed: 'bg-red-100 text-red-700',
-  cancelled: 'bg-gray-100 text-gray-700',
-};
-
 const STATUS_BADGES: Record<JobStatus, string> = {
   pending: 'bg-gray-500',
   running: 'bg-blue-500',
@@ -216,16 +207,15 @@ interface JobCardProps {
 }
 
 function JobCard({
-    job,
-    isExpanded,
-    showLogs,
-    onToggleExpand,
-    onToggleLogs,
-    onCancel,
-    onResume,
-    onDelete,
-  }: JobCardProps) {
-  
+  job,
+  isExpanded,
+  showLogs,
+  onToggleExpand,
+  onToggleLogs,
+  onCancel,
+  onResume,
+  onDelete,
+}: JobCardProps) {
 
   const logsQuery = useLogs(showLogs ? { jobId: job.id } : undefined);
   const logs = logsQuery.data ?? [];

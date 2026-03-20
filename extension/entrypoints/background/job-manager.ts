@@ -7,7 +7,6 @@ import {
   getJob,
   updateJob,
 } from '@/lib/storage/jobs';
-import type { ScrapeJob } from '@/lib/types';
 import { scrapeGroupWithScrolling } from './scraper-orchestrator';
 
 // todo - need to make there's one job running at the same time

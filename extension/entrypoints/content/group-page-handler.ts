@@ -17,13 +17,13 @@ export function initializeGroupPageScraping(
   // Initial scrape on page load
   // Wait a bit for Facebook to render content
   setTimeout(() => {
-    debouncedScrape(groupId);
+    void debouncedScrape(groupId);
   }, 1000);
 
   // Scrape on scroll (Facebook lazy-loads posts)
   function handleScroll() {
     if (isNearBottom()) {
-      debouncedScrape(groupId);
+      void debouncedScrape(groupId);
     }
   }
 

@@ -1,18 +1,8 @@
-import { useMemo, useState } from 'react';
+import { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import {
-  useGroups,
-  useScrapeSubscription,
-} from '@/lib/hooks/storage/useGroups';
-import { useMarkPostSeen, usePosts } from '@/lib/hooks/storage/usePosts';
-import { useSubscriptions } from '@/lib/hooks/storage/useSubscriptions';
 import { GroupsPage } from './components/GroupsPage';
 import { JobViewer } from './components/JobViewer';
-import { LoadingSpinner } from './components/LoadingSpinner';
 import { LogViewer } from './components/LogViewer';
-import { PostCard } from './components/PostCard';
-import { SearchBar } from './components/SearchBar';
-import { SubscriptionSidebar } from './components/SubscriptionSidebar';
 import { PostsTab } from './tabs/PostsTab';
 
 type DashboardTab = 'posts' | 'groups' | 'jobs' | 'logs';

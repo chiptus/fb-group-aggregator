@@ -1,9 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
-  createPosts,
-  deleteOldPosts,
   listPosts,
-  listPostsBySubscription,
   markPostAsSeen,
   togglePostStarred,
 } from '@/lib/storage/posts';
@@ -46,7 +43,7 @@ export function useMarkPostSeen() {
     },
     onSettled: () => {
       // Refetch after mutation
-      queryClient.invalidateQueries({ queryKey: queryKeys.posts });
+      void queryClient.invalidateQueries({ queryKey: queryKeys.posts });
     },
   });
 }
@@ -80,7 +77,7 @@ export function useTogglePostStarred() {
     },
     onSettled: () => {
       // Refetch after mutation
-      queryClient.invalidateQueries({ queryKey: queryKeys.posts });
+      void queryClient.invalidateQueries({ queryKey: queryKeys.posts });
     },
   });
 }

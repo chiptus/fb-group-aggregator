@@ -19,7 +19,7 @@ export function OverviewTab() {
     subscriptionsQuery.error || groupsQuery.error || postsQuery.error;
 
   function handleOpenDashboard() {
-    chrome.tabs.create({ url: '/dashboard.html' });
+    void chrome.tabs.create({ url: '/dashboard.html' });
   }
 
   if (isLoading) {
