@@ -21,7 +21,9 @@ export function useCreateSubscription() {
   return useMutation({
     mutationFn: (name: string) => createSubscription(name),
     onSuccess: async () => {
-      await queryClient.invalidateQueries({ queryKey: queryKeys.subscriptions });
+      await queryClient.invalidateQueries({
+        queryKey: queryKeys.subscriptions,
+      });
     },
   });
 }
@@ -38,7 +40,9 @@ export function useUpdateSubscription() {
       updates: Partial<Subscription>;
     }) => updateSubscription(id, updates),
     onSuccess: async () => {
-      await queryClient.invalidateQueries({ queryKey: queryKeys.subscriptions });
+      await queryClient.invalidateQueries({
+        queryKey: queryKeys.subscriptions,
+      });
     },
   });
 }
@@ -49,7 +53,9 @@ export function useDeleteSubscription() {
   return useMutation({
     mutationFn: (id: string) => deleteSubscription(id),
     onSuccess: async () => {
-      await queryClient.invalidateQueries({ queryKey: queryKeys.subscriptions });
+      await queryClient.invalidateQueries({
+        queryKey: queryKeys.subscriptions,
+      });
     },
   });
 }
