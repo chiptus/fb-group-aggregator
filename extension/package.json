@@ -15,9 +15,10 @@
     "test": "vitest",
     "test:ui": "vitest --ui",
     "lint": "eslint . --fix",
+    "lint:check": "eslint .",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "check": "pnpm lint && pnpm format && pnpm typecheck",
+    "check": "pnpm lint:check && pnpm format:check && pnpm typecheck",
     "ci": "pnpm check && pnpm test run"
   },
   "lint-staged": {
