@@ -111,8 +111,13 @@ export function useDeleteJob() {
 /**
  * Schema for job operation response
  */
-const jobResponseSchema = z.object({
-  success: z.boolean(),
-  jobId: z.string().optional(),
-  error: z.string().optional(),
-});
+const jobResponseSchema = z.discriminatedUnion('success', [
+  z.object({
+    success: z.literal(true),
+    jobId: z.string().optional(),
+  }),
+  z.object({
+    success: z.literal(false),
+    error: z.string(),
+  }),
+]);

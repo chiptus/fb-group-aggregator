@@ -9,12 +9,17 @@ import { z } from 'zod';
 /**
  * Schema for groups list scrape response
  */
-const groupsListResponseSchema = z.object({
-  success: z.boolean(),
-  newGroupsCount: z.number().optional(),
-  updatedGroupsCount: z.number().optional(),
-  error: z.string().optional(),
-});
+const groupsListResponseSchema = z.discriminatedUnion('success', [
+  z.object({
+    success: z.literal(true),
+    newGroupsCount: z.number(),
+    updatedGroupsCount: z.number(),
+  }),
+  z.object({
+    success: z.literal(false),
+    error: z.string(),
+  }),
+]);
 
 const debouncedScrapeGroupsList = debounce(scrapeAndSendGroupsList, 2000);
 

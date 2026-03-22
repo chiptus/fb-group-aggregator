@@ -103,13 +103,19 @@ export function useScrapeSubscription() {
 /**
  * Schema for scrape subscription response
  */
-const scrapeSubscriptionResponseSchema = z.object({
-  success: z.boolean(),
-  scrapedCount: z.number(),
-  failedGroups: z.array(
-    z.object({
-      groupId: z.string(),
-      error: z.string(),
-    })
-  ),
-});
+const scrapeSubscriptionResponseSchema = z.discriminatedUnion('success', [
+  z.object({
+    success: z.literal(true),
+    scrapedCount: z.number(),
+    failedGroups: z.array(
+      z.object({
+        groupId: z.string(),
+        error: z.string(),
+      })
+    ),
+  }),
+  z.object({
+    success: z.literal(false),
+    error: z.string(),
+  }),
+]);

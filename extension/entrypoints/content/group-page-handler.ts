@@ -12,11 +12,16 @@ const debouncedScrape = debounce(scrapeAndSend, 2000);
 /**
  * Schema for scrape response from background script
  */
-const scrapeResponseSchema = z.object({
-  success: z.boolean(),
-  count: z.number().optional(),
-  error: z.string().optional(),
-});
+const scrapeResponseSchema = z.discriminatedUnion('success', [
+  z.object({
+    success: z.literal(true),
+    count: z.number(),
+  }),
+  z.object({
+    success: z.literal(false),
+    error: z.string(),
+  }),
+]);
 
 /**
  * Schema for scroll config payload
