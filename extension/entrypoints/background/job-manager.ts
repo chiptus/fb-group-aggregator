@@ -14,7 +14,8 @@ import { scrapeGroupWithScrolling } from './scraper-orchestrator';
 
 const logger = createLogger('background');
 
-let isCancelling = false;
+// Track cancelled jobs by ID to prevent race conditions
+const cancelledJobs = new Set<string>();
 
 export async function startJob(): Promise<{ jobId: string }> {
   const activeJob = await getActiveJob();
@@ -81,7 +82,7 @@ export async function cancelJob(jobId: string): Promise<void> {
   }
 
   logger.info('Cancelling job', { jobId });
-  isCancelling = true;
+  cancelledJobs.add(jobId);
 
   await updateJob(jobId, {
     status: 'cancelled',
@@ -91,9 +92,6 @@ export async function cancelJob(jobId: string): Promise<void> {
 
 // TODO: break into smaller files
 async function executeJob(jobId: string): Promise<void> {
-  // currentJobId = jobId;
-  isCancelling = false;
-
   try {
     let job = await getJob(jobId);
     if (!job) {
@@ -114,8 +112,9 @@ async function executeJob(jobId: string): Promise<void> {
     });
 
     for (let i = job.currentGroupIndex; i < job.groupResults.length; i++) {
-      if (isCancelling) {
+      if (cancelledJobs.has(jobId)) {
         logger.info('Job cancelled by user', { jobId });
+        cancelledJobs.delete(jobId);
         return;
       }
 
@@ -252,8 +251,8 @@ async function executeJob(jobId: string): Promise<void> {
       error: errorMessage,
     });
   } finally {
-    // currentJobId = null;
-    isCancelling = false;
+    // Clean up cancellation flag for this job
+    cancelledJobs.delete(jobId);
   }
 }
 

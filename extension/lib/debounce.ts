@@ -17,7 +17,10 @@ export function debounce<Args extends unknown[]>(
     }
 
     timer = setTimeout(() => {
-      void fn(...args);
+      Promise.resolve(fn(...args)).catch((error) => {
+        // Prevent unhandled promise rejections from async debounced functions
+        console.error('Error in debounced function:', error);
+      });
     }, ms);
   };
 }
