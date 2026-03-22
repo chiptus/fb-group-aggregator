@@ -3,6 +3,7 @@
 ## Challenge: Facebook's Dynamic DOM
 
 Facebook's DOM structure is:
+
 - **Dynamically loaded**: Initial HTML contains loading skeletons
 - **Obfuscated**: Uses generated class names like `x1yztbdb`, `xdj266r`
 - **Frequently changing**: Selectors break across updates
@@ -13,6 +14,7 @@ Facebook's DOM structure is:
 Based on actual Facebook group page testing:
 
 ### Posts vs Comments
+
 - Both posts AND comments use `[role="article"]`
 - **Differentiation**: Check `aria-label` attribute
   - Comments: `aria-label="Comment by [Name] [Time] ago"`
@@ -20,13 +22,16 @@ Based on actual Facebook group page testing:
 - **Filter strategy**: Skip elements with aria-label containing "comment"
 
 ### Post ID Extraction
+
 Modern Facebook doesn't always use `data-ft` attribute. We use multiple strategies:
+
 1. `data-ft` JSON with `mf_story_key` (legacy)
 2. Extract from permalink URL: `/posts/(\d+)/`
 3. Check aria-label to filter out comments
 4. Extract from timestamp link href
 
 ### Author Extraction
+
 1. **Primary**: `a[href*="/user/"]` link text
 2. **Fallback 1**: Parse aria-label for "Post/Comment by [Name]"
 3. **Fallback 2**: First non-empty link that's not:
@@ -35,13 +40,16 @@ Modern Facebook doesn't always use `data-ft` attribute. We use multiple strategi
    - Has length > 1
 
 ### Timestamp Extraction
+
 Modern Facebook uses relative time instead of Unix timestamps:
+
 1. **Primary**: `abbr[data-utime]` (if available, most accurate)
 2. **Fallback 1**: Parse aria-label for "X days/hours/etc ago"
 3. **Fallback 2**: Parse link text for short format like "4d", "2h"
 4. **Last resort**: `Date.now()`
 
 ### Content Extraction
+
 1. Look for `[data-ad-preview="message"]` container
 2. Get inner `[dir="auto"]` element
 3. Return innerHTML to preserve formatting
@@ -49,6 +57,7 @@ Modern Facebook uses relative time instead of Unix timestamps:
 ## Current Implementation
 
 [scraper.ts](lib/scraper.ts) now uses **multi-strategy approach** with fallbacks for:
+
 - Post ID (4 strategies, filters out comments)
 - Author name (3 strategies, skips timestamp links)
 - Timestamp (3 strategies, handles relative time)
@@ -70,6 +79,7 @@ Modern Facebook uses relative time instead of Unix timestamps:
 ## Maintenance Required
 
 Monitor for Facebook DOM changes. If scraping breaks:
+
 1. Run scraper-explorer.js to identify new patterns
 2. Update extraction strategies in scraper.ts
 3. Add new test cases if needed

@@ -6,10 +6,10 @@ DO NOT create `index.ts` files that re-export from other modules.
 
 ```typescript
 // BAD
-import { useSubscriptions } from "@/lib/hooks";
+import { useSubscriptions } from '@/lib/hooks';
 
 // GOOD
-import { useSubscriptions } from "@/lib/hooks/storage/useSubscriptions";
+import { useSubscriptions } from '@/lib/hooks/storage/useSubscriptions';
 ```
 
 ## Function Declarations
@@ -18,12 +18,20 @@ Use named function declarations, not arrow functions for handlers and regular fu
 
 ```typescript
 // BAD
-const handleClick = (id: string) => { /* ... */ };
-const processData = () => { /* ... */ };
+const handleClick = (id: string) => {
+  /* ... */
+};
+const processData = () => {
+  /* ... */
+};
 
 // GOOD
-function handleClick(id: string) { /* ... */ }
-function processData() { /* ... */ }
+function handleClick(id: string) {
+  /* ... */
+}
+function processData() {
+  /* ... */
+}
 ```
 
 ## Destructure in Function Signature
@@ -37,8 +45,7 @@ function MyComponent(props: MyProps) {
 }
 
 // GOOD
-function MyComponent({ foo, bar = 'default' }: MyProps) {
-}
+function MyComponent({ foo, bar = 'default' }: MyProps) {}
 ```
 
 No biome rule enforces this — apply it by convention.

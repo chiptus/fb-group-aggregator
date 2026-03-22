@@ -1,5 +1,6 @@
 {
   "name": "fb-group-aggregator",
+  "type": "module",
   "private": true,
   "scripts": {
     "dev:extension": "pnpm --filter extension dev",
@@ -9,12 +10,21 @@
     "test": "pnpm run --recursive test",
     "build:all": "pnpm run --recursive build",
     "prepare": "husky",
+    "lint": "eslint . --fix",
+    "format": "prettier --write --log-level=warn .",
+    "format:check": "prettier --check --log-level=warn .",
     "check": "pnpm -r check",
     "typecheck": "pnpm -r typecheck"
   },
   "devDependencies": {
+    "@eslint/js": "^9.17.0",
+    "eslint": "^9.17.0",
+    "eslint-plugin-react": "^7.37.5",
+    "eslint-plugin-react-hooks": "^7.0.1",
     "husky": "^9.1.7",
-    "lint-staged": "^16.2.7"
+    "lint-staged": "^16.2.7",
+    "prettier": "^3.8.1",
+    "typescript-eslint": "^8.57.1"
   },
   "lint-staged": {
     "extension/**/*": "pnpm --filter extension lint-staged"

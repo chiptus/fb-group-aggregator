@@ -5,49 +5,63 @@ A standardized button component with multiple variants and sizes, following shad
 ## Import
 
 ```tsx
-import { Button } from "@/components/ui/button";
+import { Button } from '@/components/ui/button';
 ```
 
 ## Variants
 
 ### Default
+
 Standard button with dark background.
+
 ```tsx
 <Button variant="default">Default Button</Button>
 ```
 
 ### Primary
+
 Primary action button with blue background.
+
 ```tsx
 <Button variant="primary">Primary Button</Button>
 ```
 
 ### Secondary
+
 Secondary button with light gray background.
+
 ```tsx
 <Button variant="secondary">Secondary Button</Button>
 ```
 
 ### Ghost
+
 Transparent button with hover effect.
+
 ```tsx
 <Button variant="ghost">Ghost Button</Button>
 ```
 
 ### Link
+
 Link-style button with underline on hover.
+
 ```tsx
 <Button variant="link">Link Button</Button>
 ```
 
 ### Destructive
+
 Destructive action button with red background.
+
 ```tsx
 <Button variant="destructive">Delete</Button>
 ```
 
 ### Outline
+
 Button with border and white background.
+
 ```tsx
 <Button variant="outline">Outline Button</Button>
 ```
@@ -81,10 +95,11 @@ All standard button HTML attributes are supported:
 ## Examples from Codebase
 
 ### Selection/Filter Buttons (SubscriptionSidebar)
+
 ```tsx
 <Button
   onClick={() => onSelectSubscription(sub.id)}
-  variant={selectedSubscriptionId === sub.id ? "primary" : "ghost"}
+  variant={selectedSubscriptionId === sub.id ? 'primary' : 'ghost'}
   className="w-full justify-start"
 >
   {sub.name}
@@ -92,6 +107,7 @@ All standard button HTML attributes are supported:
 ```
 
 ### Action Buttons (BulkActionsBar)
+
 ```tsx
 <Button onClick={onBulkAssign} disabled={!bulkSubscriptionId} variant="primary" size="sm">
   Assign
@@ -102,13 +118,19 @@ All standard button HTML attributes are supported:
 ```
 
 ### Link-style Buttons (PostCard)
+
 ```tsx
-<Button onClick={() => onToggleSeen(post.id, post.seen)} variant="link" size="sm">
-  {post.seen ? "Mark as unseen" : "Mark as seen"}
+<Button
+  onClick={() => onToggleSeen(post.id, post.seen)}
+  variant="link"
+  size="sm"
+>
+  {post.seen ? 'Mark as unseen' : 'Mark as seen'}
 </Button>
 ```
 
 ### Destructive Link Button (GroupRow)
+
 ```tsx
 <Button
   onClick={() => onDelete(group.id)}
@@ -125,10 +147,7 @@ All standard button HTML attributes are supported:
 You can override styles with the `className` prop. The component uses `cn()` utility to merge classes properly:
 
 ```tsx
-<Button
-  variant="default"
-  className="bg-green-600 hover:bg-green-700"
->
+<Button variant="default" className="bg-green-600 hover:bg-green-700">
   Custom Green Button
 </Button>
 ```

@@ -31,8 +31,12 @@ const isLoading = postsQuery.isLoading;
 ```typescript
 function handleCreate() {
   createSubscriptionMutation.mutate('New Sub', {
-    onSuccess: () => { /* close form, reset state */ },
-    onError: (err) => { console.error('Failed:', err); },
+    onSuccess: () => {
+      /* close form, reset state */
+    },
+    onError: (err) => {
+      console.error('Failed:', err);
+    },
   });
 }
 ```
