@@ -4,6 +4,17 @@ import {
   isNearBottom as isNearBottomGroupsList,
   scrapeGroupsList,
 } from '@/lib/groups-list-scraper';
+import { z } from 'zod';
+
+/**
+ * Schema for groups list scrape response
+ */
+const groupsListResponseSchema = z.object({
+  success: z.boolean(),
+  newGroupsCount: z.number().optional(),
+  updatedGroupsCount: z.number().optional(),
+  error: z.string().optional(),
+});
 
 const debouncedScrapeGroupsList = debounce(scrapeAndSendGroupsList, 2000);
 
@@ -119,7 +130,7 @@ async function scrapeAndSendGroupsList(scrapedGroupIds: Set<string>) {
     );
 
     // Send to background script for storage
-    const response = await chrome.runtime.sendMessage({
+    const response: unknown = await chrome.runtime.sendMessage({
       type: 'SCRAPE_GROUPS_LIST',
       payload: {
         groups: newGroups,
@@ -127,12 +138,24 @@ async function scrapeAndSendGroupsList(scrapedGroupIds: Set<string>) {
       },
     });
 
-    if (response.success) {
+    const result = groupsListResponseSchema.safeParse(response);
+    if (!result.success) {
+      console.error(
+        '[FB Aggregator] Invalid response from background script:',
+        result.error
+      );
+      return;
+    }
+
+    if (result.data.success) {
       console.log(
-        `[FB Aggregator] Successfully processed ${response.newGroupsCount} new groups, ${response.updatedGroupsCount} updated`
+        `[FB Aggregator] Successfully processed ${result.data.newGroupsCount} new groups, ${result.data.updatedGroupsCount} updated`
       );
     } else {
-      console.error('[FB Aggregator] Failed to save groups:', response.error);
+      console.error(
+        '[FB Aggregator] Failed to save groups:',
+        result.data.error
+      );
     }
   } catch (error) {
     console.error('[FB Aggregator] Groups list scraping error:', error);

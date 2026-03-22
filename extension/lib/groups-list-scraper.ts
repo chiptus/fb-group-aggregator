@@ -10,10 +10,9 @@ export function scrapeGroupsList(): {
   totalCount: number;
 } {
   const groupsMap = new Map<string, GroupDiscovery>();
-  let totalCount = 0;
 
   // Extract total count from page header
-  totalCount = extractTotalGroupCount();
+  const totalCount = extractTotalGroupCount();
 
   // Find all group elements
   const groupElements = findGroupElements();

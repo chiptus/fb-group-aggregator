@@ -3,11 +3,10 @@ import { usePosts } from '@/lib/hooks/storage/usePosts';
 
 export function PopupHeader() {
   const postsQuery = usePosts();
-  const posts = postsQuery.data ?? [];
 
   const unseenCount = useMemo(() => {
-    return posts.filter((post) => !post.seen).length;
-  }, [posts]);
+    return postsQuery.data?.filter((post) => !post.seen).length;
+  }, [postsQuery.data]);
 
   function getDisplayContent() {
     if (postsQuery.isLoading) {

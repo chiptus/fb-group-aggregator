@@ -1,12 +1,12 @@
 /**
- * A strictly typed debounce function that avoids 'any'.
+ * debounce function
  *
- * @param fn - The function to debounce.
+ * @param fn - The function to debounce
  * @param ms - The delay in milliseconds.
- * @returns A new function with strict argument typing.
+ * @returns A new function
  */
 export function debounce<Args extends unknown[]>(
-  fn: (...args: Args) => void,
+  fn: (...args: Args) => void | Promise<void>,
   ms: number
 ): (...args: Args) => void {
   let timer: ReturnType<typeof setTimeout> | null = null;
@@ -17,7 +17,7 @@ export function debounce<Args extends unknown[]>(
     }
 
     timer = setTimeout(() => {
-      fn(...args);
+      void fn(...args);
     }, ms);
   };
 }

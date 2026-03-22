@@ -1,6 +1,7 @@
 import { createLogger } from '@/lib/logger';
 import { deleteJob, getJob } from '@/lib/storage/jobs';
-import type { ExtensionMessage, ScrapePostsResponse } from '@/lib/types';
+import type { ExtensionMessage } from '@/lib/types';
+import { getErrorMessage } from '@/lib/utils';
 import { handleScrapeGroupsList } from './handle-scrape-groups-list';
 import { handleScrapePosts } from './handle-scrape-posts';
 import { cancelJob, resumeJob, startJob } from './job-manager';
@@ -15,7 +16,7 @@ const logger = createLogger('background');
 export function messageListener(
   message: ExtensionMessage,
   _sender: chrome.runtime.MessageSender,
-  sendResponse: (response: ScrapePostsResponse | unknown) => void
+  sendResponse: (response: unknown) => void
 ): boolean {
   console.log('[Background] Received message:', message.type);
 
@@ -24,11 +25,11 @@ export function messageListener(
       .then(sendResponse)
       .catch((error) => {
         logger.error('Error handling SCRAPE_POSTS', {
-          error: error instanceof Error ? error.message : String(error),
+          error: getErrorMessage(error),
         });
         sendResponse({
           success: false,
-          error: error.message || 'Unknown error',
+          error: getErrorMessage(error),
         });
       });
 
@@ -41,11 +42,11 @@ export function messageListener(
       .then(sendResponse)
       .catch((error) => {
         logger.error('Error handling SCRAPE_GROUPS_LIST', {
-          error: error instanceof Error ? error.message : String(error),
+          error: getErrorMessage(error),
         });
         sendResponse({
           success: false,
-          error: error.message || 'Unknown error',
+          error: getErrorMessage(error),
         });
       });
 
@@ -58,11 +59,11 @@ export function messageListener(
       .catch((error) => {
         logger.error('Error handling SCRAPE_SUBSCRIPTION', {
           subscriptionId: message.payload.subscriptionId,
-          error: error instanceof Error ? error.message : String(error),
+          error: getErrorMessage(error),
         });
         sendResponse({
           success: false,
-          error: error.message || 'Unknown error',
+          error: getErrorMessage(error),
         });
       });
 
@@ -74,11 +75,11 @@ export function messageListener(
       .then((result) => sendResponse({ success: true, jobId: result.jobId }))
       .catch((error) => {
         logger.error('Error starting job', {
-          error: error instanceof Error ? error.message : String(error),
+          error: getErrorMessage(error),
         });
         sendResponse({
           success: false,
-          error: error.message || 'Unknown error',
+          error: getErrorMessage(error),
         });
       });
 
@@ -91,11 +92,11 @@ export function messageListener(
       .catch((error) => {
         logger.error('Error cancelling job', {
           jobId: message.payload.jobId,
-          error: error instanceof Error ? error.message : String(error),
+          error: getErrorMessage(error),
         });
         sendResponse({
           success: false,
-          error: error.message || 'Unknown error',
+          error: getErrorMessage(error),
         });
       });
 
@@ -108,11 +109,11 @@ export function messageListener(
       .catch((error) => {
         logger.error('Error resuming job', {
           jobId: message.payload.jobId,
-          error: error instanceof Error ? error.message : String(error),
+          error: getErrorMessage(error),
         });
         sendResponse({
           success: false,
-          error: error.message || 'Unknown error',
+          error: getErrorMessage(error),
         });
       });
 
@@ -125,11 +126,11 @@ export function messageListener(
       .catch((error) => {
         logger.error('Error getting job', {
           jobId: message.payload.jobId,
-          error: error instanceof Error ? error.message : String(error),
+          error: getErrorMessage(error),
         });
         sendResponse({
           success: false,
-          error: error.message || 'Unknown error',
+          error: getErrorMessage(error),
         });
       });
 
@@ -142,11 +143,11 @@ export function messageListener(
       .catch((error) => {
         logger.error('Error deleting job', {
           jobId: message.payload.jobId,
-          error: error instanceof Error ? error.message : String(error),
+          error: getErrorMessage(error),
         });
         sendResponse({
           success: false,
-          error: error.message || 'Unknown error',
+          error: getErrorMessage(error),
         });
       });
 

@@ -8,6 +8,7 @@ import {
 } from '@/lib/storage/groups';
 import type { Group } from '@/lib/types';
 import { queryKeys } from './queryKeys';
+import { z } from 'zod';
 
 export function useGroups() {
   return useQuery({
@@ -90,10 +91,25 @@ export function useBulkDeleteGroups() {
 export function useScrapeSubscription() {
   return useMutation({
     mutationFn: async (subscriptionId: string) => {
-      return await chrome.runtime.sendMessage({
+      const response: unknown = await chrome.runtime.sendMessage({
         type: 'SCRAPE_SUBSCRIPTION',
         payload: { subscriptionId },
       });
+      return scrapeSubscriptionResponseSchema.parse(response);
     },
   });
 }
+
+/**
+ * Schema for scrape subscription response
+ */
+const scrapeSubscriptionResponseSchema = z.object({
+  success: z.boolean(),
+  scrapedCount: z.number(),
+  failedGroups: z.array(
+    z.object({
+      groupId: z.string(),
+      error: z.string(),
+    })
+  ),
+});

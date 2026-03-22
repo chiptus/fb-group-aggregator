@@ -50,7 +50,7 @@ export default tseslint.config(
     },
   },
   {
-    // Relaxed rules for test files
+    // Relaxed rules for test files (must come after other rules to take precedence)
     files: ['**/*.test.ts', '**/*.test.tsx'],
     rules: {
       '@typescript-eslint/no-unsafe-call': 'off',
@@ -59,19 +59,6 @@ export default tseslint.config(
       '@typescript-eslint/no-unsafe-return': 'off',
       '@typescript-eslint/no-unsafe-argument': 'off',
       'max-lines-per-function': 'off', // Test suites can be long
-    },
-  },
-  {
-    // Chrome extension APIs and external libraries often have incomplete types
-    files: [
-      '**/entrypoints/**/*.ts',
-      '**/entrypoints/**/*.tsx',
-      '**/components/ui/**/*.tsx',
-    ],
-    rules: {
-      '@typescript-eslint/no-unsafe-call': 'warn',
-      '@typescript-eslint/no-unsafe-member-access': 'warn',
-      '@typescript-eslint/no-unsafe-assignment': 'warn',
     },
   },
   {
@@ -84,6 +71,7 @@ export default tseslint.config(
       '**/.cache/**',
       '**/eslint.config.js',
       '**/eslint.config.*.js',
+      '**/*-explorer.js', // Generated exploration scripts
     ],
   }
 );

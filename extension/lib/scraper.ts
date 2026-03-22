@@ -1,4 +1,5 @@
 import type { Post } from './types';
+import { z } from 'zod';
 
 /**
  * Scrapes posts from a Facebook group page
@@ -273,14 +274,15 @@ function extractPostId(element: HTMLElement): string | null {
   console.log('[Scraper] data-ft:', dataFt ? 'present' : 'absent');
   if (dataFt) {
     try {
-      const ftData = JSON.parse(dataFt) as unknown;
-      if (ftData.mf_story_key) {
-        console.log(
-          '[Scraper] ✓ Found post ID via data-ft:',
-          ftData.mf_story_key
-        );
-        return ftData.mf_story_key;
-      }
+      const ftDataSchema = z.object({
+        mf_story_key: z.string(),
+      });
+      const ftData = ftDataSchema.parse(JSON.parse(dataFt));
+      console.log(
+        '[Scraper] ✓ Found post ID via data-ft:',
+        ftData.mf_story_key
+      );
+      return ftData.mf_story_key;
     } catch {
       // Continue to next strategy
     }

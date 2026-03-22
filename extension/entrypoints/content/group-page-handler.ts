@@ -3,45 +3,29 @@ import { debounce } from '@/lib/debounce';
 import { createLogger } from '@/lib/logger';
 import { extractGroupInfo, scrapeGroupPosts } from '@/lib/scraper';
 import { getExistingPostIdsForGroup } from '@/lib/storage/posts';
+import { getErrorMessage } from '@/lib/utils';
+import { z } from 'zod';
 
 const logger = createLogger('content');
 const debouncedScrape = debounce(scrapeAndSend, 2000);
 
 /**
- * Type guard for scrape response from background script
+ * Schema for scrape response from background script
  */
-function isScrapeResponse(
-  response: unknown
-): response is { success: boolean; count?: number; error?: string } {
-  if (typeof response !== 'object' || response === null) {
-    return false;
-  }
-  const r = response as Record<string, unknown>;
-  return (
-    typeof r.success === 'boolean' &&
-    (r.count === undefined || typeof r.count === 'number') &&
-    (r.error === undefined || typeof r.error === 'string')
-  );
-}
+const scrapeResponseSchema = z.object({
+  success: z.boolean(),
+  count: z.number().optional(),
+  error: z.string().optional(),
+});
 
 /**
- * Type guard for scroll config payload
+ * Schema for scroll config payload
  */
-function isScrollConfig(payload: unknown): payload is {
-  scrollCount: number;
-  scrollInterval: number;
-  scrapeWaitTime: number;
-} {
-  if (typeof payload !== 'object' || payload === null) {
-    return false;
-  }
-  const p = payload as Record<string, unknown>;
-  return (
-    typeof p.scrollCount === 'number' &&
-    typeof p.scrollInterval === 'number' &&
-    typeof p.scrapeWaitTime === 'number'
-  );
-}
+const scrollConfigSchema = z.object({
+  scrollCount: z.number(),
+  scrollInterval: z.number(),
+  scrapeWaitTime: z.number(),
+});
 
 /**
  * Initialize scraping for a group page
@@ -81,11 +65,11 @@ export function initializeGroupPageScraping(
           .catch((error) => {
             logger.error('Scrape failed', {
               groupId,
-              error: error instanceof Error ? error.message : String(error),
+              error: getErrorMessage(error),
             });
             sendResponse({
               success: false,
-              error: error instanceof Error ? error.message : String(error),
+              error: getErrorMessage(error),
             });
           });
         return true; // Keep channel open for async response
@@ -93,7 +77,8 @@ export function initializeGroupPageScraping(
 
       // NEW: Handle autonomous scroll-and-scrape sequence
       if (message.type === 'START_SCROLL_AND_SCRAPE') {
-        if (!isScrollConfig(message.payload)) {
+        const configResult = scrollConfigSchema.safeParse(message.payload);
+        if (!configResult.success) {
           logger.error('Invalid scroll config payload', {
             groupId,
             payload: message.payload,
@@ -107,21 +92,21 @@ export function initializeGroupPageScraping(
 
         logger.info('START_SCROLL_AND_SCRAPE received', {
           groupId,
-          config: message.payload,
+          config: configResult.data,
         });
 
-        performScrollAndScrapeSequence(groupId, message.payload)
+        performScrollAndScrapeSequence(groupId, configResult.data)
           .then(() => {
             sendResponse({ success: true });
           })
           .catch((error) => {
             logger.error('Scroll-and-scrape sequence failed', {
               groupId,
-              error: error instanceof Error ? error.message : String(error),
+              error: getErrorMessage(error),
             });
             sendResponse({
               success: false,
-              error: error instanceof Error ? error.message : String(error),
+              error: getErrorMessage(error),
             });
           });
 
@@ -164,7 +149,7 @@ async function scrapeAndSend(groupId: string) {
     const groupInfo = extractGroupInfo();
 
     // Send to background script for storage
-    const response = await chrome.runtime.sendMessage({
+    const response: unknown = await chrome.runtime.sendMessage({
       type: 'SCRAPE_POSTS',
       payload: {
         groupId,
@@ -173,7 +158,8 @@ async function scrapeAndSend(groupId: string) {
       },
     });
 
-    if (!isScrapeResponse(response)) {
+    const responseResult = scrapeResponseSchema.safeParse(response);
+    if (!responseResult.success) {
       logger.error('Invalid response from background script', {
         groupId,
         response,
@@ -181,21 +167,21 @@ async function scrapeAndSend(groupId: string) {
       return;
     }
 
-    if (response.success) {
+    if (responseResult.data.success) {
       logger.info('Successfully saved new posts', {
         groupId,
-        savedCount: response.count,
+        savedCount: responseResult.data.count,
       });
     } else {
       logger.error('Failed to save posts', {
         groupId,
-        error: response.error,
+        error: responseResult.data.error,
       });
     }
   } catch (error) {
     logger.error('Scraping error', {
       groupId,
-      error: error instanceof Error ? error.message : String(error),
+      error: getErrorMessage(error),
     });
   }
 }
@@ -404,7 +390,7 @@ async function scrapeAndSendWithTracking(
     logger.error('Error in scrape cycle', {
       groupId,
       scrollNumber,
-      error: error instanceof Error ? error.message : String(error),
+      error: getErrorMessage(error),
     });
     return true;
   }

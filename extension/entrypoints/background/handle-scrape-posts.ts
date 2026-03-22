@@ -2,6 +2,7 @@ import { createLogger } from '@/lib/logger';
 import { createGroup, listGroups, updateGroup } from '@/lib/storage/groups';
 import { createPosts } from '@/lib/storage/posts';
 import type { ScrapePostsResponse } from '@/lib/types';
+import { getErrorMessage } from '@/lib/utils';
 
 const logger = createLogger('background');
 
@@ -73,7 +74,7 @@ export async function handleScrapePosts(payload: {
   } catch (error) {
     logger.error('Error in handleScrapePosts', {
       groupId,
-      error: error instanceof Error ? error.message : String(error),
+      error: getErrorMessage(error),
     });
     throw error;
   }

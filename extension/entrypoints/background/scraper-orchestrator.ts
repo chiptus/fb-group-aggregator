@@ -1,6 +1,7 @@
 import { createLogger } from '@/lib/logger';
 import { getGroupsBySubscription } from '@/lib/storage/groups';
 import type { ExtensionMessage } from '@/lib/types';
+import { getErrorMessage } from '@/lib/utils';
 
 const logger = createLogger('background');
 
@@ -55,8 +56,7 @@ export async function scrapeSubscription(subscriptionId: string): Promise<{
         await delay(3000);
       }
     } catch (error) {
-      const errorMessage =
-        error instanceof Error ? error.message : String(error);
+      const errorMessage = getErrorMessage(error);
       logger.error('Failed to scrape group', {
         groupName: group.name,
         groupId: group.id,
@@ -128,10 +128,10 @@ export async function scrapeGroupWithScrolling(
         tabId = tab.id;
 
         // Wait for page to load
-        const loadListener = (
+        function loadListener(
           tabIdUpdated: number,
           changeInfo: { status?: string }
-        ) => {
+        ) {
           if (tabIdUpdated !== tabId) return;
 
           if (changeInfo.status === 'complete') {
@@ -158,19 +158,20 @@ export async function scrapeGroupWithScrolling(
                 .catch((error) => {
                   logger.error('Failed to send START_SCROLL_AND_SCRAPE', {
                     ...logContext,
-                    error:
-                      error instanceof Error ? error.message : String(error),
+                    error: getErrorMessage(error),
                   });
                   chrome.runtime.onMessage.removeListener(progressListener);
                   clearTimeout(timeout);
                   if (tabId) {
                     chrome.tabs.remove(tabId).catch(console.error);
                   }
-                  reject(error);
+                  reject(
+                    error instanceof Error ? error : new Error(String(error))
+                  );
                 });
             }, 3000); // 3s initial wait for page render
           }
-        };
+        }
 
         chrome.tabs.onUpdated.addListener(loadListener);
       }

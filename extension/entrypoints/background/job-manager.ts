@@ -7,6 +7,7 @@ import {
   getJob,
   updateJob,
 } from '@/lib/storage/jobs';
+import { getErrorMessage } from '@/lib/utils';
 import { scrapeGroupWithScrolling } from './scraper-orchestrator';
 
 // todo - need to make there's one job running at the same time
@@ -194,8 +195,7 @@ async function executeJob(jobId: string): Promise<void> {
           postsScraped: result.postsScraped,
         });
       } catch (error) {
-        const errorMessage =
-          error instanceof Error ? error.message : String(error);
+        const errorMessage = getErrorMessage(error);
 
         logger.error('Failed to scrape group', {
           jobId,
@@ -242,7 +242,7 @@ async function executeJob(jobId: string): Promise<void> {
 
     await cleanupOldJobs();
   } catch (error) {
-    const errorMessage = error instanceof Error ? error.message : String(error);
+    const errorMessage = getErrorMessage(error);
 
     logger.error('Job execution error', { jobId, error: errorMessage });
 

@@ -216,7 +216,6 @@ function JobCard({
   onResume,
   onDelete,
 }: JobCardProps) {
-
   const logsQuery = useLogs(showLogs ? { jobId: job.id } : undefined);
   const logs = logsQuery.data ?? [];
 
@@ -224,18 +223,6 @@ function JobCard({
     job.totalGroups > 0
       ? Math.round((job.currentGroupIndex / job.totalGroups) * 100)
       : 0;
-
-  function formatDuration(
-    startedAt: number | null,
-    completedAt: number | null
-  ) {
-    if (!startedAt) return 'Not started';
-    const end = completedAt || Date.now();
-    const durationMs = end - startedAt;
-    const minutes = Math.floor(durationMs / 60000);
-    const seconds = Math.floor((durationMs % 60000) / 1000);
-    return `${minutes}m ${seconds}s`;
-  }
 
   function formatTimestamp(timestamp: number) {
     return new Date(timestamp).toLocaleString();
@@ -256,7 +243,14 @@ function JobCard({
               {formatTimestamp(job.createdAt)}
             </span>
             <span className="text-sm text-gray-600">
-              Duration: {formatDuration(job.startedAt, job.completedAt)}
+              Duration:{' '}
+              {job.startedAt
+                ? formatDuration(
+                    job.startedAt,
+
+                    job.completedAt || undefined
+                  )
+                : 'Not started'}
             </span>
           </div>
 
@@ -448,4 +442,15 @@ function JobCard({
       )}
     </div>
   );
+}
+
+function formatDuration(
+  startedAt: number | null,
+  endTime: number = Date.now()
+) {
+  if (!startedAt) return 'Not started';
+  const durationMs = endTime - startedAt;
+  const minutes = Math.floor(durationMs / 60000);
+  const seconds = Math.floor((durationMs % 60000) / 1000);
+  return `${minutes}m ${seconds}s`;
 }

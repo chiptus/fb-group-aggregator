@@ -10,7 +10,8 @@
       "Bash(grep:*)",
       "Bash(git worktree:*)",
       "WebFetch(domain:typescript-eslint.io)",
-      "Bash(pnpm lint:*)"
+      "Bash(pnpm lint:*)",
+      "Bash(pnpm eslint:*)"
     ],
     "deny": [],
     "ask": []

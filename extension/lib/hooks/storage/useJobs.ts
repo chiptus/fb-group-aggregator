@@ -1,6 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { listJobs } from '@/lib/storage/jobs';
 import { queryKeys } from './queryKeys';
+import { z } from 'zod';
 
 interface UseJobsOptions {
   jobId?: string;
@@ -29,11 +30,17 @@ export function useStartJob() {
 
   return useMutation({
     mutationFn: async (): Promise<{ jobId: string }> => {
-      const response = await chrome.runtime.sendMessage({ type: 'START_JOB' });
-      if (!response.success) {
-        throw new Error(response.error || 'Failed to start job');
+      const response: unknown = await chrome.runtime.sendMessage({
+        type: 'START_JOB',
+      });
+      const parsed = jobResponseSchema.parse(response);
+      if (!parsed.success) {
+        throw new Error(parsed.error || 'Failed to start job');
       }
-      return { jobId: response.jobId };
+      if (!parsed.jobId) {
+        throw new Error('No jobId in response');
+      }
+      return { jobId: parsed.jobId };
     },
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: queryKeys.jobs });
@@ -46,12 +53,13 @@ export function useCancelJob() {
 
   return useMutation({
     mutationFn: async (jobId: string): Promise<void> => {
-      const response = await chrome.runtime.sendMessage({
+      const response: unknown = await chrome.runtime.sendMessage({
         type: 'CANCEL_JOB',
         payload: { jobId },
       });
-      if (!response.success) {
-        throw new Error(response.error || 'Failed to cancel job');
+      const parsed = jobResponseSchema.parse(response);
+      if (!parsed.success) {
+        throw new Error(parsed.error || 'Failed to cancel job');
       }
     },
     onSuccess: () => {
@@ -65,12 +73,13 @@ export function useResumeJob() {
 
   return useMutation({
     mutationFn: async (jobId: string): Promise<void> => {
-      const response = await chrome.runtime.sendMessage({
+      const response: unknown = await chrome.runtime.sendMessage({
         type: 'RESUME_JOB',
         payload: { jobId },
       });
-      if (!response.success) {
-        throw new Error(response.error || 'Failed to resume job');
+      const parsed = jobResponseSchema.parse(response);
+      if (!parsed.success) {
+        throw new Error(parsed.error || 'Failed to resume job');
       }
     },
     onSuccess: () => {
@@ -84,12 +93,13 @@ export function useDeleteJob() {
 
   return useMutation({
     mutationFn: async (jobId: string): Promise<void> => {
-      const response = await chrome.runtime.sendMessage({
+      const response: unknown = await chrome.runtime.sendMessage({
         type: 'DELETE_JOB',
         payload: { jobId },
       });
-      if (!response.success) {
-        throw new Error(response.error || 'Failed to delete job');
+      const parsed = jobResponseSchema.parse(response);
+      if (!parsed.success) {
+        throw new Error(parsed.error || 'Failed to delete job');
       }
     },
     onSuccess: () => {
@@ -97,3 +107,12 @@ export function useDeleteJob() {
     },
   });
 }
+
+/**
+ * Schema for job operation response
+ */
+const jobResponseSchema = z.object({
+  success: z.boolean(),
+  jobId: z.string().optional(),
+  error: z.string().optional(),
+});
