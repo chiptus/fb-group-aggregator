@@ -34,13 +34,19 @@ All in `lib/hooks/`:
 
 ```typescript
 // Queries
-(useSubscriptions(), useGroups(), usePosts());
+useSubscriptions();
+useGroups();
+usePosts();
 
 // Mutations
-(useCreateSubscription(), useUpdateGroup(), useMarkPostSeen());
+useCreateSubscription();
+useUpdateGroup();
+useMarkPostSeen();
 
 // Filters (lib/hooks/filters/)
-(useFilters(), useSaveFilters(), useFilteredPosts());
+useFilters();
+useSaveFilters();
+useFilteredPosts();
 
 // Grouping (lib/hooks/grouping/)
 useGroupedPosts(posts);

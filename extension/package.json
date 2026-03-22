@@ -18,7 +18,7 @@
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "check": "pnpm lint && pnpm format && pnpm typecheck",
-    "ci": "pnpm typecheck && pnpm check && pnpm test run"
+    "ci": "pnpm check && pnpm test run"
   },
   "lint-staged": {
     "*.{js,jsx,ts,tsx}": [

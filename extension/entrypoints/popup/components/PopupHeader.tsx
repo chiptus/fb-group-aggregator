@@ -5,7 +5,10 @@ export function PopupHeader() {
   const postsQuery = usePosts();
 
   const unseenCount = useMemo(() => {
-    return postsQuery.data?.filter((post) => !post.seen).length;
+    if (!postsQuery.data) {
+      return 0;
+    }
+    return postsQuery.data.filter((post) => !post.seen).length;
   }, [postsQuery.data]);
 
   function getDisplayContent() {
