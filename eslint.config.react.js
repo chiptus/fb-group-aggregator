@@ -2,7 +2,7 @@
 import react from 'eslint-plugin-react';
 import reactHooks from 'eslint-plugin-react-hooks';
 
-/** @type {import('eslint').Linter.Config[]} */
+// /** @type {import('eslint').Linter.Config[]} */
 export default [
   {
     files: ['**/*.tsx', '**/*.jsx'],
@@ -16,7 +16,7 @@ export default [
     },
     settings: {
       react: {
-        version: '19',
+        version: 'detect',
       },
     },
     rules: {
