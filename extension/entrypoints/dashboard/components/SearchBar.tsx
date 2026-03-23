@@ -1,4 +1,3 @@
-import { useEffect, useState } from 'react';
 import { useDebounce } from '@/lib/hooks/useDebounce';
 
 interface SearchBarProps {
@@ -12,18 +11,7 @@ export function SearchBar({
   onChange,
   debounceMs = 300,
 }: SearchBarProps) {
-  const [inputValue, setInputValue] = useState(value);
-  const debouncedValue = useDebounce(inputValue, debounceMs);
-
-  useEffect(() => {
-    setInputValue(value);
-  }, [value]);
-
-  useEffect(() => {
-    if (debouncedValue !== value) {
-      onChange(debouncedValue);
-    }
-  }, [debouncedValue, onChange, value]);
+  const [inputValue, setInputValue] = useDebounce(value, onChange, debounceMs);
 
   return (
     <div className="mb-4">
