@@ -8,8 +8,11 @@ export function PostsEmptyState() {
     showOnlyStarred,
     selectedSubscriptionId,
     filters,
+    totalPostCount,
     clearFilters,
   } = usePostsView();
+
+  const noPostsExist = totalPostCount === 0;
 
   const hasAnyFilter =
     hasActiveFilters ||
@@ -21,14 +24,11 @@ export function PostsEmptyState() {
   return (
     <div className="block bg-white rounded-lg shadow p-8 text-center space-y-4">
       <p className="text-gray-600">
-        {hasAnyFilter
-          ? 'No posts match your current filters'
-          : 'No posts found'}
+        {noPostsExist
+          ? 'No posts found'
+          : 'No posts match your current filters'}
       </p>
-      {(hasActiveFilters ||
-        searchQuery ||
-        showOnlyUnseen ||
-        showOnlyStarred) && (
+      {!noPostsExist && hasAnyFilter && (
         <>
           <div className="text-sm text-gray-500 space-y-1">
             {searchQuery && <p>Search: "{searchQuery}"</p>}
