@@ -16,10 +16,10 @@ export function PostsEmptyState() {
 
   const hasAnyFilter =
     hasActiveFilters ||
-    searchQuery ||
+    !!searchQuery ||
     showOnlyUnseen ||
     showOnlyStarred ||
-    selectedSubscriptionId;
+    !!selectedSubscriptionId;
 
   return (
     <div className="block bg-white rounded-lg shadow p-8 text-center space-y-4">
