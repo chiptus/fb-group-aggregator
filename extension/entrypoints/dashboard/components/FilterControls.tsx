@@ -1,6 +1,6 @@
 import type { FilterSettings, KeywordType } from '@/lib/filters/types';
 import { DEFAULT_FILTER_SETTINGS } from '@/lib/filters/types';
-import { useFilters, useSaveFilters } from '@/lib/hooks/filters/useFilters';
+import { useFilters, useSaveFilters } from '@/lib/hooks/storage/useFilters';
 import { FilterSettingsSection } from './FilterSettingsSection';
 import { KeywordInputSection } from './KeywordInputSection';
 

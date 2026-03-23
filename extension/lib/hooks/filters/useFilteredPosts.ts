@@ -2,7 +2,7 @@ import { useMemo } from 'react';
 import { filterPosts } from '@/lib/filters/filterPosts';
 import { usePosts } from '@/lib/hooks/storage/usePosts';
 import type { Post } from '@/lib/types';
-import { useFilters } from './useFilters';
+import { useFilters } from '@/lib/hooks/storage/useFilters';
 
 export interface FilterStats {
   totalPosts: number;
