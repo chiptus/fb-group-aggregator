@@ -70,6 +70,15 @@ export async function togglePostStarred(
   await storage.setItem(POSTS_STORAGE_KEY, updatedPosts);
 }
 
+export async function markAllPostsAsSeen(postIds: string[]): Promise<void> {
+  const posts = await listPosts();
+  const seenSet = new Set(postIds);
+  const updatedPosts = posts.map((p: Post) =>
+    seenSet.has(p.id) ? { ...p, seen: true } : p
+  );
+  await storage.setItem(POSTS_STORAGE_KEY, updatedPosts);
+}
+
 export async function deleteOldPosts(daysOld: number): Promise<void> {
   const posts = await listPosts();
   const cutoffTime = Date.now() - daysOld * 24 * 60 * 60 * 1000;
