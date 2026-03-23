@@ -24,9 +24,13 @@ export function usePostsData() {
   const isLoading =
     subscriptionsQuery.isLoading ||
     groupsQuery.isLoading ||
-    postsQuery.isLoading;
+    postsQuery.isLoading ||
+    filtersQuery.isLoading;
   const error =
-    subscriptionsQuery.error || groupsQuery.error || postsQuery.error;
+    subscriptionsQuery.error ||
+    groupsQuery.error ||
+    postsQuery.error ||
+    filtersQuery.error;
 
   const subscriptions = subscriptionsQuery.data ?? [];
   const groups = groupsQuery.data ?? [];
