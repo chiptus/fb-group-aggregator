@@ -1,6 +1,7 @@
 import DOMPurify from 'dompurify';
 import { Button } from '@/components/ui/button';
 import type { Group, Post } from '@/lib/types';
+import { formatDateTime } from '@/lib/utils';
 
 interface PostCardProps {
   post: Post;
@@ -22,7 +23,7 @@ export function PostCard({
           <h3 className="font-semibold text-gray-900">{post.authorName}</h3>
           <p className="text-sm text-gray-500">
             {group && <span className="text-blue-600">{group.name} • </span>}
-            Scraped: {new Date(post.scrapedAt).toLocaleString()}
+            Scraped: {formatDateTime(post.scrapedAt)}
           </p>
         </div>
         <div className="flex gap-2">

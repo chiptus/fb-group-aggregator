@@ -14,3 +14,27 @@ export function getErrorMessage(error: unknown): string {
   }
   return String(error);
 }
+
+function formatDatePart(d: Date): string {
+  const day = String(d.getDate()).padStart(2, '0');
+  const month = String(d.getMonth() + 1).padStart(2, '0');
+  return `${day}/${month}/${d.getFullYear()}`;
+}
+
+export function formatDateTime(value: string | number | Date): string {
+  const d = new Date(value);
+  if (Number.isNaN(d.getTime())) return 'Invalid date';
+  const locale =
+    typeof navigator !== 'undefined' ? navigator.language : undefined;
+  const time = d.toLocaleTimeString(locale, {
+    hour: '2-digit',
+    minute: '2-digit',
+  });
+  return `${formatDatePart(d)}, ${time}`;
+}
+
+export function formatDate(value: string | number | Date): string {
+  const d = new Date(value);
+  if (Number.isNaN(d.getTime())) return 'Invalid date';
+  return formatDatePart(d);
+}

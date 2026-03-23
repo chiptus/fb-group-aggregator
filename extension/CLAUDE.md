@@ -43,13 +43,9 @@ useCreateSubscription();
 useUpdateGroup();
 useMarkPostSeen();
 
-// Filters (lib/hooks/filters/)
+// Filters (lib/hooks/storage/)
 useFilters();
 useSaveFilters();
-useFilteredPosts();
-
-// Grouping (lib/hooks/grouping/)
-useGroupedPosts(posts);
 ```
 
 ## Message Protocol

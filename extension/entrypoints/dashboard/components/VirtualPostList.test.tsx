@@ -86,9 +86,9 @@ describe('VirtualPostList', () => {
 });
 
 function renderComponent(props?: Partial<VirtualPostListProps>) {
-  const defaultRenderPost = (post: Post) => (
-    <div data-testid={`post-${post.id}`}>{post.contentHtml}</div>
-  );
+  function defaultRenderPost(post: Post) {
+    return <div data-testid={`post-${post.id}`}>{post.contentHtml}</div>;
+  }
   return renderWithQuery(
     <VirtualPostList
       posts={createMockPosts(10)}

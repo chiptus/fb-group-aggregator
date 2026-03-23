@@ -123,15 +123,13 @@ describe('Dashboard App', () => {
     const user = userEvent.setup();
     renderWithQuery(<App />);
 
-    // Uncheck "Show only unseen" to see all posts including seen ones
+    // Turn off "Unseen" filter to see all posts including seen ones
     await waitFor(() => {
       expect(
-        screen.getByRole('checkbox', { name: /show only unseen/i })
+        screen.getByRole('button', { name: /unseen/i })
       ).toBeInTheDocument();
     });
-    await user.click(
-      screen.getByRole('checkbox', { name: /show only unseen/i })
-    );
+    await user.click(screen.getByRole('button', { name: /unseen/i }));
 
     await waitFor(() => {
       expect(
@@ -146,13 +144,11 @@ describe('Dashboard App', () => {
     const user = userEvent.setup();
     renderWithQuery(<App />);
 
-    // Wait for initial load and uncheck "Show only unseen" to see all posts
+    // Wait for initial load and turn off "Unseen" filter to see all posts
     await waitFor(() => {
       expect(screen.getByText('Tech Jobs')).toBeInTheDocument();
     });
-    await user.click(
-      screen.getByRole('checkbox', { name: /show only unseen/i })
-    );
+    await user.click(screen.getByRole('button', { name: /unseen/i }));
 
     // Click on Tech Jobs subscription
     await user.click(screen.getByText('Tech Jobs'));
@@ -200,15 +196,13 @@ describe('Dashboard App', () => {
     const user = userEvent.setup();
     renderWithQuery(<App />);
 
-    // Uncheck "Show only unseen" to see all posts including already-seen ones
+    // Turn off "Unseen" filter to see all posts including already-seen ones
     await waitFor(() => {
       expect(
-        screen.getByRole('checkbox', { name: /show only unseen/i })
+        screen.getByRole('button', { name: /unseen/i })
       ).toBeInTheDocument();
     });
-    await user.click(
-      screen.getByRole('checkbox', { name: /show only unseen/i })
-    );
+    await user.click(screen.getByRole('button', { name: /unseen/i }));
 
     await waitFor(() => {
       expect(screen.getByText(/Junior Frontend opening/)).toBeInTheDocument();
@@ -233,8 +227,9 @@ describe('Dashboard App', () => {
     renderWithQuery(<App />);
 
     await waitFor(() => {
-      // 2 unseen posts (post1, post2)
-      expect(screen.getByText(/2.*unseen/i)).toBeInTheDocument();
+      // 2 unseen posts (post1, post2) — shown as a badge inside the Unseen pill
+      const unseenPill = screen.getByRole('button', { name: /unseen/i });
+      expect(unseenPill).toHaveTextContent('2');
     });
   });
 
@@ -289,7 +284,8 @@ describe('Dashboard App', () => {
     renderWithQuery(<App />);
 
     await waitFor(() => {
-      expect(screen.getByText(/no posts found/i)).toBeInTheDocument();
+      // 0 total posts → "No posts found" (not a filter message)
+      expect(screen.getByText('No posts found')).toBeInTheDocument();
     });
   });
 
@@ -297,15 +293,13 @@ describe('Dashboard App', () => {
     const user = userEvent.setup();
     renderWithQuery(<App />);
 
-    // Uncheck "Show only unseen" to see all 3 posts
+    // Turn off "Unseen" filter to see all 3 posts
     await waitFor(() => {
       expect(
-        screen.getByRole('checkbox', { name: /show only unseen/i })
+        screen.getByRole('button', { name: /unseen/i })
       ).toBeInTheDocument();
     });
-    await user.click(
-      screen.getByRole('checkbox', { name: /show only unseen/i })
-    );
+    await user.click(screen.getByRole('button', { name: /unseen/i }));
 
     await waitFor(() => {
       const posts = screen.getAllByRole('article');
