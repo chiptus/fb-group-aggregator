@@ -23,6 +23,7 @@ export function PostsTab() {
 function PostsTabInner() {
   const {
     getGroupById,
+    groupsMap,
     filteredPosts,
     enableGrouping,
     isLoading,
@@ -86,7 +87,7 @@ function PostsTabInner() {
       ) : enableGrouping ? (
         <GroupedPostsSection
           filteredPosts={filteredPosts}
-          getGroupById={getGroupById}
+          groupsMap={groupsMap}
           onSetSeen={setPostSeen}
           onToggleStarred={togglePostStarred}
         />

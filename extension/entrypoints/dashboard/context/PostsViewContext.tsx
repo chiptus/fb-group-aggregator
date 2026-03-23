@@ -24,6 +24,7 @@ interface PostsViewContextValue {
   togglePostStarred: (postId: string, currentStarred: boolean) => void;
   removeKeyword: (keyword: string, type: KeywordType) => void;
   getGroupById: (id: string) => Group | undefined;
+  groupsMap: Map<string, Group>;
 
   // View state
   selectedSubscriptionId: string | null;
@@ -141,6 +142,7 @@ export function PostsViewProvider({ children }: { children: ReactNode }) {
     togglePostStarred,
     removeKeyword,
     getGroupById,
+    groupsMap,
     selectedSubscriptionId,
     searchQuery,
     showOnlyUnseen,
