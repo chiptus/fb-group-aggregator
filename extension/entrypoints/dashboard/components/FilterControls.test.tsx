@@ -33,6 +33,22 @@ function createWrapper() {
   );
 }
 
+function renderFilterControls() {
+  return render(<FilterControls />, { wrapper: createWrapper() });
+}
+
+async function getInputAndButton() {
+  const input = await screen.findByPlaceholderText(/add keyword/i);
+  const addButton = screen.getByRole('button', { name: /add/i });
+  return { input, addButton };
+}
+
+async function addKeywordViaButton(keyword: string) {
+  const { input, addButton } = await getInputAndButton();
+  fireEvent.change(input, { target: { value: keyword } });
+  fireEvent.click(addButton);
+}
+
 describe('FilterControls', () => {
   beforeEach(() => {
     vi.clearAllMocks();
@@ -41,22 +57,18 @@ describe('FilterControls', () => {
   });
 
   it('should render keyword input and add button', async () => {
-    render(<FilterControls />, { wrapper: createWrapper() });
-
-    await waitFor(() => {
-      expect(screen.getByPlaceholderText(/add keyword/i)).toBeInTheDocument();
-    });
-    expect(screen.getByRole('button', { name: /add/i })).toBeInTheDocument();
+    renderFilterControls();
+    const { input, addButton } = await getInputAndButton();
+    expect(input).toBeInTheDocument();
+    expect(addButton).toBeInTheDocument();
   });
 
   it('should have positive/negative keyword toggle', async () => {
-    render(<FilterControls />, { wrapper: createWrapper() });
-
-    await waitFor(() => {
-      expect(
-        screen.getByRole('radio', { name: /positive/i })
-      ).toBeInTheDocument();
-    });
+    renderFilterControls();
+    await getInputAndButton();
+    expect(
+      screen.getByRole('radio', { name: /positive/i })
+    ).toBeInTheDocument();
     expect(
       screen.getByRole('radio', { name: /negative/i })
     ).toBeInTheDocument();
@@ -68,20 +80,8 @@ describe('FilterControls', () => {
       positiveKeywords: ['apartment'],
     };
 
-    // Update mock to return new filters after mutation
-    vi.mocked(storage.getItem).mockResolvedValueOnce(defaultFilters);
-    vi.mocked(storage.setItem).mockImplementation(() => {
-      vi.mocked(storage.getItem).mockResolvedValue(updatedFilters);
-      return Promise.resolve();
-    });
-
-    render(<FilterControls />, { wrapper: createWrapper() });
-
-    const input = await screen.findByPlaceholderText(/add keyword/i);
-    const addButton = screen.getByRole('button', { name: /add/i });
-
-    fireEvent.change(input, { target: { value: 'apartment' } });
-    fireEvent.click(addButton);
+    renderFilterControls();
+    await addKeywordViaButton('apartment');
 
     await waitFor(() => {
       expect(storage.setItem).toHaveBeenCalledWith(
@@ -97,17 +97,12 @@ describe('FilterControls', () => {
       negativeKeywords: ['sold'],
     };
 
-    render(<FilterControls />, { wrapper: createWrapper() });
-
+    renderFilterControls();
     const negativeToggle = await screen.findByRole('radio', {
       name: /negative/i,
     });
-    const input = screen.getByPlaceholderText(/add keyword/i);
-    const addButton = screen.getByRole('button', { name: /add/i });
-
     fireEvent.click(negativeToggle);
-    fireEvent.change(input, { target: { value: 'sold' } });
-    fireEvent.click(addButton);
+    await addKeywordViaButton('sold');
 
     await waitFor(() => {
       expect(storage.setItem).toHaveBeenCalledWith(
@@ -118,13 +113,9 @@ describe('FilterControls', () => {
   });
 
   it('should clear input after adding keyword', async () => {
-    render(<FilterControls />, { wrapper: createWrapper() });
-
-    const input = await screen.findByPlaceholderText(/add keyword/i);
-    const addButton = screen.getByRole('button', { name: /add/i });
-
-    fireEvent.change(input, { target: { value: 'apartment' } });
-    fireEvent.click(addButton);
+    renderFilterControls();
+    const { input } = await getInputAndButton();
+    await addKeywordViaButton('apartment');
 
     await waitFor(() => {
       expect((input as HTMLInputElement).value).toBe('');
@@ -132,34 +123,26 @@ describe('FilterControls', () => {
   });
 
   it('should not add empty keyword', async () => {
-    render(<FilterControls />, { wrapper: createWrapper() });
-
-    const addButton = await screen.findByRole('button', { name: /add/i });
-
+    renderFilterControls();
+    const { addButton } = await getInputAndButton();
     fireEvent.click(addButton);
-
-    // No error should be thrown, button just doesn't do anything
     expect(screen.queryByRole('alert')).not.toBeInTheDocument();
   });
 
   it('should have case-sensitive toggle', async () => {
-    render(<FilterControls />, { wrapper: createWrapper() });
-
-    await waitFor(() => {
-      expect(
-        screen.getByRole('checkbox', { name: /case.sensitive/i })
-      ).toBeInTheDocument();
-    });
+    renderFilterControls();
+    await getInputAndButton();
+    expect(
+      screen.getByRole('checkbox', { name: /case.sensitive/i })
+    ).toBeInTheDocument();
   });
 
   it('should have search fields selection', async () => {
-    render(<FilterControls />, { wrapper: createWrapper() });
-
-    await waitFor(() => {
-      expect(
-        screen.getByRole('checkbox', { name: /content/i })
-      ).toBeInTheDocument();
-    });
+    renderFilterControls();
+    await getInputAndButton();
+    expect(
+      screen.getByRole('checkbox', { name: /content/i })
+    ).toBeInTheDocument();
     expect(
       screen.getByRole('checkbox', { name: /author/i })
     ).toBeInTheDocument();
@@ -171,12 +154,12 @@ describe('FilterControls', () => {
       positiveKeywords: ['apartment'],
     };
 
-    render(<FilterControls />, { wrapper: createWrapper() });
-
-    const input = await screen.findByPlaceholderText(/add keyword/i);
+    renderFilterControls();
+    const { input } = await getInputAndButton();
+    const form = input.closest('form');
 
     fireEvent.change(input, { target: { value: 'apartment' } });
-    fireEvent.keyDown(input, { key: 'Enter', code: 'Enter' });
+    fireEvent.submit(form!);
 
     await waitFor(() => {
       expect(storage.setItem).toHaveBeenCalledWith(
@@ -192,13 +175,8 @@ describe('FilterControls', () => {
       positiveKeywords: ['apartment'],
     };
 
-    render(<FilterControls />, { wrapper: createWrapper() });
-
-    const input = await screen.findByPlaceholderText(/add keyword/i);
-    const addButton = screen.getByRole('button', { name: /add/i });
-
-    fireEvent.change(input, { target: { value: '  apartment  ' } });
-    fireEvent.click(addButton);
+    renderFilterControls();
+    await addKeywordViaButton('  apartment  ');
 
     await waitFor(() => {
       expect(storage.setItem).toHaveBeenCalledWith(
@@ -214,28 +192,14 @@ describe('FilterControls', () => {
       positiveKeywords: ['apartment'],
     };
 
-    // First getItem returns existing keyword, subsequent calls return same
     vi.mocked(storage.getItem).mockResolvedValue(filtersWithKeyword);
-
-    render(<FilterControls />, { wrapper: createWrapper() });
-
-    // Clear mocks after initial render
-    await waitFor(() => {
-      expect(screen.getByPlaceholderText(/add keyword/i)).toBeInTheDocument();
-    });
+    renderFilterControls();
+    await getInputAndButton();
     vi.mocked(storage.setItem).mockClear();
 
-    const input = screen.getByPlaceholderText(/add keyword/i);
-    const addButton = screen.getByRole('button', { name: /add/i });
-
-    // Try to add duplicate keyword
-    fireEvent.change(input, { target: { value: 'apartment' } });
-    fireEvent.click(addButton);
-
-    // Wait a bit for potential mutation
+    await addKeywordViaButton('apartment');
     await new Promise((resolve) => setTimeout(resolve, 100));
 
-    // setItem should NOT have been called (duplicate prevented)
     expect(storage.setItem).not.toHaveBeenCalled();
   });
 });
