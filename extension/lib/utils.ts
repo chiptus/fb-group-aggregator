@@ -23,6 +23,7 @@ function formatDatePart(d: Date): string {
 
 export function formatDateTime(value: string | number | Date): string {
   const d = new Date(value);
+  if (Number.isNaN(d.getTime())) return 'Invalid date';
   const locale =
     typeof navigator !== 'undefined' ? navigator.language : undefined;
   const time = d.toLocaleTimeString(locale, {
@@ -33,5 +34,7 @@ export function formatDateTime(value: string | number | Date): string {
 }
 
 export function formatDate(value: string | number | Date): string {
-  return formatDatePart(new Date(value));
+  const d = new Date(value);
+  if (Number.isNaN(d.getTime())) return 'Invalid date';
+  return formatDatePart(d);
 }
