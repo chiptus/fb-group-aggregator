@@ -54,7 +54,10 @@ export function KeywordInputSection({
       <div className="flex gap-4">
         <form.Field name="type">
           {(field) => (
-            <>
+            <fieldset
+              disabled={disabled}
+              className="flex gap-4 border-none p-0 m-0"
+            >
               <label className="flex items-center gap-2">
                 <input
                   type="radio"
@@ -73,7 +76,7 @@ export function KeywordInputSection({
                 />
                 Negative
               </label>
-            </>
+            </fieldset>
           )}
         </form.Field>
       </div>
