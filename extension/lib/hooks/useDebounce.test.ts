@@ -78,4 +78,25 @@ describe('useDebounce', () => {
 
     expect(result.current[0]).toBe('reset');
   });
+
+  it('does not call onChange when external value prop resets', () => {
+    const onChange = vi.fn();
+    let externalValue = 'initial';
+    const { result, rerender } = renderHook(() =>
+      useDebounce(externalValue, onChange, 300)
+    );
+
+    act(() => {
+      result.current[1]('typed');
+    });
+
+    externalValue = 'reset';
+    rerender();
+
+    act(() => {
+      vi.advanceTimersByTime(300);
+    });
+
+    expect(onChange).not.toHaveBeenCalled();
+  });
 });
