@@ -71,6 +71,7 @@ export async function togglePostStarred(
 }
 
 export async function markAllPostsAsSeen(postIds: string[]): Promise<void> {
+  if (postIds.length === 0) return;
   const posts = await listPosts();
   const seenSet = new Set(postIds);
   const updatedPosts = posts.map((p: Post) =>
