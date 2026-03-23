@@ -60,6 +60,7 @@ export default tseslint.config(
       '@typescript-eslint/no-unsafe-argument': 'off',
       '@typescript-eslint/unbound-method': 'off', // Mocking patterns in tests don't need this
       'max-lines-per-function': 'off', // Test suites can be long
+      'max-lines': 'off', // Test suites can be long
     },
   },
   {

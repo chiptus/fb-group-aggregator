@@ -38,3 +38,13 @@ export function formatDate(value: string | number | Date): string {
   if (Number.isNaN(d.getTime())) return 'Invalid date';
   return formatDatePart(d);
 }
+
+export function formatLogTime(timestamp: number): string {
+  return new Date(timestamp).toLocaleTimeString('en-US', {
+    hour12: false,
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit',
+    fractionalSecondDigits: 3,
+  });
+}

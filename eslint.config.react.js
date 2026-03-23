@@ -31,6 +31,15 @@ export default [
           skipComments: true,
         },
       ],
+      // Max 200 lines per component file
+      'max-lines': [
+        'warn',
+        {
+          max: 200,
+          skipBlankLines: true,
+          skipComments: true,
+        },
+      ],
 
       // Props destructuring in signature
       'react/destructuring-assignment': [
