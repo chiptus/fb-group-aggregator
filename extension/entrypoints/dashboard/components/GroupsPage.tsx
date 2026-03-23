@@ -12,6 +12,45 @@ import { BulkActionsBar } from './BulkActionsBar';
 import { GroupsPageHeader } from './GroupsPageHeader';
 import { GroupsTable } from './GroupsTable';
 
+function useGroupsPageData(
+  filterSubscriptionId: string | null,
+  searchQuery: string
+) {
+  const groupsQuery = useGroups();
+  const subscriptionsQuery = useSubscriptions();
+
+  const groups = groupsQuery.data ?? [];
+  const subscriptions = subscriptionsQuery.data ?? [];
+  const isLoading = groupsQuery.isLoading || subscriptionsQuery.isLoading;
+
+  const filteredGroups = useMemo(() => {
+    let result = groups;
+    if (filterSubscriptionId) {
+      result = result.filter((g) =>
+        filterSubscriptionId === 'unassigned'
+          ? g.subscriptionIds.length === 0
+          : g.subscriptionIds.includes(filterSubscriptionId)
+      );
+    }
+    if (searchQuery) {
+      const query = searchQuery.toLowerCase();
+      result = result.filter((g) => g.name.toLowerCase().includes(query));
+    }
+    return result;
+  }, [groups, filterSubscriptionId, searchQuery]);
+
+  const stats = useMemo(() => {
+    const total = groups.length;
+    const unassigned = groups.filter(
+      (g) => g.subscriptionIds.length === 0
+    ).length;
+    const enabled = groups.filter((g) => g.enabled).length;
+    return { total, unassigned, enabled };
+  }, [groups]);
+
+  return { groups, subscriptions, isLoading, filteredGroups, stats };
+}
+
 export function GroupsPage() {
   const [selectedGroupIds, setSelectedGroupIds] = useState<Set<string>>(
     new Set()
@@ -22,9 +61,10 @@ export function GroupsPage() {
   >(null);
   const [bulkSubscriptionId, setBulkSubscriptionId] = useState('');
 
-  // Fetch data
-  const groupsQuery = useGroups();
-  const subscriptionsQuery = useSubscriptions();
+  const { subscriptions, isLoading, filteredGroups, stats } = useGroupsPageData(
+    filterSubscriptionId,
+    searchQuery
+  );
 
   // Mutations
   const scanGroupsList = useScanGroupsList();
@@ -32,42 +72,6 @@ export function GroupsPage() {
   const deleteGroup = useDeleteGroup();
   const bulkUpdateGroups = useBulkUpdateGroups();
   const bulkDeleteGroups = useBulkDeleteGroups();
-
-  const groups = groupsQuery.data ?? [];
-  const subscriptions = subscriptionsQuery.data ?? [];
-  const isLoading = groupsQuery.isLoading || subscriptionsQuery.isLoading;
-
-  // Filter and search groups
-  const filteredGroups = useMemo(() => {
-    let result = groups;
-
-    // Filter by subscription
-    if (filterSubscriptionId) {
-      result = result.filter((g) =>
-        filterSubscriptionId === 'unassigned'
-          ? g.subscriptionIds.length === 0
-          : g.subscriptionIds.includes(filterSubscriptionId)
-      );
-    }
-
-    // Filter by search query
-    if (searchQuery) {
-      const query = searchQuery.toLowerCase();
-      result = result.filter((g) => g.name.toLowerCase().includes(query));
-    }
-
-    return result;
-  }, [groups, filterSubscriptionId, searchQuery]);
-
-  // Calculate stats
-  const stats = useMemo(() => {
-    const total = groups.length;
-    const unassigned = groups.filter(
-      (g) => g.subscriptionIds.length === 0
-    ).length;
-    const enabled = groups.filter((g) => g.enabled).length;
-    return { total, unassigned, enabled };
-  }, [groups]);
 
   // Handle checkbox toggle
   function handleToggleSelection(groupId: string) {

@@ -11,6 +11,10 @@ import { useLogs } from '@/lib/hooks/storage/useLogs';
 import type { JobStatus, ScrapeJob } from '@/lib/types';
 import { LoadingSpinner } from './LoadingSpinner';
 
+function formatTimestamp(timestamp: number) {
+  return new Date(timestamp).toLocaleString();
+}
+
 const STATUS_BADGES: Record<JobStatus, string> = {
   pending: 'bg-gray-500',
   running: 'bg-blue-500',
@@ -19,6 +23,41 @@ const STATUS_BADGES: Record<JobStatus, string> = {
   failed: 'bg-red-500',
   cancelled: 'bg-gray-500',
 };
+
+interface JobViewerHeaderProps {
+  hasActiveJob: boolean;
+  isPending: boolean;
+  isCancelling: boolean;
+  onStartJob: () => void;
+}
+
+function JobViewerHeader({
+  hasActiveJob,
+  isPending,
+  isCancelling,
+  onStartJob,
+}: JobViewerHeaderProps) {
+  return (
+    <div className="bg-white rounded-lg shadow p-6">
+      <div className="flex items-center justify-between">
+        <div>
+          <h2 className="text-xl font-semibold">Scraping Jobs</h2>
+          <p className="text-sm text-gray-600 mt-1">
+            Manage background scraping jobs for all enabled groups
+          </p>
+        </div>
+        <Button
+          onClick={onStartJob}
+          disabled={isPending || hasActiveJob || isCancelling}
+          variant="primary"
+          className="px-6 font-medium"
+        >
+          {isPending ? 'Starting...' : 'Start New Job'}
+        </Button>
+      </div>
+    </div>
+  );
+}
 
 export function JobViewer() {
   const jobsQuery = useJobs();
@@ -108,29 +147,12 @@ export function JobViewer() {
 
   return (
     <div className="space-y-6">
-      {/* Header with Start Job Button */}
-      <div className="bg-white rounded-lg shadow p-6">
-        <div className="flex items-center justify-between">
-          <div>
-            <h2 className="text-xl font-semibold">Scraping Jobs</h2>
-            <p className="text-sm text-gray-600 mt-1">
-              Manage background scraping jobs for all enabled groups
-            </p>
-          </div>
-          <Button
-            onClick={handleStartJob}
-            disabled={
-              startJobMutation.isPending ||
-              !!activeJob ||
-              cancelJobMutation.isPending
-            }
-            variant="primary"
-            className="px-6 font-medium"
-          >
-            {startJobMutation.isPending ? 'Starting...' : 'Start New Job'}
-          </Button>
-        </div>
-      </div>
+      <JobViewerHeader
+        hasActiveJob={!!activeJob}
+        isPending={startJobMutation.isPending}
+        isCancelling={cancelJobMutation.isPending}
+        onStartJob={handleStartJob}
+      />
 
       {/* Active Job Section */}
       {activeJob && (
@@ -216,17 +238,10 @@ function JobCard({
   onResume,
   onDelete,
 }: JobCardProps) {
-  const logsQuery = useLogs(showLogs ? { jobId: job.id } : undefined);
-  const logs = logsQuery.data ?? [];
-
   const progressPercentage =
     job.totalGroups > 0
       ? Math.round((job.currentGroupIndex / job.totalGroups) * 100)
       : 0;
-
-  function formatTimestamp(timestamp: number) {
-    return new Date(timestamp).toLocaleString();
-  }
 
   return (
     <div className="p-6">
@@ -341,101 +356,122 @@ function JobCard({
         </div>
       </div>
 
-      {/* Expanded Details */}
       {isExpanded && (
         <div className="mt-6 border-t border-gray-200 pt-6 space-y-4">
-          {/* Group Results */}
-          <div>
-            <h4 className="font-medium mb-3">Group Results</h4>
-            <div className="space-y-2 max-h-96 overflow-y-auto">
-              {job.groupResults.map((result, index) => (
+          <GroupResultsList groupResults={job.groupResults} />
+          <JobLogsSection
+            jobId={job.id}
+            showLogs={showLogs}
+            onToggleLogs={onToggleLogs}
+          />
+        </div>
+      )}
+    </div>
+  );
+}
+
+function GroupResultsList({
+  groupResults,
+}: {
+  groupResults: ScrapeJob['groupResults'];
+}) {
+  return (
+    <div>
+      <h4 className="font-medium mb-3">Group Results</h4>
+      <div className="space-y-2 max-h-96 overflow-y-auto">
+        {groupResults.map((result, index) => (
+          <div
+            key={result.groupId}
+            className="flex items-center gap-3 p-3 bg-gray-50 rounded text-sm"
+          >
+            <span className="text-gray-500 w-8">{index + 1}.</span>
+            {result.status === 'success' && (
+              <span className="text-green-600 text-lg">✓</span>
+            )}
+            {result.status === 'failed' && (
+              <span className="text-red-600 text-lg">✗</span>
+            )}
+            {result.status === 'pending' && (
+              <span className="text-gray-400 text-lg">⏳</span>
+            )}
+            {result.status === 'skipped' && (
+              <span className="text-gray-400 text-lg">⊘</span>
+            )}
+            <span className="flex-1 font-medium">{result.groupName}</span>
+            {result.postsScraped !== undefined && (
+              <span className="text-gray-600">{result.postsScraped} posts</span>
+            )}
+            {result.error && (
+              <span className="text-red-600 text-xs">{result.error}</span>
+            )}
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+interface JobLogsSectionProps {
+  jobId: string;
+  showLogs: boolean;
+  onToggleLogs: (jobId: string) => void;
+}
+
+function JobLogsSection({
+  jobId,
+  showLogs,
+  onToggleLogs,
+}: JobLogsSectionProps) {
+  const logsQuery = useLogs(showLogs ? { jobId } : undefined);
+  const logs = logsQuery.data ?? [];
+
+  return (
+    <div>
+      <Button onClick={() => onToggleLogs(jobId)} variant="secondary" size="sm">
+        {showLogs ? 'Hide Logs' : 'Show Logs'}
+      </Button>
+      {showLogs && (
+        <div className="border-t border-gray-200 pt-4 mt-4">
+          <h4 className="font-medium mb-3">Job Logs</h4>
+          {logsQuery.isLoading ? (
+            <div className="text-center py-4">
+              <LoadingSpinner />
+            </div>
+          ) : logs.length === 0 ? (
+            <p className="text-gray-500 text-sm">No logs for this job</p>
+          ) : (
+            <div className="max-h-96 overflow-y-auto space-y-2 font-mono text-xs">
+              {logs.map((log) => (
                 <div
-                  key={result.groupId}
-                  className="flex items-center gap-3 p-3 bg-gray-50 rounded text-sm"
+                  key={log.id}
+                  className="p-2 bg-gray-50 rounded border border-gray-200"
                 >
-                  <span className="text-gray-500 w-8">{index + 1}.</span>
-                  {result.status === 'success' && (
-                    <span className="text-green-600 text-lg">✓</span>
-                  )}
-                  {result.status === 'failed' && (
-                    <span className="text-red-600 text-lg">✗</span>
-                  )}
-                  {result.status === 'pending' && (
-                    <span className="text-gray-400 text-lg">⏳</span>
-                  )}
-                  {result.status === 'skipped' && (
-                    <span className="text-gray-400 text-lg">⊘</span>
-                  )}
-                  <span className="flex-1 font-medium">{result.groupName}</span>
-                  {result.postsScraped !== undefined && (
-                    <span className="text-gray-600">
-                      {result.postsScraped} posts
+                  <div className="flex items-start gap-2">
+                    <span className="text-gray-500 whitespace-nowrap">
+                      {new Date(log.timestamp).toLocaleTimeString()}
                     </span>
-                  )}
-                  {result.error && (
-                    <span className="text-red-600 text-xs">{result.error}</span>
+                    <span
+                      className={`px-1.5 py-0.5 rounded text-xs font-semibold uppercase ${
+                        log.level === 'error'
+                          ? 'bg-red-500 text-white'
+                          : log.level === 'warn'
+                            ? 'bg-yellow-500 text-white'
+                            : log.level === 'info'
+                              ? 'bg-blue-500 text-white'
+                              : 'bg-gray-500 text-white'
+                      }`}
+                    >
+                      {log.level}
+                    </span>
+                    <span className="flex-1">{log.message}</span>
+                  </div>
+                  {log.context && Object.keys(log.context).length > 0 && (
+                    <pre className="mt-1 text-xs text-gray-600 overflow-x-auto">
+                      {JSON.stringify(log.context, null, 2)}
+                    </pre>
                   )}
                 </div>
               ))}
-            </div>
-          </div>
-
-          {/* Logs Toggle */}
-          <div>
-            <Button
-              onClick={() => onToggleLogs(job.id)}
-              variant="secondary"
-              size="sm"
-            >
-              {showLogs ? 'Hide Logs' : 'Show Logs'}
-            </Button>
-          </div>
-
-          {/* Logs Section */}
-          {showLogs && (
-            <div className="border-t border-gray-200 pt-4">
-              <h4 className="font-medium mb-3">Job Logs</h4>
-              {logsQuery.isLoading ? (
-                <div className="text-center py-4">
-                  <LoadingSpinner />
-                </div>
-              ) : logs.length === 0 ? (
-                <p className="text-gray-500 text-sm">No logs for this job</p>
-              ) : (
-                <div className="max-h-96 overflow-y-auto space-y-2 font-mono text-xs">
-                  {logs.map((log) => (
-                    <div
-                      key={log.id}
-                      className="p-2 bg-gray-50 rounded border border-gray-200"
-                    >
-                      <div className="flex items-start gap-2">
-                        <span className="text-gray-500 whitespace-nowrap">
-                          {new Date(log.timestamp).toLocaleTimeString()}
-                        </span>
-                        <span
-                          className={`px-1.5 py-0.5 rounded text-xs font-semibold uppercase ${
-                            log.level === 'error'
-                              ? 'bg-red-500 text-white'
-                              : log.level === 'warn'
-                                ? 'bg-yellow-500 text-white'
-                                : log.level === 'info'
-                                  ? 'bg-blue-500 text-white'
-                                  : 'bg-gray-500 text-white'
-                          }`}
-                        >
-                          {log.level}
-                        </span>
-                        <span className="flex-1">{log.message}</span>
-                      </div>
-                      {log.context && Object.keys(log.context).length > 0 && (
-                        <pre className="mt-1 text-xs text-gray-600 overflow-x-auto">
-                          {JSON.stringify(log.context, null, 2)}
-                        </pre>
-                      )}
-                    </div>
-                  ))}
-                </div>
-              )}
             </div>
           )}
         </div>

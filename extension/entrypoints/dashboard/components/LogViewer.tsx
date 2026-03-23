@@ -18,6 +18,22 @@ const LOG_LEVEL_BADGES: Record<LogLevel, string> = {
   error: 'bg-red-500',
 };
 
+function formatTime(timestamp: number): string {
+  const date = new Date(timestamp);
+  return date.toLocaleTimeString('en-US', {
+    hour12: false,
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit',
+    fractionalSecondDigits: 3,
+  });
+}
+
+function formatContext(context?: Record<string, unknown>): string {
+  if (!context || Object.keys(context).length === 0) return '';
+  return JSON.stringify(context, null, 2);
+}
+
 export function LogViewer() {
   const logsQuery = useLogs();
   const clearLogsMutation = useClearLogs();
@@ -28,7 +44,6 @@ export function LogViewer() {
 
   const logs = logsQuery.data ?? [];
 
-  // Filter logs
   const filteredLogs = useMemo(() => {
     return logs.filter((log) => {
       if (levelFilter !== 'all' && log.level !== levelFilter) return false;
@@ -36,24 +51,6 @@ export function LogViewer() {
       return true;
     });
   }, [logs, levelFilter, sourceFilter]);
-
-  // Format timestamp
-  function formatTime(timestamp: number): string {
-    const date = new Date(timestamp);
-    return date.toLocaleTimeString('en-US', {
-      hour12: false,
-      hour: '2-digit',
-      minute: '2-digit',
-      second: '2-digit',
-      fractionalSecondDigits: 3,
-    });
-  }
-
-  // Format context object
-  function formatContext(context?: Record<string, unknown>): string {
-    if (!context || Object.keys(context).length === 0) return '';
-    return JSON.stringify(context, null, 2);
-  }
 
   function handleClearLogs() {
     if (confirm('Are you sure you want to clear all logs?')) {
@@ -173,52 +170,39 @@ export function LogViewer() {
       </div>
     </div>
   );
+}
 
-  function LogEntryRow({ log }: { log: LogEntry }) {
-    const [expanded, setExpanded] = useState(false);
+function LogEntryRow({ log }: { log: LogEntry }) {
+  const [expanded, setExpanded] = useState(false);
 
-    return (
-      <button
-        type="button"
-        className={`w-full text-left border rounded p-3 ${LOG_LEVEL_COLORS[log.level]} hover:opacity-90 transition-opacity`}
-        onClick={() => setExpanded(!expanded)}
-      >
-        <div className="flex items-start gap-3">
-          {/* Timestamp */}
-          <span className="text-gray-500 whitespace-nowrap">
-            {formatTime(log.timestamp)}
-          </span>
-
-          {/* Level Badge */}
-          <span
-            className={`px-2 py-0.5 rounded text-xs font-semibold text-white uppercase ${LOG_LEVEL_BADGES[log.level]}`}
-          >
-            {log.level}
-          </span>
-
-          {/* Source Badge */}
-          <span className="px-2 py-0.5 rounded text-xs font-semibold bg-gray-700 text-white uppercase">
-            {log.source}
-          </span>
-
-          {/* Message */}
-          <span className="flex-1">{log.message}</span>
-
-          {/* Expand indicator */}
-          {log.context && Object.keys(log.context).length > 0 && (
-            <span className="text-gray-400 text-xs">
-              {expanded ? '▼' : '▶'}
-            </span>
-          )}
-        </div>
-
-        {/* Expanded Context */}
-        {expanded && log.context && Object.keys(log.context).length > 0 && (
-          <pre className="mt-2 p-2 bg-black bg-opacity-10 rounded text-xs overflow-x-auto">
-            {formatContext(log.context)}
-          </pre>
+  return (
+    <button
+      type="button"
+      className={`w-full text-left border rounded p-3 ${LOG_LEVEL_COLORS[log.level]} hover:opacity-90 transition-opacity`}
+      onClick={() => setExpanded(!expanded)}
+    >
+      <div className="flex items-start gap-3">
+        <span className="text-gray-500 whitespace-nowrap">
+          {formatTime(log.timestamp)}
+        </span>
+        <span
+          className={`px-2 py-0.5 rounded text-xs font-semibold text-white uppercase ${LOG_LEVEL_BADGES[log.level]}`}
+        >
+          {log.level}
+        </span>
+        <span className="px-2 py-0.5 rounded text-xs font-semibold bg-gray-700 text-white uppercase">
+          {log.source}
+        </span>
+        <span className="flex-1">{log.message}</span>
+        {log.context && Object.keys(log.context).length > 0 && (
+          <span className="text-gray-400 text-xs">{expanded ? '▼' : '▶'}</span>
         )}
-      </button>
-    );
-  }
+      </div>
+      {expanded && log.context && Object.keys(log.context).length > 0 && (
+        <pre className="mt-2 p-2 bg-black bg-opacity-10 rounded text-xs overflow-x-auto">
+          {formatContext(log.context)}
+        </pre>
+      )}
+    </button>
+  );
 }
