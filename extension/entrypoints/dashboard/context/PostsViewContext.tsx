@@ -141,8 +141,9 @@ export function PostsViewProvider({ children }: { children: ReactNode }) {
 
   const clearFilters = useCallback(() => {
     setSearchQuery('');
-    setShowOnlyUnseen(false);
+    setShowOnlyUnseen(true);
     setShowOnlyStarred(false);
+    setShowFilterPanel(false);
     saveFiltersMutation.mutate(DEFAULT_FILTER_SETTINGS);
   }, [saveFiltersMutation]);
 
