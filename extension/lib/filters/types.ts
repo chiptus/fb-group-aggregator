@@ -11,7 +11,7 @@ export const FilterSettingsSchema = z.object({
 
 export type FilterSettings = z.infer<typeof FilterSettingsSchema>;
 
-export type KeywordType = "positive" | "negative";
+export type KeywordType = 'positive' | 'negative';
 
 export const DEFAULT_FILTER_SETTINGS: FilterSettings = {
   positiveKeywords: [],

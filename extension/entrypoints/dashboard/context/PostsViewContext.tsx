@@ -1,17 +1,17 @@
 import type { ReactNode } from 'react';
 import {
-	createContext,
-	useCallback,
-	useContext,
-	useMemo,
-	useState,
-} from "react";
-import { filterPosts } from "@/lib/filters/filterPosts";
-import type { FilterSettings, KeywordType } from "@/lib/filters/types";
-import { useMarkAllPostsSeen } from "@/lib/hooks/storage/usePosts";
-import type { Group, Post, Subscription } from "@/lib/types";
-import { useFilteredPosts } from "../hooks/useFilteredPosts";
-import { DEFAULT_FILTER_SETTINGS, usePostsData } from "../hooks/usePostsData";
+  createContext,
+  useCallback,
+  useContext,
+  useMemo,
+  useState,
+} from 'react';
+import { filterPosts } from '@/lib/filters/filterPosts';
+import type { FilterSettings, KeywordType } from '@/lib/filters/types';
+import { useMarkAllPostsSeen } from '@/lib/hooks/storage/usePosts';
+import type { Group, Post, Subscription } from '@/lib/types';
+import { useFilteredPosts } from '../hooks/useFilteredPosts';
+import { DEFAULT_FILTER_SETTINGS, usePostsData } from '../hooks/usePostsData';
 
 interface PostsViewContextValue {
   // Server data
@@ -23,10 +23,10 @@ interface PostsViewContextValue {
   isLoading: boolean;
   error: unknown;
 
-	// Server actions
-	setPostSeen: (postId: string, seen: boolean) => void;
-	togglePostStarred: (postId: string, currentStarred: boolean) => void;
-	removeKeyword: (keyword: string, type: KeywordType) => void;
+  // Server actions
+  setPostSeen: (postId: string, seen: boolean) => void;
+  togglePostStarred: (postId: string, currentStarred: boolean) => void;
+  removeKeyword: (keyword: string, type: KeywordType) => void;
 
   // View state
   selectedSubscriptionId: string | null;

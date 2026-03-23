@@ -55,7 +55,6 @@ describe('useFilters', () => {
       searchFields: ['contentHtml'],
     };
 
-    // eslint-disable-next-line @typescript-eslint/unbound-method
     const mockGetItem = vi.mocked(storage).getItem;
     mockGetItem.mockResolvedValue(storedFilters);
 
@@ -101,8 +100,10 @@ describe('useSaveFilters', () => {
   });
 
   it('should save filters to storage', async () => {
-    vi.mocked(storage.getItem).mockResolvedValue(DEFAULT_FILTER_SETTINGS);
-    vi.mocked(storage.setItem).mockResolvedValue(undefined);
+    const mockGetItem = vi.mocked(storage).getItem;
+    const mockSetItem = vi.mocked(storage).setItem;
+    mockGetItem.mockResolvedValue(DEFAULT_FILTER_SETTINGS);
+    mockSetItem.mockResolvedValue(undefined);
 
     const { result } = renderHook(
       () => ({
@@ -127,8 +128,6 @@ describe('useSaveFilters', () => {
 
     await waitFor(() => expect(result.current.update.isSuccess).toBe(true));
 
-    // eslint-disable-next-line @typescript-eslint/unbound-method
-    const mockSetItem = vi.mocked(storage).setItem;
     expect(mockSetItem).toHaveBeenCalledWith(
       'local:filterSettings',
       newFilters
@@ -136,8 +135,10 @@ describe('useSaveFilters', () => {
   });
 
   it('should update query cache on successful mutation', async () => {
-    vi.mocked(storage.getItem).mockResolvedValue(DEFAULT_FILTER_SETTINGS);
-    vi.mocked(storage.setItem).mockResolvedValue(undefined);
+    const mockGetItem = vi.mocked(storage).getItem;
+    const mockSetItem = vi.mocked(storage).setItem;
+    mockGetItem.mockResolvedValue(DEFAULT_FILTER_SETTINGS);
+    mockSetItem.mockResolvedValue(undefined);
 
     const { result } = renderHook(
       () => ({
@@ -159,7 +160,7 @@ describe('useSaveFilters', () => {
     };
 
     // Update mock to return new filters after mutation
-    vi.mocked(storage).getItem.mockResolvedValue(newFilters);
+    mockGetItem.mockResolvedValue(newFilters);
 
     result.current.update.mutate(newFilters);
 
@@ -172,8 +173,10 @@ describe('useSaveFilters', () => {
   });
 
   it('should handle mutation errors', async () => {
-    vi.mocked(storage.getItem).mockResolvedValue(DEFAULT_FILTER_SETTINGS);
-    vi.mocked(storage.setItem).mockRejectedValue(new Error('Save failed'));
+    const mockGetItem = vi.mocked(storage).getItem;
+    const mockSetItem = vi.mocked(storage).setItem;
+    mockGetItem.mockResolvedValue(DEFAULT_FILTER_SETTINGS);
+    mockSetItem.mockRejectedValue(new Error('Save failed'));
 
     const { result } = renderHook(
       () => ({
