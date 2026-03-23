@@ -1,4 +1,4 @@
-import { useCallback } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import type { Post } from '@/lib/types';
 import { LoadingSpinner } from '../components/LoadingSpinner';
@@ -21,7 +21,7 @@ export function PostsTab() {
 
 function PostsTabInner() {
   const {
-    groupsMap,
+    getGroupById,
     filteredPosts,
     isLoading,
     error,
@@ -31,9 +31,20 @@ function PostsTabInner() {
     setSearchQuery,
   } = usePostsView();
 
+  const [inputValue, setInputValue] = useState(searchQuery);
+
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      if (inputValue !== searchQuery) {
+        setSearchQuery(inputValue);
+      }
+    }, 300);
+    return () => clearTimeout(handler);
+  }, [inputValue, searchQuery, setSearchQuery]);
+
   const renderPost = useCallback(
     (post: Post) => {
-      const group = groupsMap.get(post.groupId);
+      const group = getGroupById(post.groupId);
       return (
         <div className="pb-4">
           <PostCard
@@ -47,7 +58,7 @@ function PostsTabInner() {
         </div>
       );
     },
-    [groupsMap, setPostSeen, togglePostStarred]
+    [getGroupById, setPostSeen, togglePostStarred]
   );
 
   if (isLoading) return <LoadingSpinner />;
@@ -71,7 +82,7 @@ function PostsTabInner() {
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-6">
-      <SearchBar value={searchQuery} onChange={setSearchQuery} />
+      <SearchBar value={inputValue} onChange={setInputValue} />
 
       <SubscriptionSidebar />
 
