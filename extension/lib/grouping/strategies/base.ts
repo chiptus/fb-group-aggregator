@@ -1,5 +1,5 @@
-import type { Post } from "@/lib/types";
-import type { GroupingResult } from "../types";
+import type { Post } from '@/lib/types';
+import type { GroupingResult } from '../types';
 
 /**
  * Grouping Strategy Interface
@@ -8,18 +8,18 @@ import type { GroupingResult } from "../types";
  * Allows swapping between exact match, fuzzy match, etc.
  */
 export interface GroupingStrategy {
-	/** Human-readable name of strategy (e.g., "exact-match", "fuzzy-match") */
-	readonly name: string;
+  /** Human-readable name of strategy (e.g., "exact-match", "fuzzy-match") */
+  readonly name: string;
 
-	/**
-	 * Group posts by similarity
-	 *
-	 * @param posts - Array of posts to group
-	 * @returns GroupingResult with groups, ungrouped posts, and stats
-	 *
-	 * @performance Must complete in <500ms for 10,000 posts
-	 */
-	group(posts: Post[]): GroupingResult;
+  /**
+   * Group posts by similarity
+   *
+   * @param posts - Array of posts to group
+   * @returns GroupingResult with groups, ungrouped posts, and stats
+   *
+   * @performance Must complete in <500ms for 10,000 posts
+   */
+  group(posts: Post[]): GroupingResult;
 }
 
 /**
