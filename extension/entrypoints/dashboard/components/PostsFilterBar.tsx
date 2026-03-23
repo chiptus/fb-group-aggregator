@@ -9,7 +9,7 @@ export function PostsFilterBar() {
     hasActiveFilters,
     filters,
     removeKeyword,
-    posts,
+    totalPostCount,
     filteredPosts,
   } = usePostsView();
 
@@ -27,13 +27,14 @@ export function PostsFilterBar() {
         </div>
       )}
 
-      <FilterStatsBanner
-        totalPosts={posts.length}
-        filteredPosts={filteredPosts.length}
-        positiveKeywordCount={filters.positiveKeywords.length}
-        negativeKeywordCount={filters.negativeKeywords.length}
-        className="mb-4"
-      />
+      <div className="mb-4">
+        <FilterStatsBanner
+          totalPosts={totalPostCount}
+          filteredPosts={filteredPosts.length}
+          positiveKeywordCount={filters.positiveKeywords.length}
+          negativeKeywordCount={filters.negativeKeywords.length}
+        />
+      </div>
     </>
   );
 }

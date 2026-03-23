@@ -3,7 +3,6 @@ interface FilterStatsBannerProps {
   filteredPosts: number;
   positiveKeywordCount: number;
   negativeKeywordCount: number;
-  className?: string;
 }
 
 export function FilterStatsBanner({
@@ -11,7 +10,6 @@ export function FilterStatsBanner({
   filteredPosts,
   positiveKeywordCount,
   negativeKeywordCount,
-  className = '',
 }: FilterStatsBannerProps) {
   const removedCount = totalPosts - filteredPosts;
 
@@ -29,7 +27,7 @@ export function FilterStatsBanner({
 
   return (
     <output
-      className={`flex items-center justify-between px-4 py-2 bg-blue-50 border border-blue-200 rounded-lg text-sm ${className}`}
+      className="flex items-center justify-between px-4 py-2 bg-blue-50 border border-blue-200 rounded-lg text-sm"
       aria-live="polite"
     >
       <span className="text-blue-800">
