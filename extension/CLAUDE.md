@@ -46,9 +46,6 @@ useMarkPostSeen();
 // Filters (lib/hooks/storage/)
 useFilters();
 useSaveFilters();
-
-// Derived (lib/hooks/filters/)
-useFilteredPosts();
 ```
 
 ## Message Protocol
