@@ -68,27 +68,34 @@ function createWrapper() {
   );
 }
 
+function mockPostsQuery(data: Post[] | undefined, isPending = false) {
+  vi.mocked(usePosts).mockReturnValue({
+    data,
+    isSuccess: !isPending && data !== undefined,
+    isPending,
+    isError: false,
+    error: null,
+  } as UseQueryResult<Post[], Error>);
+}
+
+function mockFiltersQuery(data: FilterSettings | undefined, isPending = false) {
+  vi.mocked(useFilters).mockReturnValue({
+    data,
+    isSuccess: !isPending && data !== undefined,
+    isPending,
+    isError: false,
+    error: null,
+  } as UseQueryResult<FilterSettings, Error>);
+}
+
 describe('useFilteredPosts', () => {
   beforeEach(() => {
     vi.clearAllMocks();
   });
 
   it('should return all posts when no filters are active', () => {
-    vi.mocked(usePosts).mockReturnValue({
-      data: mockPosts,
-      isSuccess: true,
-      isPending: false,
-      isError: false,
-      error: null,
-    } as UseQueryResult<Post[], Error>);
-
-    vi.mocked(useFilters).mockReturnValue({
-      data: defaultFilters,
-      isSuccess: true,
-      isPending: false,
-      isError: false,
-      error: null,
-    } as UseQueryResult<FilterSettings, Error>);
+    mockPostsQuery(mockPosts);
+    mockFiltersQuery(defaultFilters);
 
     const { result } = renderHook(() => useFilteredPosts(), {
       wrapper: createWrapper(),
@@ -104,26 +111,13 @@ describe('useFilteredPosts', () => {
   });
 
   it('should filter posts by positive keywords', () => {
-    vi.mocked(usePosts).mockReturnValue({
-      data: mockPosts,
-      isSuccess: true,
-      isPending: false,
-      isError: false,
-      error: null,
-    } as UseQueryResult<Post[], Error>);
-
-    vi.mocked(useFilters).mockReturnValue({
-      data: {
-        positiveKeywords: ['apartment'],
-        negativeKeywords: [] as string[],
-        caseSensitive: false,
-        searchFields: ['contentHtml'] as ('contentHtml' | 'authorName')[],
-      },
-      isSuccess: true,
-      isPending: false,
-      isError: false,
-      error: null,
-    } as UseQueryResult<FilterSettings, Error>);
+    mockPostsQuery(mockPosts);
+    mockFiltersQuery({
+      positiveKeywords: ['apartment'],
+      negativeKeywords: [],
+      caseSensitive: false,
+      searchFields: ['contentHtml'],
+    });
 
     const { result } = renderHook(() => useFilteredPosts(), {
       wrapper: createWrapper(),
@@ -137,26 +131,13 @@ describe('useFilteredPosts', () => {
   });
 
   it('should filter posts by negative keywords', () => {
-    vi.mocked(usePosts).mockReturnValue({
-      data: mockPosts,
-      isSuccess: true,
-      isPending: false,
-      isError: false,
-      error: null,
-    } as UseQueryResult<Post[], Error>);
-
-    vi.mocked(useFilters).mockReturnValue({
-      data: {
-        positiveKeywords: [] as string[],
-        negativeKeywords: ['sold'],
-        caseSensitive: false,
-        searchFields: ['contentHtml'] as ('contentHtml' | 'authorName')[],
-      },
-      isSuccess: true,
-      isPending: false,
-      isError: false,
-      error: null,
-    } as UseQueryResult<FilterSettings, Error>);
+    mockPostsQuery(mockPosts);
+    mockFiltersQuery({
+      positiveKeywords: [],
+      negativeKeywords: ['sold'],
+      caseSensitive: false,
+      searchFields: ['contentHtml'],
+    });
 
     const { result } = renderHook(() => useFilteredPosts(), {
       wrapper: createWrapper(),
@@ -167,26 +148,13 @@ describe('useFilteredPosts', () => {
   });
 
   it('should apply negative precedence when both positive and negative filters match', () => {
-    vi.mocked(usePosts).mockReturnValue({
-      data: mockPosts,
-      isSuccess: true,
-      isPending: false,
-      isError: false,
-      error: null,
-    } as UseQueryResult<Post[], Error>);
-
-    vi.mocked(useFilters).mockReturnValue({
-      data: {
-        positiveKeywords: ['apartment'],
-        negativeKeywords: ['sold'],
-        caseSensitive: false,
-        searchFields: ['contentHtml'] as ('contentHtml' | 'authorName')[],
-      },
-      isSuccess: true,
-      isPending: false,
-      isError: false,
-      error: null,
-    } as UseQueryResult<FilterSettings, Error>);
+    mockPostsQuery(mockPosts);
+    mockFiltersQuery({
+      positiveKeywords: ['apartment'],
+      negativeKeywords: ['sold'],
+      caseSensitive: false,
+      searchFields: ['contentHtml'],
+    });
 
     const { result } = renderHook(() => useFilteredPosts(), {
       wrapper: createWrapper(),
@@ -198,21 +166,8 @@ describe('useFilteredPosts', () => {
   });
 
   it('should handle loading state', () => {
-    vi.mocked(usePosts).mockReturnValue({
-      data: undefined,
-      isSuccess: false,
-      isPending: true,
-      isError: false,
-      error: null,
-    } as UseQueryResult<Post[], Error>);
-
-    vi.mocked(useFilters).mockReturnValue({
-      data: undefined,
-      isSuccess: false,
-      isPending: true,
-      isError: false,
-      error: null,
-    } as UseQueryResult<FilterSettings, Error>);
+    mockPostsQuery(undefined, true);
+    mockFiltersQuery(undefined, true);
 
     const { result } = renderHook(() => useFilteredPosts(), {
       wrapper: createWrapper(),
@@ -223,21 +178,8 @@ describe('useFilteredPosts', () => {
   });
 
   it('should handle empty posts array', () => {
-    vi.mocked(usePosts).mockReturnValue({
-      data: [] as Post[],
-      isSuccess: true,
-      isPending: false,
-      isError: false,
-      error: null,
-    } as UseQueryResult<Post[], Error>);
-
-    vi.mocked(useFilters).mockReturnValue({
-      data: defaultFilters,
-      isSuccess: true,
-      isPending: false,
-      isError: false,
-      error: null,
-    } as UseQueryResult<FilterSettings, Error>);
+    mockPostsQuery([]);
+    mockFiltersQuery(defaultFilters);
 
     const { result } = renderHook(() => useFilteredPosts(), {
       wrapper: createWrapper(),
@@ -248,26 +190,13 @@ describe('useFilteredPosts', () => {
   });
 
   it('should calculate stats correctly', () => {
-    vi.mocked(usePosts).mockReturnValue({
-      data: mockPosts,
-      isSuccess: true,
-      isPending: false,
-      isError: false,
-      error: null,
-    } as UseQueryResult<Post[], Error>);
-
-    vi.mocked(useFilters).mockReturnValue({
-      data: {
-        positiveKeywords: ['apartment'],
-        negativeKeywords: [] as string[],
-        caseSensitive: false,
-        searchFields: ['contentHtml'] as ('contentHtml' | 'authorName')[],
-      },
-      isSuccess: true,
-      isPending: false,
-      isError: false,
-      error: null,
-    } as UseQueryResult<FilterSettings, Error>);
+    mockPostsQuery(mockPosts);
+    mockFiltersQuery({
+      positiveKeywords: ['apartment'],
+      negativeKeywords: [],
+      caseSensitive: false,
+      searchFields: ['contentHtml'],
+    });
 
     const { result } = renderHook(() => useFilteredPosts(), {
       wrapper: createWrapper(),
@@ -282,26 +211,13 @@ describe('useFilteredPosts', () => {
   });
 
   it('should return empty array when no posts match filters', () => {
-    vi.mocked(usePosts).mockReturnValue({
-      data: mockPosts,
-      isSuccess: true,
-      isPending: false,
-      isError: false,
-      error: null,
-    } as UseQueryResult<Post[], Error>);
-
-    vi.mocked(useFilters).mockReturnValue({
-      data: {
-        positiveKeywords: ['nonexistent'],
-        negativeKeywords: [] as string[],
-        caseSensitive: false,
-        searchFields: ['contentHtml'] as ('contentHtml' | 'authorName')[],
-      },
-      isSuccess: true,
-      isPending: false,
-      isError: false,
-      error: null,
-    } as UseQueryResult<FilterSettings, Error>);
+    mockPostsQuery(mockPosts);
+    mockFiltersQuery({
+      positiveKeywords: ['nonexistent'],
+      negativeKeywords: [],
+      caseSensitive: false,
+      searchFields: ['contentHtml'],
+    });
 
     const { result } = renderHook(() => useFilteredPosts(), {
       wrapper: createWrapper(),
