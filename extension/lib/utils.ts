@@ -23,7 +23,9 @@ function formatDatePart(d: Date): string {
 
 export function formatDateTime(value: string | number | Date): string {
   const d = new Date(value);
-  const time = d.toLocaleTimeString(navigator.language, {
+  const locale =
+    typeof navigator !== 'undefined' ? navigator.language : undefined;
+  const time = d.toLocaleTimeString(locale, {
     hour: '2-digit',
     minute: '2-digit',
   });
