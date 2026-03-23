@@ -1,24 +1,32 @@
 import { render, screen } from '@testing-library/react';
-import { describe, expect, it, vi } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { DEFAULT_FILTER_SETTINGS } from '@/lib/filters/types';
 import { PostsFilterBar } from './PostsFilterBar';
 
-const baseContext = {
-  showFilterPanel: false,
-  hasActiveFilters: false,
-  filters: DEFAULT_FILTER_SETTINGS,
-  removeKeyword: vi.fn(),
-  totalPostCount: 10,
-  filteredPosts: Array(10).fill(null),
-};
+function makeContext() {
+  return {
+    showFilterPanel: false,
+    hasActiveFilters: false,
+    filters: DEFAULT_FILTER_SETTINGS,
+    removeKeyword: vi.fn(),
+    totalPostCount: 10,
+    filteredPosts: Array(10).fill(null),
+  };
+}
+
+let ctx: ReturnType<typeof makeContext>;
 
 vi.mock('../context/PostsViewContext', () => ({
-  usePostsView: () => baseContext,
+  usePostsView: () => ctx,
 }));
 
 vi.mock('./FilterControls', () => ({
   FilterControls: () => <div data-testid="filter-controls" />,
 }));
+
+beforeEach(() => {
+  ctx = makeContext();
+});
 
 describe('PostsFilterBar', () => {
   it('always shows the stats banner', () => {
@@ -28,22 +36,19 @@ describe('PostsFilterBar', () => {
   });
 
   it('does not render FilterControls when showFilterPanel is false', () => {
-    baseContext.showFilterPanel = false;
     render(<PostsFilterBar />);
 
     expect(screen.queryByTestId('filter-controls')).not.toBeInTheDocument();
   });
 
   it('renders FilterControls when showFilterPanel is true', () => {
-    baseContext.showFilterPanel = true;
+    ctx.showFilterPanel = true;
     render(<PostsFilterBar />);
 
     expect(screen.getByTestId('filter-controls')).toBeInTheDocument();
   });
 
   it('does not render keyword chips when no active filters', () => {
-    baseContext.hasActiveFilters = false;
-    baseContext.filters = DEFAULT_FILTER_SETTINGS;
     render(<PostsFilterBar />);
 
     expect(
@@ -52,8 +57,8 @@ describe('PostsFilterBar', () => {
   });
 
   it('renders keyword chips when active filters exist', () => {
-    baseContext.hasActiveFilters = true;
-    baseContext.filters = {
+    ctx.hasActiveFilters = true;
+    ctx.filters = {
       ...DEFAULT_FILTER_SETTINGS,
       positiveKeywords: ['apartment'],
     };

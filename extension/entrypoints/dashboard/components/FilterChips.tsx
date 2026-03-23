@@ -7,17 +7,6 @@ export interface FilterChipsProps {
 }
 
 export function FilterChips({ filters, onRemoveKeyword }: FilterChipsProps) {
-  const hasKeywords =
-    filters.positiveKeywords.length > 0 || filters.negativeKeywords.length > 0;
-
-  if (!hasKeywords) {
-    return (
-      <div className="p-4 text-gray-500 text-sm">
-        No filters active. Add keywords above to filter posts.
-      </div>
-    );
-  }
-
   const searchFieldsText = filters.searchFields
     .map((field) => {
       if (field === 'contentHtml') return 'content';
