@@ -1,3 +1,4 @@
+import { cn } from '@/lib/utils';
 import type { KeywordType } from '@/lib/filters/types';
 
 interface KeywordChipProps {
@@ -16,14 +17,18 @@ export function KeywordChip({ keyword, type, onRemove }: KeywordChipProps) {
   return (
     <div
       data-type={type}
-      className={`flex items-center gap-1 px-3 py-1 ${colorClasses} rounded-full text-sm`}
+      className={cn(
+        'flex items-center gap-1 px-3 py-1 rounded-full text-sm',
+        colorClasses
+      )}
     >
       <span>{keyword}</span>
       <button
         type="button"
         onClick={() => onRemove(keyword, type)}
-        className={`ml-1 ${hoverClass} rounded-full p-0.5`}
+        className={cn('ml-1 rounded-full p-0.5', hoverClass)}
         aria-label={`Remove ${keyword}`}
+        title={`Remove ${keyword}`}
       >
         <svg
           className="w-4 h-4"
