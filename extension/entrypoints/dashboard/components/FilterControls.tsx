@@ -53,7 +53,9 @@ export function FilterControls() {
     checked: boolean
   ) {
     const updatedFields = checked
-      ? [...filters.searchFields, field]
+      ? filters.searchFields.includes(field)
+        ? filters.searchFields
+        : [...filters.searchFields, field]
       : filters.searchFields.filter((f) => f !== field);
 
     if (updatedFields.length === 0) return;
