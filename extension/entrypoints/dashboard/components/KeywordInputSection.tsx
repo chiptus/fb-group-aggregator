@@ -31,15 +31,21 @@ export function KeywordInputSection({
       <div className="flex gap-2 mb-3">
         <form.Field name="keyword">
           {(field) => (
-            <input
-              type="text"
-              placeholder="Add keyword"
-              value={field.state.value}
-              onChange={(e) => field.handleChange(e.target.value)}
-              onBlur={field.handleBlur}
-              disabled={disabled}
-              className="flex-1 px-3 py-2 border rounded disabled:opacity-50"
-            />
+            <>
+              <label htmlFor="keyword-input" className="sr-only">
+                Keyword
+              </label>
+              <input
+                id="keyword-input"
+                type="text"
+                placeholder="Add keyword"
+                value={field.state.value}
+                onChange={(e) => field.handleChange(e.target.value)}
+                onBlur={field.handleBlur}
+                disabled={disabled}
+                className="flex-1 px-3 py-2 border rounded disabled:opacity-50"
+              />
+            </>
           )}
         </form.Field>
         <button
