@@ -1,10 +1,9 @@
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { renderHook, waitFor } from '@testing-library/react';
-import type { ReactNode } from 'react';
 import { beforeEach, describe, expect, it } from 'vitest';
 import { fakeBrowser } from 'wxt/testing';
 import { DEFAULT_FILTER_SETTINGS } from '@/lib/filters/types';
 import type { Post } from '@/lib/types';
+import { createQueryWrapper } from '@/test/test-utils';
 import { useFilteredPosts } from './useFilteredPosts';
 
 const mockPosts: Post[] = [
@@ -43,18 +42,6 @@ const mockPosts: Post[] = [
   },
 ];
 
-function createWrapper() {
-  const queryClient = new QueryClient({
-    defaultOptions: {
-      queries: { retry: false },
-    },
-  });
-
-  return ({ children }: { children: ReactNode }) => (
-    <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
-  );
-}
-
 describe('useFilteredPosts', () => {
   beforeEach(() => {
     fakeBrowser.reset();
@@ -67,7 +54,7 @@ describe('useFilteredPosts', () => {
     });
 
     const { result } = renderHook(() => useFilteredPosts(), {
-      wrapper: createWrapper(),
+      wrapper: createQueryWrapper(),
     });
 
     await waitFor(() => expect(result.current.data).toBeDefined());
@@ -93,7 +80,7 @@ describe('useFilteredPosts', () => {
     });
 
     const { result } = renderHook(() => useFilteredPosts(), {
-      wrapper: createWrapper(),
+      wrapper: createQueryWrapper(),
     });
 
     await waitFor(() => expect(result.current.data).toBeDefined());
@@ -107,7 +94,7 @@ describe('useFilteredPosts', () => {
   it('should handle loading state', () => {
     // Storage is empty and unflushed — both queries start pending
     const { result } = renderHook(() => useFilteredPosts(), {
-      wrapper: createWrapper(),
+      wrapper: createQueryWrapper(),
     });
 
     expect(result.current.isLoading).toBe(true);
@@ -121,7 +108,7 @@ describe('useFilteredPosts', () => {
     });
 
     const { result } = renderHook(() => useFilteredPosts(), {
-      wrapper: createWrapper(),
+      wrapper: createQueryWrapper(),
     });
 
     await waitFor(() => expect(result.current.data).toBeDefined());
@@ -142,7 +129,7 @@ describe('useFilteredPosts', () => {
     });
 
     const { result } = renderHook(() => useFilteredPosts(), {
-      wrapper: createWrapper(),
+      wrapper: createQueryWrapper(),
     });
 
     await waitFor(() => expect(result.current.data).toBeDefined());
@@ -167,7 +154,7 @@ describe('useFilteredPosts', () => {
     });
 
     const { result } = renderHook(() => useFilteredPosts(), {
-      wrapper: createWrapper(),
+      wrapper: createQueryWrapper(),
     });
 
     await waitFor(() => expect(result.current.data).toBeDefined());
