@@ -1,7 +1,7 @@
 import { useCallback, useMemo } from 'react';
 import type { KeywordType } from '@/lib/filters/types';
 import { DEFAULT_FILTER_SETTINGS } from '@/lib/filters/types';
-import { useFilters, useSaveFilters } from '@/lib/hooks/filters/useFilters';
+import { useFilters, useSaveFilters } from '@/lib/hooks/storage/useFilters';
 import { useGroups } from '@/lib/hooks/storage/useGroups';
 import {
   useMarkPostSeen,
@@ -9,8 +9,6 @@ import {
   useTogglePostStarred,
 } from '@/lib/hooks/storage/usePosts';
 import { useSubscriptions } from '@/lib/hooks/storage/useSubscriptions';
-
-export { DEFAULT_FILTER_SETTINGS };
 
 export function usePostsData() {
   const markPostSeenMutation = useMarkPostSeen();

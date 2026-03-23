@@ -7,18 +7,20 @@ import {
   useState,
 } from 'react';
 import { filterPosts } from '@/lib/filters/filterPosts';
-import type { FilterSettings, KeywordType } from '@/lib/filters/types';
+import {
+  DEFAULT_FILTER_SETTINGS,
+  type FilterSettings,
+  type KeywordType,
+} from '@/lib/filters/types';
 import { useMarkAllPostsSeen } from '@/lib/hooks/storage/usePosts';
 import type { Group, Post, Subscription } from '@/lib/types';
 import { useFilteredPosts } from '../hooks/useFilteredPosts';
-import { DEFAULT_FILTER_SETTINGS, usePostsData } from '../hooks/usePostsData';
+import { usePostsData } from '../hooks/usePostsData';
 
 interface PostsViewContextValue {
   // Server data
   subscriptions: Subscription[];
-  groups: Group[];
-  posts: Post[];
-  groupsMap: Map<string, Group>;
+  totalPostCount: number;
   filters: FilterSettings;
   isLoading: boolean;
   error: unknown;
@@ -27,6 +29,7 @@ interface PostsViewContextValue {
   setPostSeen: (postId: string, seen: boolean) => void;
   togglePostStarred: (postId: string, currentStarred: boolean) => void;
   removeKeyword: (keyword: string, type: KeywordType) => void;
+  getGroupById: (id: string) => Group | undefined;
 
   // View state
   selectedSubscriptionId: string | null;
@@ -90,6 +93,11 @@ export function PostsViewProvider({ children }: { children: ReactNode }) {
 
   const markAllPostsSeen = useMarkAllPostsSeen();
 
+  const getGroupById = useCallback(
+    (id: string) => groupsMap.get(id),
+    [groupsMap]
+  );
+
   const { filteredPosts, unseenCount, starredCount } = useFilteredPosts({
     posts,
     groups,
@@ -146,15 +154,14 @@ export function PostsViewProvider({ children }: { children: ReactNode }) {
 
   const value: PostsViewContextValue = {
     subscriptions,
-    groups,
-    posts,
-    groupsMap,
+    totalPostCount: posts.length,
     filters,
     isLoading,
     error,
     setPostSeen,
     togglePostStarred,
     removeKeyword,
+    getGroupById,
     selectedSubscriptionId,
     searchQuery,
     showOnlyUnseen,
