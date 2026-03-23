@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback } from 'react';
 import { Button } from '@/components/ui/button';
 import type { Post } from '@/lib/types';
 import { LoadingSpinner } from '../components/LoadingSpinner';
@@ -30,17 +30,6 @@ function PostsTabInner() {
     searchQuery,
     setSearchQuery,
   } = usePostsView();
-
-  const [inputValue, setInputValue] = useState(searchQuery);
-
-  useEffect(() => {
-    const handler = setTimeout(() => {
-      if (inputValue !== searchQuery) {
-        setSearchQuery(inputValue);
-      }
-    }, 300);
-    return () => clearTimeout(handler);
-  }, [inputValue, searchQuery, setSearchQuery]);
 
   const renderPost = useCallback(
     (post: Post) => {
@@ -82,7 +71,7 @@ function PostsTabInner() {
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-6">
-      <SearchBar value={inputValue} onChange={setInputValue} />
+      <SearchBar value={searchQuery} onChange={setSearchQuery} />
 
       <SubscriptionSidebar />
 

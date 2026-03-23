@@ -1,9 +1,30 @@
+import { useEffect, useState } from 'react';
+import { useDebounce } from '@/lib/hooks/useDebounce';
+
 interface SearchBarProps {
   value: string;
   onChange: (value: string) => void;
+  debounceMs?: number;
 }
 
-export function SearchBar({ value, onChange }: SearchBarProps) {
+export function SearchBar({
+  value,
+  onChange,
+  debounceMs = 300,
+}: SearchBarProps) {
+  const [inputValue, setInputValue] = useState(value);
+  const debouncedValue = useDebounce(inputValue, debounceMs);
+
+  useEffect(() => {
+    setInputValue(value);
+  }, [value]);
+
+  useEffect(() => {
+    if (debouncedValue !== value) {
+      onChange(debouncedValue);
+    }
+  }, [debouncedValue, onChange, value]);
+
   return (
     <div className="mb-4">
       <label htmlFor="search-posts" className="sr-only">
@@ -13,8 +34,8 @@ export function SearchBar({ value, onChange }: SearchBarProps) {
         id="search-posts"
         type="search"
         placeholder="Search posts..."
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
+        value={inputValue}
+        onChange={(e) => setInputValue(e.target.value)}
         className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
       />
     </div>
