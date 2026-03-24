@@ -24,8 +24,11 @@ export default [
     // Test files: relax function-length rules (test suites can be long)
     files: ['**/*.test.ts', '**/*.test.tsx'],
     rules: {
-      'max-lines-per-function': 'off',
-      'max-lines': 'off',
+      'max-lines-per-function': 'off', // Test suites can be long
+      'max-lines': [
+        'warn',
+        { max: 250, skipBlankLines: true, skipComments: true },
+      ], // Test suites can be longer
     },
   },
 ];

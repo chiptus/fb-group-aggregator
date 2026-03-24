@@ -1,7 +1,7 @@
-import { Button } from '@/components/ui/button';
 import type { JobStatus, ScrapeJob } from '@/lib/types';
 import { formatDateTime } from '@/lib/utils';
 import { GroupResultsList } from './GroupResultsList';
+import { JobCardActions } from './JobCardActions';
 import { JobLogsSection } from './JobLogsSection';
 
 export const STATUS_BADGES: Record<JobStatus, string> = {
@@ -110,44 +110,15 @@ export function JobCard({
             </div>
           )}
         </div>
-        <div className="flex gap-2 ml-4">
-          {job.status === 'running' && (
-            <Button
-              type="button"
-              onClick={() => onCancel(job.id)}
-              variant="destructive"
-            >
-              Cancel
-            </Button>
-          )}
-          {(job.status === 'paused' || job.status === 'failed') && (
-            <Button
-              onClick={() => onResume(job.id)}
-              variant="primary"
-              size="sm"
-            >
-              Resume
-            </Button>
-          )}
-          {(job.status === 'completed' ||
-            job.status === 'failed' ||
-            job.status === 'cancelled') && (
-            <Button
-              onClick={() => onDelete(job.id)}
-              variant="destructive"
-              size="sm"
-            >
-              Delete
-            </Button>
-          )}
-          <Button
-            onClick={() => onToggleExpand(job.id)}
-            variant="secondary"
-            size="sm"
-          >
-            {isExpanded ? 'Hide Details' : 'Show Details'}
-          </Button>
-        </div>
+        <JobCardActions
+          jobId={job.id}
+          status={job.status}
+          isExpanded={isExpanded}
+          onToggleExpand={onToggleExpand}
+          onCancel={onCancel}
+          onResume={onResume}
+          onDelete={onDelete}
+        />
       </div>
       {isExpanded && (
         <div className="mt-6 border-t border-gray-200 pt-6 space-y-4">

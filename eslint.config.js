@@ -19,6 +19,8 @@ export default tseslint.config(
     rules: {
       // Named function declarations (not arrow functions)
       'func-style': ['error', 'declaration', { allowArrowFunctions: false }],
+      // No nested ternaries
+      'no-nested-ternary': 'warn',
 
       // No barrel exports (no index.ts re-exports)
       'no-restricted-syntax': [
@@ -60,7 +62,7 @@ export default tseslint.config(
       '@typescript-eslint/no-unsafe-argument': 'off',
       '@typescript-eslint/unbound-method': 'off', // Mocking patterns in tests don't need this
       'max-lines-per-function': 'off', // Test suites can be long
-      'max-lines': 'off', // Test suites can be long
+      'max-lines': ['warn', { max: 250, skipBlankLines: true, skipComments: true }], // Test suites can be longer
     },
   },
   {

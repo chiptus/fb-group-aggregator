@@ -35,7 +35,7 @@ export default [
       'max-lines': [
         'warn',
         {
-          max: 200,
+          max: 150,
           skipBlankLines: true,
           skipComments: true,
         },

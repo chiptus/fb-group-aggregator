@@ -3,7 +3,7 @@ import { useGroups } from '@/lib/hooks/storage/useGroups';
 import { useSubscriptions } from '@/lib/hooks/storage/useSubscriptions';
 
 interface GroupsPageDataParams {
-  filterSubscriptionId: string | null;
+  filterSubscriptionId: ('unassigned' | (string & {})) | null;
   searchQuery: string;
 }
 

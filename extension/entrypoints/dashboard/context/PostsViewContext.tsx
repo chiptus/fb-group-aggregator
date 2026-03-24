@@ -1,12 +1,5 @@
 import type { ReactNode } from 'react';
-import {
-  createContext,
-  useCallback,
-  useContext,
-  useMemo,
-  useState,
-} from 'react';
-import { filterPosts } from '@/lib/filters/filterPosts';
+import { createContext, useCallback, useContext, useState } from 'react';
 import {
   DEFAULT_FILTER_SETTINGS,
   type FilterSettings,
@@ -16,6 +9,7 @@ import { useMarkAllPostsSeen } from '@/lib/hooks/storage/usePosts';
 import type { Group, Post, Subscription } from '@/lib/types';
 import { useFilteredPosts } from '../hooks/useFilteredPosts';
 import { usePostsData } from '../hooks/usePostsData';
+import { useSubscriptionUnseenCounts } from '../hooks/useSubscriptionUnseenCounts';
 
 interface PostsViewContextValue {
   // Server data
@@ -108,31 +102,12 @@ export function PostsViewProvider({ children }: { children: ReactNode }) {
     showOnlyStarred,
   });
 
-  const subscriptionUnseenCounts = useMemo(() => {
-    const hasKeywordFilters =
-      filters.positiveKeywords.length > 0 ||
-      filters.negativeKeywords.length > 0;
-    const keywordFilteredPosts = hasKeywordFilters
-      ? filterPosts(posts, filters)
-      : posts;
-
-    const counts = new Map<string, number>();
-    counts.set('__all__', keywordFilteredPosts.filter((p) => !p.seen).length);
-    for (const sub of subscriptions) {
-      const subGroupIds = new Set(
-        groups
-          .filter((g) => g.subscriptionIds.includes(sub.id))
-          .map((g) => g.id)
-      );
-      counts.set(
-        sub.id,
-        keywordFilteredPosts.filter(
-          (p) => subGroupIds.has(p.groupId) && !p.seen
-        ).length
-      );
-    }
-    return counts;
-  }, [subscriptions, groups, posts, filters]);
+  const subscriptionUnseenCounts = useSubscriptionUnseenCounts({
+    posts,
+    groups,
+    subscriptions,
+    filters,
+  });
 
   const hasActiveFilters =
     filters.positiveKeywords.length > 0 || filters.negativeKeywords.length > 0;

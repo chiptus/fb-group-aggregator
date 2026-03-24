@@ -122,7 +122,9 @@ export async function scrapeGroupPosts(
     try {
       const idA = BigInt(a.id);
       const idB = BigInt(b.id);
-      return idB > idA ? 1 : idB < idA ? -1 : 0;
+      if (idB > idA) return 1;
+      if (idB < idA) return -1;
+      return 0;
     } catch {
       // Fallback for non-numeric IDs (e.g., in tests)
       return b.id.localeCompare(a.id);
