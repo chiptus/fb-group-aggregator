@@ -120,21 +120,6 @@ describe('ExactMatchStrategy', () => {
     });
   });
 
-  describe('seen count tracking', () => {
-    it('should correctly count seen posts in group', () => {
-      const posts = [
-        createMockPost('1', 'Looking for apartment in the city', true),
-        createMockPost('2', 'Looking for apartment in the city', false),
-        createMockPost('3', 'Looking for apartment in the city', true),
-      ];
-
-      const strategy = new ExactMatchStrategy();
-      const result = strategy.group(posts);
-
-      expect(result.groups[0].seenCount).toBe(2);
-    });
-  });
-
   describe('firstSeenAt tracking', () => {
     it('should use earliest scrapedAt as firstSeenAt', () => {
       const earliestTime = 1000000;

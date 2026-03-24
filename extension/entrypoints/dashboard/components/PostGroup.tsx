@@ -2,7 +2,6 @@ import DOMPurify from 'dompurify';
 import type { ReactNode } from 'react';
 import { Button } from '@/components/ui/button';
 import type { PostGroup as PostGroupType } from '@/lib/grouping/types';
-import { computeGroupProperties } from '@/lib/grouping/types';
 import type { Group, Post } from '@/lib/types';
 import { formatDateTime } from '@/lib/utils';
 import { GroupsTooltip } from './GroupsTooltip';
@@ -47,7 +46,7 @@ export function PostGroup({
   renderPost,
   className,
 }: PostGroupProps) {
-  const computed = computeGroupProperties(group);
+  const computed = computeGroupProperties(group, posts);
   const otherPostsCount = group.count - 1;
 
   // Get all unique group IDs from posts in this group
@@ -125,9 +124,9 @@ export function PostGroup({
             <span className="text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded-full">
               All seen
             </span>
-          ) : group.seenCount > 0 ? (
+          ) : computed.seenCount > 0 ? (
             <span className="text-xs bg-yellow-100 text-yellow-700 px-2 py-0.5 rounded-full">
-              {group.seenCount} of {group.count} seen
+              {computed.seenCount} of {group.count} seen
             </span>
           ) : null}
         </div>
@@ -160,4 +159,23 @@ export function PostGroup({
       )}
     </article>
   );
+}
+
+interface PostGroupComputed extends PostGroupType {
+  seenCount: number;
+  isFullySeen: boolean;
+  isPartiallySeen: boolean;
+}
+
+function computeGroupProperties(
+  group: PostGroupType,
+  posts: { seen: boolean }[]
+): PostGroupComputed {
+  const seenCount = posts.filter((p) => p.seen).length;
+  return {
+    ...group,
+    seenCount,
+    isFullySeen: seenCount === group.count,
+    isPartiallySeen: seenCount > 0 && seenCount < group.count,
+  };
 }

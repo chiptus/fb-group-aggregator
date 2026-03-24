@@ -18,14 +18,13 @@ function createMockPost(id: string, seen = false, groupId = 'group1'): Post {
   };
 }
 
-function createMockGroup(postIds: string[], seenCount = 0): PostGroupType {
+function createMockGroup(postIds: string[]): PostGroupType {
   return {
     id: 'group-abc123',
     normalizedContent: 'looking for apartment in the city center area',
     postIds,
     firstSeenAt: Date.now() - 10000,
     count: postIds.length,
-    seenCount,
     isExpanded: false,
   };
 }
@@ -168,7 +167,7 @@ describe('PostGroup', () => {
   });
 
   it('should show seen count when partially seen', () => {
-    const group = createMockGroup(['1', '2', '3'], 1);
+    const group = createMockGroup(['1', '2', '3']);
     const posts = [
       createMockPost('1', true),
       createMockPost('2', false),
@@ -180,7 +179,7 @@ describe('PostGroup', () => {
   });
 
   it('should show fully seen indicator', () => {
-    const group = createMockGroup(['1', '2'], 2);
+    const group = createMockGroup(['1', '2']);
     const posts = [createMockPost('1', true), createMockPost('2', true)];
 
     renderPostGroup({ group, posts });

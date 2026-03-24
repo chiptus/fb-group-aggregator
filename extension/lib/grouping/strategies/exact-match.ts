@@ -33,7 +33,6 @@ export class ExactMatchStrategy implements GroupingStrategy {
       string,
       {
         postIds: string[];
-        seenCount: number;
         firstSeenAt: number;
       }
     >();
@@ -54,12 +53,10 @@ export class ExactMatchStrategy implements GroupingStrategy {
 
       if (existing) {
         existing.postIds.push(post.id);
-        existing.seenCount += post.seen ? 1 : 0;
         existing.firstSeenAt = Math.min(existing.firstSeenAt, post.scrapedAt);
       } else {
         contentToGroup.set(normalized, {
           postIds: [post.id],
-          seenCount: post.seen ? 1 : 0,
           firstSeenAt: post.scrapedAt,
         });
       }
@@ -78,7 +75,6 @@ export class ExactMatchStrategy implements GroupingStrategy {
           postIds: groupData.postIds,
           firstSeenAt: groupData.firstSeenAt,
           count: groupData.postIds.length,
-          seenCount: groupData.seenCount,
           isExpanded: false,
         });
         totalPostsGrouped += groupData.postIds.length;

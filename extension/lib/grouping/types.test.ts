@@ -14,7 +14,6 @@ describe('PostGroup Schema', () => {
       postIds: ['post1', 'post2', 'post3'],
       firstSeenAt: 1704067200000,
       count: 3,
-      seenCount: 1,
       isExpanded: false,
     };
 
@@ -29,7 +28,6 @@ describe('PostGroup Schema', () => {
       postIds: ['post1'],
       firstSeenAt: 1704067200000,
       count: 1,
-      seenCount: 0,
       isExpanded: false,
     };
 
@@ -44,7 +42,6 @@ describe('PostGroup Schema', () => {
       postIds: ['post1'],
       firstSeenAt: 1704067200000,
       count: 1,
-      seenCount: 0,
       isExpanded: false,
     };
 
@@ -59,7 +56,6 @@ describe('PostGroup Schema', () => {
       postIds: [],
       firstSeenAt: 1704067200000,
       count: 0,
-      seenCount: 0,
       isExpanded: false,
     };
 
@@ -74,7 +70,6 @@ describe('PostGroup Schema', () => {
       postIds: ['post1'],
       firstSeenAt: 1704067200000,
       count: 1,
-      seenCount: 0,
     };
 
     const result = PostGroupSchema.safeParse(groupWithoutExpanded);
@@ -95,7 +90,6 @@ describe('GroupingResult Schema', () => {
           postIds: ['post1', 'post2'],
           firstSeenAt: 1704067200000,
           count: 2,
-          seenCount: 0,
           isExpanded: false,
         },
       ],

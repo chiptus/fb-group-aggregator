@@ -19,9 +19,6 @@ export const PostGroupSchema = z.object({
   /** Total number of posts in the group */
   count: z.number().int().positive(),
 
-  /** Number of posts in group marked as seen */
-  seenCount: z.number().int().nonnegative(),
-
   /** Whether group is expanded in UI (not persisted, resets on page load) */
   isExpanded: z.boolean().default(false),
 });
@@ -49,28 +46,6 @@ export const GroupingResultSchema = z.object({
 });
 
 export type GroupingResult = z.infer<typeof GroupingResultSchema>;
-
-/**
- * Computed properties for PostGroup
- */
-export interface PostGroupComputed extends PostGroup {
-  /** All posts in group are marked as seen */
-  isFullySeen: boolean;
-
-  /** Some but not all posts are marked as seen */
-  isPartiallySeen: boolean;
-}
-
-/**
- * Creates computed properties for a PostGroup
- */
-export function computeGroupProperties(group: PostGroup): PostGroupComputed {
-  return {
-    ...group,
-    isFullySeen: group.seenCount === group.count,
-    isPartiallySeen: group.seenCount > 0 && group.seenCount < group.count,
-  };
-}
 
 /**
  * Grouping statistics for UI display
