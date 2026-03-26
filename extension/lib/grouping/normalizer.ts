@@ -51,7 +51,9 @@ function decodeHtmlEntities(text: string): string {
 }
 
 /**
- * Generates a simple hash for a string to use as group ID
+ * Generates a simple hash for a string to use as group ID.
+ * 32-bit djb2 hash - collision probability ~1 in 4 billion.
+ * No detection; different content with same hash would merge silently.
  */
 export function hashContent(content: string): string {
   let hash = 0;
