@@ -1,3 +1,4 @@
+import { useMemo } from 'react';
 import type { PostGroupingService } from '@/lib/grouping/service';
 import type { GroupingResult } from '@/lib/grouping/types';
 import type { Group, Post } from '@/lib/types';
@@ -27,6 +28,11 @@ export function GroupedPostsView({
   onToggleSeen,
   onToggleStarred,
 }: GroupedPostsViewProps) {
+  const ungroupedSet = useMemo(
+    () => new Set(groupingData.ungroupedPostIds),
+    [groupingData.ungroupedPostIds]
+  );
+
   return (
     <div className="space-y-4">
       {groupingData.groups.map((group) => {
@@ -68,7 +74,7 @@ export function GroupedPostsView({
           </h3>
           <div className="space-y-4">
             {filteredPosts
-              .filter((p) => groupingData.ungroupedPostIds.includes(p.id))
+              .filter((p) => ungroupedSet.has(p.id))
               .map((post) => {
                 const fbGroup = groupsMap.get(post.groupId);
                 return (

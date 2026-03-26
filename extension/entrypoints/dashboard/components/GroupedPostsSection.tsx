@@ -1,5 +1,6 @@
 import { useCallback } from 'react';
 import { useGroupedPosts } from '@/lib/hooks/grouping/useGroupedPosts';
+import { useMarkAllPostsSeen } from '@/lib/hooks/storage/usePosts';
 import type { Group, Post } from '@/lib/types';
 import { GroupedPostsView } from './GroupedPostsView';
 import { GroupingStatsBanner } from './GroupingStatsBanner';
@@ -18,14 +19,13 @@ export function GroupedPostsSection({
   onToggleStarred,
 }: GroupedPostsSectionProps) {
   const groupingResult = useGroupedPosts(filteredPosts);
+  const markAllPostsSeen = useMarkAllPostsSeen();
 
   const handleMarkGroupSeen = useCallback(
     (postIds: string[]) => {
-      for (const postId of postIds) {
-        onSetSeen(postId, true);
-      }
+      markAllPostsSeen.mutate(postIds);
     },
-    [onSetSeen]
+    [markAllPostsSeen]
   );
 
   if (groupingResult.isLoading) {

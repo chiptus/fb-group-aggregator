@@ -14,9 +14,15 @@ export function useGroupedPosts(posts: Post[]) {
     return new PostGroupingService(new ExactMatchStrategy());
   }, []);
 
+  // Stable query key: sort IDs for order-independence, use count for quick invalidation
+  const queryKey = useMemo(() => {
+    const sortedIds = [...posts.map((p) => p.id)].sort().join(',');
+    return ['groupedPosts', posts.length, sortedIds];
+  }, [posts]);
+
   // Query for grouped posts data
   const query = useQuery({
-    queryKey: ['groupedPosts', posts.map((p) => p.id).join(',')],
+    queryKey,
     queryFn: () => service.groupPosts(posts),
     staleTime: 0,
     placeholderData: keepPreviousData,

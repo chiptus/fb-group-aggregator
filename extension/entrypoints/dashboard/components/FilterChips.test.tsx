@@ -104,7 +104,9 @@ describe('FilterChips', () => {
       wrapper: createWrapper(),
     });
 
-    expect(screen.getByText(/no filters/i)).toBeInTheDocument();
+    expect(screen.getByText(/searching in:/i)).toBeInTheDocument();
+    expect(screen.queryByText(/positive/i)).not.toBeInTheDocument();
+    expect(screen.queryByText(/negative/i)).not.toBeInTheDocument();
   });
 
   it('should display case-sensitive indicator when enabled', () => {

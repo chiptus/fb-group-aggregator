@@ -94,7 +94,7 @@ export interface FilterStats {
   activePositiveKeywords: string[];
 
   /** Active negative keywords */
-  activeNegativeKeywords: number;
+  activeNegativeKeywords: string[];
 }
 
 /**

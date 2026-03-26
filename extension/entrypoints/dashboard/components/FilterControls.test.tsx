@@ -1,5 +1,6 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { storage } from 'wxt/utils/storage';
 import type { FilterSettings } from '@/lib/filters/types';
@@ -44,9 +45,10 @@ async function getInputAndButton() {
 }
 
 async function addKeywordViaButton(keyword: string) {
+  const user = userEvent.setup();
   const { input, addButton } = await getInputAndButton();
-  fireEvent.change(input, { target: { value: keyword } });
-  fireEvent.click(addButton);
+  await user.type(input, keyword);
+  await user.click(addButton);
 }
 
 describe('FilterControls', () => {
@@ -92,6 +94,7 @@ describe('FilterControls', () => {
   });
 
   it('should add negative keyword when negative toggle selected', async () => {
+    const user = userEvent.setup();
     const updatedFilters: FilterSettings = {
       ...defaultFilters,
       negativeKeywords: ['sold'],
@@ -101,7 +104,7 @@ describe('FilterControls', () => {
     const negativeToggle = await screen.findByRole('radio', {
       name: /negative/i,
     });
-    fireEvent.click(negativeToggle);
+    await user.click(negativeToggle);
     await addKeywordViaButton('sold');
 
     await waitFor(() => {
@@ -123,9 +126,10 @@ describe('FilterControls', () => {
   });
 
   it('should not add empty keyword', async () => {
+    const user = userEvent.setup();
     renderFilterControls();
     const { addButton } = await getInputAndButton();
-    fireEvent.click(addButton);
+    await user.click(addButton);
     expect(screen.queryByRole('alert')).not.toBeInTheDocument();
   });
 
@@ -149,6 +153,7 @@ describe('FilterControls', () => {
   });
 
   it('should allow adding keyword with Enter key', async () => {
+    const user = userEvent.setup();
     const updatedFilters: FilterSettings = {
       ...defaultFilters,
       positiveKeywords: ['apartment'],
@@ -156,10 +161,8 @@ describe('FilterControls', () => {
 
     renderFilterControls();
     const { input } = await getInputAndButton();
-    const form = input.closest('form');
 
-    fireEvent.change(input, { target: { value: 'apartment' } });
-    fireEvent.submit(form!);
+    await user.type(input, 'apartment{Enter}');
 
     await waitFor(() => {
       expect(storage.setItem).toHaveBeenCalledWith(

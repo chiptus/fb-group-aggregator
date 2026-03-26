@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useId, useState } from 'react';
 import type { Group } from '@/lib/types';
 
 interface GroupsTooltipProps {
@@ -16,6 +16,7 @@ export function GroupsTooltip({
   className,
 }: GroupsTooltipProps) {
   const [isOpen, setIsOpen] = useState(false);
+  const tooltipId = useId();
 
   // Get unique group names from the group IDs
   const groupNames = groupIds
@@ -42,7 +43,7 @@ export function GroupsTooltip({
         onMouseLeave={() => setIsOpen(false)}
         onFocus={() => setIsOpen(true)}
         onBlur={() => setIsOpen(false)}
-        aria-describedby={hasMore ? 'groups-tooltip' : undefined}
+        aria-describedby={hasMore ? tooltipId : undefined}
       >
         {displayName}
         {hasMore && (
@@ -52,7 +53,7 @@ export function GroupsTooltip({
 
       {isOpen && hasMore && (
         <div
-          id="groups-tooltip"
+          id={tooltipId}
           role="tooltip"
           className="absolute z-10 bottom-full left-0 mb-1 px-3 py-2 bg-gray-900 text-white text-xs rounded shadow-lg whitespace-nowrap"
         >
