@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import type { LogEntry, LogLevel } from '@/lib/types';
-import { formatLogTime } from '@/lib/utils';
+import { cn, formatContext, formatLogTime } from '@/lib/utils';
 
 const LOG_LEVEL_COLORS: Record<LogLevel, string> = {
   debug: 'bg-gray-100 text-gray-700 border-gray-300',
@@ -16,18 +16,16 @@ const LOG_LEVEL_BADGES: Record<LogLevel, string> = {
   error: 'bg-red-500',
 };
 
-function formatContext(context?: Record<string, unknown>): string {
-  if (!context || Object.keys(context).length === 0) return '';
-  return JSON.stringify(context, null, 2);
-}
-
 export function LogEntryRow({ log }: { log: LogEntry }) {
   const [expanded, setExpanded] = useState(false);
 
   return (
     <button
       type="button"
-      className={`w-full text-left border rounded p-3 ${LOG_LEVEL_COLORS[log.level]} hover:opacity-90 transition-opacity`}
+      className={cn(
+        'w-full text-left border rounded p-3 hover:opacity-90 transition-opacity',
+        LOG_LEVEL_COLORS[log.level]
+      )}
       aria-expanded={expanded}
       onClick={() => setExpanded(!expanded)}
     >
@@ -36,7 +34,10 @@ export function LogEntryRow({ log }: { log: LogEntry }) {
           {formatLogTime(log.timestamp)}
         </span>
         <span
-          className={`px-2 py-0.5 rounded text-xs font-semibold text-white uppercase ${LOG_LEVEL_BADGES[log.level]}`}
+          className={cn(
+            'px-2 py-0.5 rounded text-xs font-semibold text-white uppercase',
+            LOG_LEVEL_BADGES[log.level]
+          )}
         >
           {log.level}
         </span>

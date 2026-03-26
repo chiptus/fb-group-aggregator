@@ -1,5 +1,5 @@
 import type { ScrapeJob } from '@/lib/types';
-import { formatDateTime, formatDuration } from '@/lib/utils';
+import { cn, formatDateTime, formatDuration } from '@/lib/utils';
 import { JobCardActions } from './JobCardActions';
 import { STATUS_BADGES } from './JobCard';
 
@@ -30,7 +30,10 @@ export function JobCardHeader({
       <div className="flex-1">
         <div className="flex items-center gap-3 mb-3">
           <span
-            className={`px-2 py-1 rounded text-xs font-semibold text-white uppercase ${STATUS_BADGES[job.status]}`}
+            className={cn(
+              'px-2 py-1 rounded text-xs font-semibold text-white uppercase',
+              STATUS_BADGES[job.status]
+            )}
           >
             {job.status}
           </span>

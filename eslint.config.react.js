@@ -31,7 +31,6 @@ export default [
           skipComments: true,
         },
       ],
-      // Max 150 lines per component file
       'max-lines': [
         'warn',
         {

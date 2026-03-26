@@ -39,6 +39,11 @@ export function formatDate(value: string | number | Date): string {
   return formatDatePart(d);
 }
 
+export function formatContext(context?: Record<string, unknown>): string {
+  if (!context || Object.keys(context).length === 0) return '';
+  return JSON.stringify(context, null, 2);
+}
+
 export function formatDuration(
   startedAt: number | null,
   endTime: number = Date.now()

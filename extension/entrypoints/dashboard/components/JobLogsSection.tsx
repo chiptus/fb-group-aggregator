@@ -2,7 +2,7 @@ import { useMemo } from 'react';
 import { Button } from '@/components/ui/button';
 import { useLogs } from '@/lib/hooks/storage/useLogs';
 import type { LogEntry, LogLevel } from '@/lib/types';
-import { formatLogTime } from '@/lib/utils';
+import { formatContext, formatLogTime } from '@/lib/utils';
 import { LoadingSpinner } from './LoadingSpinner';
 
 const LOG_LEVEL_BADGE: Record<LogLevel, string> = {
@@ -28,7 +28,7 @@ function JobLogEntry({ log }: { log: LogEntry }) {
       </div>
       {log.context && Object.keys(log.context).length > 0 && (
         <pre className="mt-1 text-xs text-gray-600 overflow-x-auto">
-          {JSON.stringify(log.context, null, 2)}
+          {formatContext(log.context)}
         </pre>
       )}
     </div>
