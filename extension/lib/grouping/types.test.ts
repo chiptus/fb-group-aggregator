@@ -14,7 +14,6 @@ describe('PostGroup Schema', () => {
       postIds: ['post1', 'post2', 'post3'],
       firstSeenAt: 1704067200000,
       count: 3,
-      isExpanded: false,
     };
 
     const result = PostGroupSchema.safeParse(validGroup);
@@ -28,7 +27,6 @@ describe('PostGroup Schema', () => {
       postIds: ['post1'],
       firstSeenAt: 1704067200000,
       count: 1,
-      isExpanded: false,
     };
 
     const result = PostGroupSchema.safeParse(invalidGroup);
@@ -42,7 +40,6 @@ describe('PostGroup Schema', () => {
       postIds: ['post1'],
       firstSeenAt: 1704067200000,
       count: 1,
-      isExpanded: false,
     };
 
     const result = PostGroupSchema.safeParse(invalidGroup);
@@ -56,27 +53,10 @@ describe('PostGroup Schema', () => {
       postIds: [],
       firstSeenAt: 1704067200000,
       count: 0,
-      isExpanded: false,
     };
 
     const result = PostGroupSchema.safeParse(invalidGroup);
     expect(result.success).toBe(false);
-  });
-
-  it('should default isExpanded to false', () => {
-    const groupWithoutExpanded = {
-      id: 'grp_abc123',
-      normalizedContent: 'looking for 2br apartment',
-      postIds: ['post1'],
-      firstSeenAt: 1704067200000,
-      count: 1,
-    };
-
-    const result = PostGroupSchema.safeParse(groupWithoutExpanded);
-    expect(result.success).toBe(true);
-    if (result.success) {
-      expect(result.data.isExpanded).toBe(false);
-    }
   });
 });
 
@@ -90,7 +70,6 @@ describe('GroupingResult Schema', () => {
           postIds: ['post1', 'post2'],
           firstSeenAt: 1704067200000,
           count: 2,
-          isExpanded: false,
         },
       ],
       ungroupedPostIds: ['post3', 'post4'],

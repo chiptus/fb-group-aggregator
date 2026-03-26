@@ -75,7 +75,6 @@ export class ExactMatchStrategy implements GroupingStrategy {
           postIds: groupData.postIds,
           firstSeenAt: groupData.firstSeenAt,
           count: groupData.postIds.length,
-          isExpanded: false,
         });
         totalPostsGrouped += groupData.postIds.length;
       } else {

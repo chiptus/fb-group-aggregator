@@ -25,7 +25,6 @@ function createMockGroup(postIds: string[]): PostGroupType {
     postIds,
     firstSeenAt: Date.now() - 10000,
     count: postIds.length,
-    isExpanded: false,
   };
 }
 

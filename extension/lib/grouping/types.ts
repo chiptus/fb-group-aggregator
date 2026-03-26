@@ -18,9 +18,6 @@ export const PostGroupSchema = z.object({
 
   /** Total number of posts in the group */
   count: z.number().int().positive(),
-
-  /** Whether group is expanded in UI (not persisted, resets on page load) */
-  isExpanded: z.boolean().default(false),
 });
 
 export type PostGroup = z.infer<typeof PostGroupSchema>;
