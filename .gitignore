@@ -36,3 +36,6 @@ webapp/.env
 *.njsproj
 *.sln
 *.sw?
+
+
+settings.local.json

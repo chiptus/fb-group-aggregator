@@ -24,6 +24,7 @@ interface PostsViewContextValue {
   togglePostStarred: (postId: string, currentStarred: boolean) => void;
   removeKeyword: (keyword: string, type: KeywordType) => void;
   getGroupById: (id: string) => Group | undefined;
+  groupsMap: Map<string, Group>;
 
   // View state
   selectedSubscriptionId: string | null;
@@ -31,6 +32,7 @@ interface PostsViewContextValue {
   showOnlyUnseen: boolean;
   showOnlyStarred: boolean;
   showFilterPanel: boolean;
+  enableGrouping: boolean;
 
   // View state setters
   setSelectedSubscriptionId: (id: string | null) => void;
@@ -38,6 +40,7 @@ interface PostsViewContextValue {
   setShowOnlyUnseen: (value: boolean) => void;
   setShowOnlyStarred: (value: boolean) => void;
   setShowFilterPanel: (value: boolean) => void;
+  setEnableGrouping: (value: boolean) => void;
 
   // Derived data
   filteredPosts: Post[];
@@ -70,6 +73,7 @@ export function PostsViewProvider({ children }: { children: ReactNode }) {
   const [showOnlyUnseen, setShowOnlyUnseen] = useState(true);
   const [showOnlyStarred, setShowOnlyStarred] = useState(false);
   const [showFilterPanel, setShowFilterPanel] = useState(false);
+  const [enableGrouping, setEnableGrouping] = useState(false);
 
   const {
     subscriptions,
@@ -138,16 +142,19 @@ export function PostsViewProvider({ children }: { children: ReactNode }) {
     togglePostStarred,
     removeKeyword,
     getGroupById,
+    groupsMap,
     selectedSubscriptionId,
     searchQuery,
     showOnlyUnseen,
     showOnlyStarred,
     showFilterPanel,
+    enableGrouping,
     setSelectedSubscriptionId,
     setSearchQuery,
     setShowOnlyUnseen,
     setShowOnlyStarred,
     setShowFilterPanel,
+    setEnableGrouping,
     filteredPosts,
     unseenCount,
     starredCount,

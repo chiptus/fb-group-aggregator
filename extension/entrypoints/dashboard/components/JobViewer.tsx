@@ -7,7 +7,7 @@ import {
   useStartJob,
 } from '@/lib/hooks/storage/useJobs';
 import { LoadingSpinner } from './LoadingSpinner';
-import { JobCard, STATUS_BADGES } from './JobCard';
+import { JobCard } from './JobCard';
 import { JobViewerHeader } from './JobViewerHeader';
 
 export function JobViewer() {
@@ -51,12 +51,20 @@ export function JobViewer() {
 
   function handleCancelJob(jobId: string) {
     if (confirm('Are you sure you want to cancel this job?')) {
-      cancelJobMutation.mutate(jobId);
+      cancelJobMutation.mutate(jobId, {
+        onError: (error) => {
+          alert(`Failed to cancel job: ${error.message}`);
+        },
+      });
     }
   }
 
   function handleResumeJob(jobId: string) {
-    resumeJobMutation.mutate(jobId);
+    resumeJobMutation.mutate(jobId, {
+      onError: (error) => {
+        alert(`Failed to resume job: ${error.message}`);
+      },
+    });
   }
 
   function handleDeleteJob(jobId: string) {
@@ -102,11 +110,6 @@ export function JobViewer() {
         <div className="bg-white rounded-lg shadow">
           <div className="p-6 border-b border-gray-200">
             <h3 className="text-lg font-semibold flex items-center gap-2">
-              <span
-                className={`px-2 py-1 rounded text-xs font-semibold text-white uppercase ${STATUS_BADGES[activeJob.status]}`}
-              >
-                {activeJob.status}
-              </span>
               Current Job
             </h3>
           </div>

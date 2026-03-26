@@ -1,4 +1,4 @@
-import { CheckCheck, Eye, Filter, Star } from 'lucide-react';
+import { CheckCheck, Eye, Filter, Layers, Star } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { usePostsView } from '../context/PostsViewContext';
 import { TogglePill } from './TogglePill';
@@ -11,6 +11,8 @@ export function PostsListControls() {
     setShowOnlyUnseen,
     showOnlyStarred,
     setShowOnlyStarred,
+    enableGrouping,
+    setEnableGrouping,
     showFilterPanel,
     setShowFilterPanel,
     activeFilterCount,
@@ -33,6 +35,12 @@ export function PostsListControls() {
           icon={<Star size={12} />}
           label="Starred"
           count={starredCount}
+        />
+        <TogglePill
+          active={enableGrouping}
+          onClick={() => setEnableGrouping(!enableGrouping)}
+          icon={<Layers size={12} />}
+          label="Grouped"
         />
         <TogglePill
           active={showFilterPanel}
