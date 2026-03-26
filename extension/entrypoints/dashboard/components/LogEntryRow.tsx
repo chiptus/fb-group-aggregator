@@ -28,6 +28,7 @@ export function LogEntryRow({ log }: { log: LogEntry }) {
     <button
       type="button"
       className={`w-full text-left border rounded p-3 ${LOG_LEVEL_COLORS[log.level]} hover:opacity-90 transition-opacity`}
+      aria-expanded={expanded}
       onClick={() => setExpanded(!expanded)}
     >
       <div className="flex items-start gap-3">
