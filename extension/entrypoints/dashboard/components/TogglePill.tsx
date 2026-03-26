@@ -15,6 +15,15 @@ interface TogglePillProps {
   variant?: 'filter' | 'nav';
 }
 
+function getBadgeClass(isNav: boolean, active: boolean): string {
+  if (isNav) {
+    return active
+      ? 'bg-slate-600 text-slate-200'
+      : 'bg-slate-100 text-slate-600';
+  }
+  return active ? 'bg-blue-500 text-white' : 'bg-gray-300 text-gray-700';
+}
+
 export function TogglePill({
   active,
   onClick,
@@ -57,13 +66,7 @@ export function TogglePill({
         <span
           className={cn(
             'rounded-full px-1.5 py-0.5 text-[10px] font-semibold leading-none',
-            isNav
-              ? active
-                ? 'bg-slate-600 text-slate-200'
-                : 'bg-slate-100 text-slate-600'
-              : active
-                ? 'bg-blue-500 text-white'
-                : 'bg-gray-300 text-gray-700'
+            getBadgeClass(isNav, active)
           )}
         >
           {count}

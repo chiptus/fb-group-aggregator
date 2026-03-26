@@ -38,3 +38,29 @@ export function formatDate(value: string | number | Date): string {
   if (Number.isNaN(d.getTime())) return 'Invalid date';
   return formatDatePart(d);
 }
+
+export function formatContext(context?: Record<string, unknown>): string {
+  if (!context || Object.keys(context).length === 0) return '';
+  return JSON.stringify(context, null, 2);
+}
+
+export function formatDuration(
+  startedAt: number | null,
+  endTime: number = Date.now()
+): string {
+  if (startedAt == null) return 'Not started';
+  const durationMs = endTime - startedAt;
+  const minutes = Math.floor(durationMs / 60000);
+  const seconds = Math.floor((durationMs % 60000) / 1000);
+  return `${minutes}m ${seconds}s`;
+}
+
+export function formatLogTime(timestamp: number): string {
+  return new Date(timestamp).toLocaleTimeString('en-US', {
+    hour12: false,
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit',
+    fractionalSecondDigits: 3,
+  });
+}

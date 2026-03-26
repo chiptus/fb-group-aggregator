@@ -52,11 +52,14 @@ export function FilterControls() {
     field: 'contentHtml' | 'authorName',
     checked: boolean
   ) {
-    const updatedFields = checked
-      ? filters.searchFields.includes(field)
+    let updatedFields: typeof filters.searchFields;
+    if (checked) {
+      updatedFields = filters.searchFields.includes(field)
         ? filters.searchFields
-        : [...filters.searchFields, field]
-      : filters.searchFields.filter((f) => f !== field);
+        : [...filters.searchFields, field];
+    } else {
+      updatedFields = filters.searchFields.filter((f) => f !== field);
+    }
 
     if (updatedFields.length === 0) return;
 

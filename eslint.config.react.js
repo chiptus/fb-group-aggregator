@@ -31,6 +31,14 @@ export default [
           skipComments: true,
         },
       ],
+      'max-lines': [
+        'warn',
+        {
+          max: 150,
+          skipBlankLines: true,
+          skipComments: true,
+        },
+      ],
 
       // Props destructuring in signature
       'react/destructuring-assignment': [
