@@ -1,4 +1,3 @@
-import { keepPreviousData, useQuery } from '@tanstack/react-query';
 import { useMemo, useState } from 'react';
 import { PostGroupingService } from '@/lib/grouping/service';
 import { ExactMatchStrategy } from '@/lib/grouping/strategies/exact-match';
@@ -14,19 +13,8 @@ export function useGroupedPosts(posts: Post[]) {
     return new PostGroupingService(new ExactMatchStrategy());
   }, []);
 
-  // Stable query key: sort IDs for order-independence, use count for quick invalidation
-  const queryKey = useMemo(() => {
-    const sortedIds = [...posts.map((p) => p.id)].sort().join(',');
-    return ['groupedPosts', posts.length, sortedIds];
-  }, [posts]);
-
-  // Query for grouped posts data
-  const query = useQuery({
-    queryKey,
-    queryFn: () => service.groupPosts(posts),
-    staleTime: 0,
-    placeholderData: keepPreviousData,
-  });
+  // Group posts synchronously
+  const data = useMemo(() => service.groupPosts(posts), [service, posts]);
 
   function toggleExpanded(groupId: string) {
     setExpansionState((prev) => {
@@ -38,9 +26,7 @@ export function useGroupedPosts(posts: Post[]) {
   }
 
   return {
-    data: query.data,
-    isLoading: query.isLoading,
-    error: query.error,
+    data,
     service,
     expansionState,
     toggleExpanded,
