@@ -96,7 +96,6 @@ export function PostGroup({
         {/* Post content */}
         <div
           className="prose max-w-full mb-3 break-all overflow-hidden"
-          // biome-ignore lint/security/noDangerouslySetInnerHtml: Content is sanitized with DOMPurify
           dangerouslySetInnerHTML={{
             __html: DOMPurify.sanitize(representativePost.contentHtml),
           }}
