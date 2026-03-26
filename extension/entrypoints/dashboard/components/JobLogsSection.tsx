@@ -2,6 +2,7 @@ import { useMemo } from 'react';
 import { Button } from '@/components/ui/button';
 import { useLogs } from '@/lib/hooks/storage/useLogs';
 import type { LogEntry, LogLevel } from '@/lib/types';
+import { formatLogTime } from '@/lib/utils';
 import { LoadingSpinner } from './LoadingSpinner';
 
 const LOG_LEVEL_BADGE: Record<LogLevel, string> = {
@@ -16,7 +17,7 @@ function JobLogEntry({ log }: { log: LogEntry }) {
     <div className="p-2 bg-gray-50 rounded border border-gray-200">
       <div className="flex items-start gap-2">
         <span className="text-gray-500 whitespace-nowrap">
-          {new Date(log.timestamp).toLocaleTimeString()}
+          {formatLogTime(log.timestamp)}
         </span>
         <span
           className={`px-1.5 py-0.5 rounded text-xs font-semibold uppercase ${LOG_LEVEL_BADGE[log.level]}`}

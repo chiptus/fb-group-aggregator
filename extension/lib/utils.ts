@@ -39,6 +39,17 @@ export function formatDate(value: string | number | Date): string {
   return formatDatePart(d);
 }
 
+export function formatDuration(
+  startedAt: number | null,
+  endTime: number = Date.now()
+): string {
+  if (!startedAt) return 'Not started';
+  const durationMs = endTime - startedAt;
+  const minutes = Math.floor(durationMs / 60000);
+  const seconds = Math.floor((durationMs % 60000) / 1000);
+  return `${minutes}m ${seconds}s`;
+}
+
 export function formatLogTime(timestamp: number): string {
   return new Date(timestamp).toLocaleTimeString('en-US', {
     hour12: false,
